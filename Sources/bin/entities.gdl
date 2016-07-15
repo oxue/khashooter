@@ -1,0 +1,15 @@
+[gdlversion : 1.2]
+
+[entities:{ 
+	
+[
+[name : "zombie"]
+[components : {
+}]
+]
+
+[
+[name : "player"]
+[components : {}]
+]
+}

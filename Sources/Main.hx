@@ -1,11 +1,12 @@
 package;
 
 import kha.System;
+import refraction.core.Application;
 
-class Main {
+class Main{
 	public static function main() {
-		System.init({title: "Empty", width: 800, height: 600}, function() {
-			new Empty();
+		Application.init("HXB Port", 800, 600, 2, function(){
+			Application.setState(new KhaBlitTestState());
 		});
 	}
 }

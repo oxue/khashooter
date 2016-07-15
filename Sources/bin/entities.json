@@ -1,0 +1,15 @@
+{
+	"entities":[
+		{
+			"name":"zombie",
+			"components":[
+				{"name":"DimensionsComponent", "args":[20,20]},
+				{"name":"PositionComponent", "args":["args"]}
+			]
+		},
+		{
+		},
+		{
+		}
+	]
+}
