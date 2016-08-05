@@ -4,6 +4,6 @@ uniform mat4 mproj;
 varying vec2 tuv;
 
 void kore(){
-	gl_Position = mproj * vec4(pos, 0, 0);
+	gl_Position = mproj * vec4(pos, 0, 1);
 	tuv = uv;
 }
