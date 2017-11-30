@@ -4,29 +4,25 @@ import haxe.Json;
 import hxblit.KhaBlit;
 import hxblit.TextureAtlas.IntRect;
 import kha.Assets;
+import kha.Color;
+import kha.Font;
 import kha.Framebuffer;
 import kha.network.Entity;
-import kha.network.Session;
 import refraction.core.Application;
 import refraction.core.State;
 import refraction.display.Canvas;
 import refraction.ds2d.DS2D;
 import refraction.ds2d.LightSource;
 import refraction.ds2d.Polygon;
+import refraction.generic.PositionComponent;
 import refraction.tile.TilemapUtils;
+import zui.Id;
+import zui.Zui;
 
 /**
  * ...
  * @author 
  */
-class Pos implements Entity
-{
-	@replicated 
-	public var x:Float = 0;
-	
-	@replicated 
-	public var y:Float = 0;
-}
  
 class KhaGameState extends State
 {
@@ -36,10 +32,11 @@ class KhaGameState extends State
 	private var gameContext:GameContext;
 	private var entFactory:EntFactory;
 	
-	private var shadowSystem:DS2D;
-	
-	private var pos:Pos;
-	private var session:Session;
+	private var ui:Zui;
+	private var showMenu:Bool = false;
+	private var mouse2WasDown:Bool = false;
+	private var menuX:Int;
+	private var menuY:Int;
 	
 	public function new() 
 	{
@@ -52,58 +49,72 @@ class KhaGameState extends State
 		
 		isRenderingReady = false;
 		
-		session = new Session(2);
-		
-		session.waitForStart(function(){
-			Assets.loadEverything(function(){
-				// Init Rendering
-				KhaBlit.init(Application.width, Application.height, Application.zoom);
-				
-				// Init Game Context
-				gameContext = 
-					new GameContext(
-					new IntRect(0, 0, Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom)));
-				
-				// Init Ent Factory
-				entFactory = new EntFactory(gameContext);
-				
-				shadowSystem = new DS2D();
-				shadowSystem.addLightSource(new LightSource(200, 200, 0xffffff));
-
-				loadMap("blookd");
-				
-				
-				
-				isRenderingReady = true;
-			});
+		Assets.loadEverything(function(){
+			// Init Rendering
+			KhaBlit.init(Application.width, Application.height, Application.zoom);
 			
-			//trace(session.me.id);
+			ui = new Zui(Assets.fonts.OpenSans);
+			
+			// Init Game Context
+			gameContext = 
+				new GameContext(
+				new IntRect(0, 0, Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom)));
+			
+			// Init Ent Factory
+			entFactory = new EntFactory(gameContext);
+			
+			// Init Lighting 
+			var i = 1;
+			while(i-->0)
+			gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0x111111));
+			
+			// load map
+			loadMap("blookd");
+			
+			isRenderingReady = true;
 		});
 	}
 	
 	public function loadMap(_name:String)
 	{
 		var obj:Dynamic = Json.parse(Assets.blobs.rooms_json.toString());
-		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data);
+		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "all_tiles");
 		
 		entFactory.createPlayer(obj.start.x, obj.start.y);
 		
+		var i:Int = obj.lights.length;
+		while (i-->0){
+			gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
+		}
+		entFactory.createNPC(obj.start.x, obj.start.y, "mimi");
+		//entFactory.createZombie(obj.start.x, obj.start.y);
+		
 		for (p in TilemapUtils.computeGeometry(gameContext.currentTilemapData)){
-			shadowSystem.polygons.push(p);
+			gameContext.lightingSystem.polygons.push(p);
 		}
 		
-		//shadowSystem.polygons.push(new Polygon(3, 20, 100, 100));
 	}
+	
+	// =========
+	// MAIN LOOP 
+	// =========
 	
 	override public function update():Void 
 	{
 		super.update();
 		
-		if(gameContext != null){
+		if (gameContext != null){
+			
 			gameContext.controlSystem.update();
+			gameContext.spacingSystem.update();
 			gameContext.dampingSystem.update();
 			gameContext.velocitySystem.update();
 			gameContext.collisionSystem.update();
+			gameContext.lightSourceSystem.update();
+			
+			gameContext.npcSystem.update();
+			gameContext.breadCrumbsSystem.update();
+			gameContext.aiSystem.update();
 		}
 	}
 	
@@ -111,12 +122,23 @@ class KhaGameState extends State
 	{
 		if (!isRenderingReady) return;
 		
-		var i:Int = 1;
+		var playerPos:PositionComponent = cast gameContext.playerEntity.components.get("pos_comp");
+		
+		gameContext.cameraRect.x += Std.int((playerPos.x - 200 - gameContext.cameraRect.x)/8);
+		gameContext.cameraRect.y += Std.int((playerPos.y - 100 - gameContext.cameraRect.y)/8);
+		
+		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.cameraRect.x;
+		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.cameraRect.y;
+		
+		var i:Int = 0;
+		//if (Application.mouseIsDown) i = 2;
 		while(i-->0){
-			shadowSystem.lights[i].position.x =  cast Application.mouseX / 2 + i % 4 * 2;
-			shadowSystem.lights[i].position.y = cast Application.mouseY / 2 + Std.int(i/4) * 2;
+			gameContext.lightingSystem.lights[i].position.x =  cast Application.mouseX / 2 + gameContext.cameraRect.x + Std.int(i/4) * 2;
+			gameContext.lightingSystem.lights[i].position.y = cast Application.mouseY / 2 + gameContext.cameraRect.y + i%4 * 2;
 		}
+		
 		var g = frame.g4;
+		
 		g.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
@@ -134,7 +156,53 @@ class KhaGameState extends State
 
 		g.end();
 
-		shadowSystem.renderHXB(gameContext);
+		gameContext.lightingSystem.renderHXB(gameContext);
+		
+		
+		//UI
+		if (!mouse2WasDown && Application.mouse2IsDown)
+		{
+			showMenu = !showMenu;
+			menuX = Application.mouseX + 5;
+			menuY = Application.mouseY;
+		}
+		
+		
+		
+		ui.begin(frame.g2);
+		if (showMenu){
+			var worldMenuX:Int = cast menuX / 2 + gameContext.cameraRect.x;
+			var worldMenuY:Int = cast menuY / 2 + gameContext.cameraRect.y;
+			
+			if (ui.window(Id.window(), menuX, menuY, 200, 300, Zui.LAYOUT_VERTICAL)) {
+				
+				if (ui.button("Teleport Here")){
+					showMenu = false;
+					playerPos.x = worldMenuX;
+					playerPos.y = worldMenuY;
+				}
+				
+				if (ui.button("Spawn Hell Minion")) {
+					showMenu = false;
+					entFactory.createZombie(worldMenuX,
+											worldMenuY);
+				}
+				
+				if (ui.button("Spawn light Source")) {
+					showMenu = false;
+					gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY,
+						[Color.Cyan, Color.Orange, Color.Pink, Color.White,Color.Green, Color.Yellow, Color.Red][Std.int(Math.random() * 7)].value & 0xFFFFFF));
+				}
+				gameContext.lightingSystem.setAmbientLevel(
+					ui.slider(Id.slider(), "Ambient Level", 0, 1, false, 100, gameContext.lightingSystem.getAmbientLevel()));
+				
+			}
+		}
+		ui.end();
+		
+		
+		mouse2WasDown = Application.mouse2IsDown;
+		//gameContext.statusText.render(frame.g2);
 		
 	}
 	

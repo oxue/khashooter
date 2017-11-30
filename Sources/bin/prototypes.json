@@ -1,0 +1,23 @@
+{
+    "entities": {
+        "BaseTransform": {
+            "components": [
+                {
+                    "name": "DimensionsComponent",
+                    "args": [
+                        20,
+                        20
+                    ]
+                },
+                {
+                    "name": "PositionComponent",
+                    "args": [
+                        "args"
+                    ]
+                }
+            ]
+        },
+        "Player": {},
+        "Zombie": {}
+    }
+}
