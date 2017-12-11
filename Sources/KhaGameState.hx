@@ -168,9 +168,9 @@ class KhaGameState extends refraction.core.State
 		
 		
 		// ========== UI BEGIN ==========
-		ui.begin(frame.g2);
+		
 
-		gameContext.tooltipSystem.update(frame.g2);
+		ui.begin(frame.g2);
 
 		if (showMenu){
 			var worldMenuX:Int = cast menuX / 2 + gameContext.cameraRect.x;
@@ -202,7 +202,9 @@ class KhaGameState extends refraction.core.State
 		}
 		ui.end();
 		
-		
+		frame.g2.begin(false);
+		gameContext.tooltipSystem.update(frame.g2);
+		frame.g2.end();
 		mouse2WasDown = Application.mouse2IsDown;
 		//gameContext.statusText.render(frame.g2);
 		

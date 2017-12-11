@@ -213,7 +213,7 @@ class EntFactory
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 
-		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, name);
+		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, name, kha.Color.Pink);
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 	}

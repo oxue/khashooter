@@ -37,7 +37,7 @@ class ItemBuilder
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
-		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect);
+		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, "medkit", kha.Color.Green);
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 
