@@ -54,22 +54,22 @@ class EntFactory
 	public function createActorEntity(_x:Int = 0, _y:Int = 0, _w:Int = 20, _h:Int = 20):Entity
 	{
 		var e:Entity = new Entity();
-		e.addDataComponent(new PositionComponent(_x, _y));
-		e.addDataComponent(new DimensionsComponent(_w, _h));
-		e.addDataComponent(new TransformComponent());
+		e.addComponent(new PositionComponent(_x, _y));
+		e.addComponent(new DimensionsComponent(_w, _h));
+		e.addComponent(new TransformComponent());
 		
 		var velocity:VelocityComponent = new VelocityComponent();
-		e.addActiveComponent(velocity);
+		e.addComponent(velocity);
 		gameContext.velocitySystem.addComponent(velocity);
 		
 		gameContext.spacingSystem.add(cast e.components.get("pos_comp"), velocity, _w/2);
 		
 		var damping:DampingComponent = new DampingComponent(0.7);
-		e.addActiveComponent(damping);
+		e.addComponent(damping);
 		gameContext.dampingSystem.addComponent(damping);
 		
 		var lightsource:LightSourceComponent = new LightSourceComponent(gameContext.lightingSystem, 0xaaaaaa, cast _w/2 + 5, cast _w / 2, cast _h/2);
-		e.addActiveComponent(lightsource);
+		e.addComponent(lightsource);
 		gameContext.lightSourceSystem.addComponent(lightsource);
 		
 		//var shadowSurface = 
@@ -80,11 +80,11 @@ class EntFactory
 	public function createZombie(_x:Int = 0, _y:Int = 0):Void
 	{
 		var e:Entity = createActorEntity(_x, _y, 20, 20);
-		e.addDataComponent(ResourceFormat.surfacesets.get("zombie"));
+		e.addComponent(ResourceFormat.surfacesets.get("zombie"));
 		
 		// SURFACE2 RENDER
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
-		e.addActiveComponent(surfaceRender);
+		e.addComponent(surfaceRender);
 		surfaceRender.targetCamera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0];
@@ -97,16 +97,16 @@ class EntFactory
 		
 		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
 		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addActiveComponent(tileCollision);
+		e.addComponent(tileCollision);
 		gameContext.collisionSystem.addComponent(tileCollision);
 		
 		var breadcrumbs:BreadCrumbsComponent = new BreadCrumbsComponent(3, 0.8);
-		e.addActiveComponent(breadcrumbs);
+		e.addComponent(breadcrumbs);
 		gameContext.breadCrumbsSystem.addComponent(breadcrumbs);
 		breadcrumbs.breadcrumbs.push(new FastVector2(40, 40));
 		
 		var ai:ZombieAI = new ZombieAI("ZombieAI", cast gameContext.playerEntity.components.get("pos_comp"), gameContext.currentTilemapData);
-		e.addActiveComponent(ai);
+		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
 	
@@ -114,12 +114,12 @@ class EntFactory
 	{
 		// BASE ENTITY
 		var e:Entity = createActorEntity(_x, _y, 20, 20);
-		e.addDataComponent(ResourceFormat.surfacesets.get("shiro"));
+		e.addComponent(ResourceFormat.surfacesets.get("shiro"));
 		gameContext.playerEntity = e;
 		
 		// SURFACE2 RENDER
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
-		e.addActiveComponent(surfaceRender);
+		e.addComponent(surfaceRender);
 		surfaceRender.targetCamera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0]; 				 // standing
@@ -133,28 +133,28 @@ class EntFactory
 		
 		// CONTROL
 		var rotationControl:RotationControlComponent = new RotationControlComponent(gameContext.cameraRect);
-		e.addActiveComponent(rotationControl);
+		e.addComponent(rotationControl);
 		gameContext.controlSystem.addComponent(rotationControl);
 
 		var inventory = new InventoryComponent();
-		e.addActiveComponent(inventory);
+		e.addComponent(inventory);
 		
 		var keyControl:KeyControlComponent = new KeyControlComponent(1);
-		e.addActiveComponent(keyControl);
+		e.addComponent(keyControl);
 		gameContext.controlSystem.addComponent(keyControl);
 		
 		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
 		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addActiveComponent(tileCollision);
+		e.addComponent(tileCollision);
 		gameContext.collisionSystem.addComponent(tileCollision);
 		
 		var we:Entity = new Entity();
-		we.addDataComponent(ResourceFormat.surfacesets.get("weapons"));
-		we.addDataComponent(e.components.get("pos_comp"));
-		we.addDataComponent(e.components.get("trans_comp"));
+		we.addComponent(ResourceFormat.surfacesets.get("weapons"));
+		we.addComponent(e.components.get("pos_comp"));
+		we.addComponent(e.components.get("trans_comp"));
 		
 		//var surfaceRenderWeapons:Surface2RenderComponentC = new Surface2RenderComponentC();
-		//we.addActiveComponent(surfaceRenderWeapons);
+		//we.addComponent(surfaceRenderWeapons);
 		//surfaceRenderWeapons.targetCamera = gameContext.cameraRect;
 		//surfaceRenderWeapons.animations[0] = [0];
 		//
@@ -169,7 +169,7 @@ class EntFactory
 		
 		var animationControl:AnimationControlComponent = new AnimationControlComponent();
 		//animationControl.blc2 = surfaceRenderWeapons;
-		e.addActiveComponent(animationControl);
+		e.addComponent(animationControl);
 		
 		gameContext.controlSystem.addComponent(animationControl);
 		
@@ -178,12 +178,12 @@ class EntFactory
 	
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String){
 		var e:Entity = createActorEntity(_x, _y, 20, 20);
-		e.addDataComponent(ResourceFormat.surfacesets.get(name));
+		e.addComponent(ResourceFormat.surfacesets.get(name));
 		
 		cast(e.components.get("trans_comp"), TransformComponent).rotation = Math.random() * 360;
 		
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
-		e.addActiveComponent(surfaceRender);
+		e.addComponent(surfaceRender);
 		surfaceRender.targetCamera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0];
@@ -194,22 +194,22 @@ class EntFactory
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
 		var npc:NPCComponent = new NPCComponent(gameContext.cameraRect, gameContext.statusText);
-		e.addActiveComponent(npc);
+		e.addComponent(npc);
 		
 		gameContext.npcSystem.addComponent(npc);
 		
 		var breadcrumbs:BreadCrumbsComponent = new BreadCrumbsComponent(20, 0.3);
-		e.addActiveComponent(breadcrumbs);
+		e.addComponent(breadcrumbs);
 		gameContext.breadCrumbsSystem.addComponent(breadcrumbs);
 		breadcrumbs.breadcrumbs.push(new FastVector2(40, 40));
 		
 		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
 		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addActiveComponent(tileCollision);
+		e.addComponent(tileCollision);
 		gameContext.collisionSystem.addComponent(tileCollision);
 		
 		var ai:MimiAI = new MimiAI("MimiAI");
-		e.addActiveComponent(ai);
+		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
 	
@@ -218,13 +218,13 @@ class EntFactory
 		var e:Entity = new Entity();
 		
 		var tilemapData:TilemapDataComponent = new TilemapDataComponent(_width, _height, _tilesize, _colIndex);
-		e.addDataComponent(tilemapData);
+		e.addComponent(tilemapData);
 		tilemapData.setDataIntArray(_data);
-		e.addDataComponent(ResourceFormat.surfacesets.get(_tileset));
+		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
 		
 		var tileRender:Surface2TileRenderComponent = new Surface2TileRenderComponent();
 		tileRender.targetCamera = gameContext.cameraRect;
-		e.addActiveComponent(tileRender);
+		e.addComponent(tileRender);
 		
 		gameContext.currentMap = tileRender;
 		gameContext.currentTilemapData = tilemapData;

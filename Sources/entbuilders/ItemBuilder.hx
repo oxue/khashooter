@@ -17,12 +17,12 @@ class ItemBuilder
 	public function create(_x = 0, _y = 0):Entity
 	{
 		var e:Entity = new Entity();
-		e.addDataComponent(new PositionComponent(_x, _y));
-		e.addDataComponent(new TransformComponent());
-		e.addDataComponent(ResourceFormat.getSurfaceSet("items"));
+		e.addComponent(new PositionComponent(_x, _y));
+		e.addComponent(new TransformComponent());
+		e.addComponent(ResourceFormat.getSurfaceSet("items"));
 		
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
-		e.addActiveComponent(surfaceRender);
+		e.addComponent(surfaceRender);
 		surfaceRender.targetCamera = gameContext.cameraRect;
 
 		surfaceRender.animations[0] = [0];
