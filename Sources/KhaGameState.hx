@@ -49,10 +49,14 @@ class KhaGameState extends refraction.core.State
 			
 			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId:0, scaleFactor:1});
 			
+			var gameCamera = 
+				new IntRect(0, 0, Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom));
+
 			// Init Game Context
-			gameContext = 
-				new GameContext(
-				new IntRect(0, 0, Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom)));
+			gameContext = new GameContext(
+				gameCamera,
+				ui
+			);
 			
 			// Init Ent Factory
 			entFactory = new EntFactory(gameContext);
@@ -163,8 +167,11 @@ class KhaGameState extends refraction.core.State
 		}
 		
 		
-		
+		// ========== UI BEGIN ==========
 		ui.begin(frame.g2);
+
+		gameContext.tooltipSystem.update(frame.g2);
+
 		if (showMenu){
 			var worldMenuX:Int = cast menuX / 2 + gameContext.cameraRect.x;
 			var worldMenuY:Int = cast menuY / 2 + gameContext.cameraRect.y;

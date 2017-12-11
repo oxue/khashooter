@@ -16,6 +16,7 @@ import refraction.tile.Surface2TileRenderComponent;
 import refraction.tile.TileCollisionComponent;
 import refraction.tile.TilemapDataComponent;
 import entbuilders.ItemBuilder;
+import refraction.generic.TooltipComponent;
 
 /**
  * ...
@@ -211,6 +212,10 @@ class EntFactory
 		var ai:MimiAI = new MimiAI("MimiAI");
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
+
+		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, name);
+		e.addComponent(tt);
+		gameContext.tooltipSystem.addComponent(tt);
 	}
 	
 	public function createTilemap(_width:Int, _height:Int, _tilesize:Int, _colIndex:Int, _data:Array<Array<Int>>, _tileset:String = "all_tiles"):Entity

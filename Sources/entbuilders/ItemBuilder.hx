@@ -2,7 +2,9 @@ package entbuilders;
 import refraction.core.Entity;
 import refraction.generic.PositionComponent;
 import refraction.generic.TransformComponent;
+import refraction.generic.DimensionsComponent;
 import refraction.display.Surface2RenderComponentC;
+import refraction.generic.TooltipComponent;
 
 /**
  * ...
@@ -18,6 +20,7 @@ class ItemBuilder
 	{
 		var e:Entity = new Entity();
 		e.addComponent(new PositionComponent(_x, _y));
+		e.addComponent(new DimensionsComponent(32,32));
 		e.addComponent(new TransformComponent());
 		e.addComponent(ResourceFormat.getSurfaceSet("items"));
 		
@@ -33,6 +36,10 @@ class ItemBuilder
 		surfaceRender.frame = 0;
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+
+		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect);
+		e.addComponent(tt);
+		gameContext.tooltipSystem.addComponent(tt);
 
 		return e;
 	}
