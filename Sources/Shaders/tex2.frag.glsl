@@ -1,8 +1,11 @@
+#version 450
+
 precision mediump float;
 
 uniform sampler2D tex;
 
-varying vec2 tuv;
-void kore(){	
-    gl_FragColor = texture2D(tex, tuv);
+in vec2 tuv;
+out vec4 fragmentColor;
+void main(){	
+    fragmentColor = texture(tex, tuv);
 }

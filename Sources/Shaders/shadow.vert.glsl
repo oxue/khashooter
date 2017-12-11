@@ -1,9 +1,11 @@
-attribute vec3 pos;
+#version 450
+
+in vec3 pos;
 
 uniform mat4 mproj;
 uniform vec2 cpos;
 
-void kore(){
+void main(){
 	vec2 v0 = pos.xy - cpos;
 	v0 = normalize(v0);
 	v0 = v0 * pos.z * 200.0 + pos.xy;

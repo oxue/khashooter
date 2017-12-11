@@ -1,6 +1,5 @@
 package;
 
-import kha.System;
 import refraction.core.Application;
 
 class Main{

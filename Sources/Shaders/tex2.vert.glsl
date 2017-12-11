@@ -1,9 +1,11 @@
-attribute vec2 pos;
-attribute vec2 uv;
-uniform mat4 mproj;
-varying vec2 tuv;
+#version 450
 
-void kore(){
+in vec2 pos;
+in vec2 uv;
+uniform mat4 mproj;
+out vec2 tuv;
+
+void main(){
 	gl_Position = mproj * vec4(pos, 0, 1);
 	tuv = uv;
 }

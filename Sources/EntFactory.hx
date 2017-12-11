@@ -1,5 +1,4 @@
 package;
-import haxe.Json;
 import kha.Assets;
 import kha.math.FastVector2;
 import refraction.control.BreadCrumbsComponent;
@@ -9,7 +8,6 @@ import refraction.control.RotationControlComponent;
 import refraction.core.Entity;
 import refraction.display.LightSourceComponent;
 import refraction.display.Surface2RenderComponentC;
-import refraction.display.Surface2SetComponent;
 import refraction.generic.DimensionsComponent;
 import refraction.generic.PositionComponent;
 import refraction.generic.TransformComponent;
@@ -17,6 +15,7 @@ import refraction.generic.VelocityComponent;
 import refraction.tile.Surface2TileRenderComponent;
 import refraction.tile.TileCollisionComponent;
 import refraction.tile.TilemapDataComponent;
+import entbuilders.ItemBuilder;
 
 /**
  * ...
@@ -27,6 +26,7 @@ class EntFactory
 
 	private var gameContext:GameContext;
 	private var entityPrototypes:Dynamic;
+	private var itemBuilder:ItemBuilder;
 	
 	public function new(_gc:GameContext){
 		gameContext = _gc;
@@ -40,7 +40,15 @@ class EntFactory
 		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3);
 		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
 		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
+		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
 		ResourceFormat.endAtlas();
+
+		itemBuilder = new ItemBuilder(gameContext);
+	}
+
+	public function createItem(_x, _y):Entity
+	{
+		return itemBuilder.create(_x, _y);
 	}
 	
 	public function createActorEntity(_x:Int = 0, _y:Int = 0, _w:Int = 20, _h:Int = 20):Entity
@@ -126,8 +134,10 @@ class EntFactory
 		// CONTROL
 		var rotationControl:RotationControlComponent = new RotationControlComponent(gameContext.cameraRect);
 		e.addActiveComponent(rotationControl);
-		
 		gameContext.controlSystem.addComponent(rotationControl);
+
+		var inventory = new InventoryComponent();
+		e.addActiveComponent(inventory);
 		
 		var keyControl:KeyControlComponent = new KeyControlComponent(1);
 		e.addActiveComponent(keyControl);
@@ -163,7 +173,7 @@ class EntFactory
 		
 		gameContext.controlSystem.addComponent(animationControl);
 		
-		e.addEntity(we);
+		//e.addEntity(we);
 	}
 	
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String){

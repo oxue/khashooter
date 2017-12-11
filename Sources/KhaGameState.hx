@@ -4,27 +4,21 @@ import haxe.Json;
 import hxblit.KhaBlit;
 import hxblit.TextureAtlas.IntRect;
 import kha.Assets;
-import kha.Color;
-import kha.Font;
 import kha.Framebuffer;
-import kha.network.Entity;
 import refraction.core.Application;
 import refraction.core.State;
-import refraction.display.Canvas;
-import refraction.ds2d.DS2D;
 import refraction.ds2d.LightSource;
-import refraction.ds2d.Polygon;
 import refraction.generic.PositionComponent;
 import refraction.tile.TilemapUtils;
-import zui.Id;
-import zui.Zui;
+import kha.Color;
+import zui.*;
 
 /**
  * ...
  * @author 
  */
  
-class KhaGameState extends State
+class KhaGameState extends refraction.core.State
 {
 
 	private var isRenderingReady:Bool;
@@ -53,7 +47,7 @@ class KhaGameState extends State
 			// Init Rendering
 			KhaBlit.init(Application.width, Application.height, Application.zoom);
 			
-			ui = new Zui(Assets.fonts.OpenSans);
+			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId:0, scaleFactor:1});
 			
 			// Init Game Context
 			gameContext = 
@@ -81,6 +75,7 @@ class KhaGameState extends State
 		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "all_tiles");
 		
 		entFactory.createPlayer(obj.start.x, obj.start.y);
+		entFactory.createItem(obj.start.x, obj.start.y);
 		
 		var i:Int = obj.lights.length;
 		while (i-->0){
@@ -174,7 +169,7 @@ class KhaGameState extends State
 			var worldMenuX:Int = cast menuX / 2 + gameContext.cameraRect.x;
 			var worldMenuY:Int = cast menuY / 2 + gameContext.cameraRect.y;
 			
-			if (ui.window(Id.window(), menuX, menuY, 200, 300, Zui.LAYOUT_VERTICAL)) {
+			if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
 				
 				if (ui.button("Teleport Here")){
 					showMenu = false;
@@ -194,8 +189,8 @@ class KhaGameState extends State
 						[Color.Cyan, Color.Orange, Color.Pink, Color.White,Color.Green, Color.Yellow, Color.Red][Std.int(Math.random() * 7)].value & 0xFFFFFF));
 				}
 				gameContext.lightingSystem.setAmbientLevel(
-					ui.slider(Id.slider(), "Ambient Level", 0, 1, false, 100, gameContext.lightingSystem.getAmbientLevel()));
-				
+					ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "Ambient Level", 0, 1, false, 100, true));
+
 			}
 		}
 		ui.end();
