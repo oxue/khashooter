@@ -26,7 +26,7 @@ class ItemBuilder
 		
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.targetCamera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.cameraRect;
 
 		surfaceRender.animations[0] = [0];
 		surfaceRender.animations.push([1]);
@@ -37,7 +37,7 @@ class ItemBuilder
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
-		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, "medkit", kha.Color.Green);
+		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, "Demon Hunter's Crossbow", kha.Color.Green);
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 

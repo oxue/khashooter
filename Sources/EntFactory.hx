@@ -42,6 +42,7 @@ class EntFactory
 		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
 		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
 		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
+		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24);
 		ResourceFormat.endAtlas();
 
 		itemBuilder = new ItemBuilder(gameContext);
@@ -77,6 +78,31 @@ class EntFactory
 		
 		return e;
 	}
+
+	public function createGyo(_x,_y):Entity
+	{
+		var e:Entity = createActorEntity(_x,_y,29,24);
+		e.addComponent(ResourceFormat.surfacesets.get("gyo"));
+
+		var surfaceRender = new Surface2RenderComponentC();
+		e.addComponent(surfaceRender);
+		surfaceRender.camera = gameContext.cameraRect;
+
+		surfaceRender.animations[0] = [4];
+		surfaceRender.animations.push([for (i in 0...12) i]);
+		surfaceRender.frameTime = 2;
+		surfaceRender.frame = 0;
+		surfaceRender.curAnimaition = 1;
+
+		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+
+		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
+		tileCollision.targetTilemap = gameContext.currentTilemapData;
+		e.addComponent(tileCollision);
+		gameContext.collisionSystem.addComponent(tileCollision);
+
+		return e;
+	}
 	
 	public function createZombie(_x:Int = 0, _y:Int = 0):Void
 	{
@@ -86,7 +112,7 @@ class EntFactory
 		// SURFACE2 RENDER
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.targetCamera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0];
 		surfaceRender.animations.push([0, 1, 0, 2]);
@@ -121,7 +147,7 @@ class EntFactory
 		// SURFACE2 RENDER
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.targetCamera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0]; 				 // standing
 		surfaceRender.animations.push([0, 1, 0, 2]);	 // walking
@@ -156,7 +182,7 @@ class EntFactory
 		
 		//var surfaceRenderWeapons:Surface2RenderComponentC = new Surface2RenderComponentC();
 		//we.addComponent(surfaceRenderWeapons);
-		//surfaceRenderWeapons.targetCamera = gameContext.cameraRect;
+		//surfaceRenderWeapons.camera = gameContext.cameraRect;
 		//surfaceRenderWeapons.animations[0] = [0];
 		//
 		//surfaceRenderWeapons.animations.push([0, 1, 0, 2]);
@@ -185,7 +211,7 @@ class EntFactory
 		
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.targetCamera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0];
 		surfaceRender.animations.push([0, 1, 0, 2]);

@@ -28,6 +28,7 @@ class KhaGameState extends refraction.core.State
 	
 	private var ui:Zui;
 	private var showMenu:Bool = false;
+	private var drawHitBoxes:Bool = false;
 	private var mouse2WasDown:Bool = false;
 	private var menuX:Int;
 	private var menuY:Int;
@@ -168,7 +169,13 @@ class KhaGameState extends refraction.core.State
 		
 		
 		// ========== UI BEGIN ==========
-		
+		if(drawHitBoxes){
+			frame.g2.begin(false);
+			for(tc in gameContext.collisionSystem.components){
+				tc.drawHitbox(gameContext.cameraRect, frame.g2);
+			}
+			frame.g2.end();
+		}
 
 		ui.begin(frame.g2);
 
@@ -189,6 +196,11 @@ class KhaGameState extends refraction.core.State
 					entFactory.createZombie(worldMenuX,
 											worldMenuY);
 				}
+
+				if (ui.button("Spawn Gyo")) {
+					showMenu = false;
+					entFactory.createGyo(worldMenuX, worldMenuY);
+				}
 				
 				if (ui.button("Spawn light Source")) {
 					showMenu = false;
@@ -198,6 +210,7 @@ class KhaGameState extends refraction.core.State
 				gameContext.lightingSystem.setAmbientLevel(
 					ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "Ambient Level", 0, 1, false, 100, true));
 
+				drawHitBoxes = ui.check(Id.handle(), "draw hitboxes");
 			}
 		}
 		ui.end();
