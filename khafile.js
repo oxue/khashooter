@@ -6,5 +6,8 @@ project.addSources('../shooter2016/src');
 project.addAssets('./Sources/bin/**');
 project.addLibrary('zui');
 
+project.windowOptions.width = 800;
+project.windowOptions.height = 400;
+
 resolve(project);
 

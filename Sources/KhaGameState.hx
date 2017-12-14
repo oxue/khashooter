@@ -76,8 +76,8 @@ class KhaGameState extends refraction.core.State
 	
 	public function loadMap(_name:String)
 	{
-		var obj:Dynamic = Json.parse(Assets.blobs.rooms_json.toString());
-		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "all_tiles");
+		var obj:Dynamic = Json.parse(Assets.blobs.modern_home_json.toString());
+		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "modern");
 		
 		entFactory.createPlayer(obj.start.x, obj.start.y);
 		entFactory.createItem(obj.start.x, obj.start.y);
@@ -112,7 +112,7 @@ class KhaGameState extends refraction.core.State
 			gameContext.collisionSystem.update();
 			gameContext.lightSourceSystem.update();
 			
-			gameContext.npcSystem.update();
+			gameContext.interactSystem.update();
 			gameContext.breadCrumbsSystem.update();
 			gameContext.aiSystem.update();
 		}
@@ -142,7 +142,7 @@ class KhaGameState extends refraction.core.State
 		g.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
-		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState);
+		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
 		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
 		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases.get("all").image);
 		
@@ -197,9 +197,11 @@ class KhaGameState extends refraction.core.State
 											worldMenuY);
 				}
 
-				if (ui.button("Spawn Gyo")) {
+				if (ui.button("Spawn Several Gyo")) {
 					showMenu = false;
-					entFactory.createGyo(worldMenuX, worldMenuY);
+					for(i in 0...5){
+						entFactory.createGyo(worldMenuX+Std.int(Math.random()*5), worldMenuY+Std.int(Math.random()*5));
+					}
 				}
 				
 				if (ui.button("Spawn light Source")) {
@@ -219,7 +221,7 @@ class KhaGameState extends refraction.core.State
 		gameContext.tooltipSystem.update(frame.g2);
 		frame.g2.end();
 		mouse2WasDown = Application.mouse2IsDown;
-		//gameContext.statusText.render(frame.g2);
+		gameContext.statusText.render(frame.g2);
 		
 	}
 	

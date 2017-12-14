@@ -42,10 +42,18 @@ class EntFactory
 		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
 		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
 		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
-		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24);
+		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24).addTranslation(3, 4);
 		ResourceFormat.endAtlas();
 
 		itemBuilder = new ItemBuilder(gameContext);
+	}
+
+	private function addTileCollisionComponent(e:Entity):Void
+	{
+		var tileCollision = new TileCollisionComponent();
+		tileCollision.targetTilemap = gameContext.currentTilemapData;
+		e.addComponent(tileCollision);
+		gameContext.collisionSystem.addComponent(tileCollision);
 	}
 
 	public function createItem(_x, _y):Entity
@@ -81,7 +89,7 @@ class EntFactory
 
 	public function createGyo(_x,_y):Entity
 	{
-		var e:Entity = createActorEntity(_x,_y,29,24);
+		var e:Entity = createActorEntity(_x,_y,20,16);
 		e.addComponent(ResourceFormat.surfacesets.get("gyo"));
 
 		var surfaceRender = new Surface2RenderComponentC();
@@ -96,10 +104,16 @@ class EntFactory
 
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
-		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
-		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addComponent(tileCollision);
-		gameContext.collisionSystem.addComponent(tileCollision);
+		addTileCollisionComponent(e);
+
+		var breadcrumbs:BreadCrumbsComponent = new BreadCrumbsComponent(20, 1);
+		e.addComponent(breadcrumbs);
+		gameContext.breadCrumbsSystem.addComponent(breadcrumbs);
+		//breadcrumbs.breadcrumbs.push(new FastVector2(40, 40));
+
+		var ai:MimiAI = new MimiAI("MimiAI");
+		e.addComponent(ai);
+		gameContext.aiSystem.addComponent(ai);
 
 		return e;
 	}
@@ -122,10 +136,7 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
-		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addComponent(tileCollision);
-		gameContext.collisionSystem.addComponent(tileCollision);
+		addTileCollisionComponent(e);
 		
 		var breadcrumbs:BreadCrumbsComponent = new BreadCrumbsComponent(3, 0.8);
 		e.addComponent(breadcrumbs);
@@ -170,10 +181,7 @@ class EntFactory
 		e.addComponent(keyControl);
 		gameContext.controlSystem.addComponent(keyControl);
 		
-		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
-		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addComponent(tileCollision);
-		gameContext.collisionSystem.addComponent(tileCollision);
+		addTileCollisionComponent(e);
 		
 		var we:Entity = new Entity();
 		we.addComponent(ResourceFormat.surfacesets.get("weapons"));
@@ -220,20 +228,17 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		var npc:NPCComponent = new NPCComponent(gameContext.cameraRect, gameContext.statusText);
+		var npc = new InteractComponent(gameContext.cameraRect, null);
 		e.addComponent(npc);
 		
-		gameContext.npcSystem.addComponent(npc);
+		gameContext.interactSystem.addComponent(npc);
 		
 		var breadcrumbs:BreadCrumbsComponent = new BreadCrumbsComponent(20, 0.3);
 		e.addComponent(breadcrumbs);
 		gameContext.breadCrumbsSystem.addComponent(breadcrumbs);
 		breadcrumbs.breadcrumbs.push(new FastVector2(40, 40));
 		
-		var tileCollision:TileCollisionComponent = new TileCollisionComponent();
-		tileCollision.targetTilemap = gameContext.currentTilemapData;
-		e.addComponent(tileCollision);
-		gameContext.collisionSystem.addComponent(tileCollision);
+		addTileCollisionComponent(e);
 		
 		var ai:MimiAI = new MimiAI("MimiAI");
 		e.addComponent(ai);
