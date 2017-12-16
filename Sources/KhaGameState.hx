@@ -11,6 +11,7 @@ import refraction.ds2d.LightSource;
 import refraction.generic.PositionComponent;
 import refraction.tile.TilemapUtils;
 import kha.Color;
+import kha.input.Mouse;
 import zui.*;
 
 /**
@@ -48,6 +49,8 @@ class KhaGameState extends refraction.core.State
 			// Init Rendering
 			KhaBlit.init(Application.width, Application.height, Application.zoom);
 			
+			Mouse.get().notify(mouseDown, null, null, null);
+
 			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId:0, scaleFactor:1});
 			
 			var gameCamera = 
@@ -94,6 +97,14 @@ class KhaGameState extends refraction.core.State
 		}
 		
 	}
+
+	private function mouseDown(button:Int, x:Int, y:Int)
+	{
+		if (button == 0)
+		{
+			gameContext.interactSystem.update();
+		}
+	}
 	
 	// =========
 	// MAIN LOOP 
@@ -112,7 +123,6 @@ class KhaGameState extends refraction.core.State
 			gameContext.collisionSystem.update();
 			gameContext.lightSourceSystem.update();
 			
-			gameContext.interactSystem.update();
 			gameContext.breadCrumbsSystem.update();
 			gameContext.aiSystem.update();
 		}

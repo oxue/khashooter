@@ -17,6 +17,7 @@ import refraction.tile.TileCollisionComponent;
 import refraction.tile.TilemapDataComponent;
 import entbuilders.ItemBuilder;
 import refraction.generic.TooltipComponent;
+import components.InteractComponent;
 
 /**
  * ...
@@ -58,7 +59,7 @@ class EntFactory
 
 	public function createItem(_x, _y):Entity
 	{
-		return itemBuilder.create(_x, _y);
+		return itemBuilder.create(_x, _y, 0);
 	}
 	
 	public function createActorEntity(_x:Int = 0, _y:Int = 0, _w:Int = 20, _h:Int = 20):Entity
@@ -228,7 +229,9 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		var npc = new InteractComponent(gameContext.cameraRect, null);
+		var npc = new InteractComponent(gameContext.cameraRect, function(e){
+			trace("Asd");
+		});
 		e.addComponent(npc);
 		
 		gameContext.interactSystem.addComponent(npc);
