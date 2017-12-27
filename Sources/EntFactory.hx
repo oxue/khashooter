@@ -1,6 +1,7 @@
 package;
 import kha.Assets;
 import kha.math.FastVector2;
+import kha.math.Vector2;
 import refraction.control.BreadCrumbsComponent;
 import refraction.control.DampingComponent;
 import refraction.control.KeyControlComponent;
@@ -18,6 +19,8 @@ import refraction.tile.TilemapDataComponent;
 import entbuilders.ItemBuilder;
 import refraction.generic.TooltipComponent;
 import components.InteractComponent;
+import components.ProjectileComponent;
+import refraction.core.Application;
 
 /**
  * ...
@@ -26,7 +29,16 @@ import components.InteractComponent;
 class EntFactory
 {
 
-	private var gameContext:GameContext;
+	private static var myInstance:EntFactory = null;
+
+	public static function instance(?_gc:GameContext):EntFactory{
+		if(myInstance == null){
+			myInstance = new EntFactory(_gc);
+		}
+		return myInstance;
+	}
+
+	public var gameContext:GameContext;
 	private var entityPrototypes:Dynamic;
 	private var itemBuilder:ItemBuilder;
 	
@@ -35,15 +47,20 @@ class EntFactory
 		
 		ResourceFormat.init();
 		ResourceFormat.beginAtlas("all");
+
 		ResourceFormat.formatTileSheet("all_tiles", Assets.images.tilesheet, 16);
 		ResourceFormat.formatTileSheet("modern", Assets.images.modern, 16);
+
 		ResourceFormat.formatRotatedSprite("man", Assets.images.man, 26, 26).addTranslation(3,3);
-		ResourceFormat.formatRotatedSprite("weapons", Assets.images.weapons, 36, 20).translateX += 8;
+		ResourceFormat.formatRotatedSprite("weapons", Assets.images.weapons, 36, 20).addTranslation(8, 0);
 		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3);
 		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
 		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
 		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
 		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24).addTranslation(3, 4);
+		ResourceFormat.formatRotatedSprite("weapons", Assets.images.crossbow ,26,26).addTranslation(3, 3).registration(-13,-6);
+		ResourceFormat.formatRotatedSprite("projectiles", Assets.images.projectiles ,20,20).registration(10,10);
+		
 		ResourceFormat.endAtlas();
 
 		itemBuilder = new ItemBuilder(gameContext);
@@ -55,6 +72,13 @@ class EntFactory
 		tileCollision.targetTilemap = gameContext.currentTilemapData;
 		e.addComponent(tileCollision);
 		gameContext.collisionSystem.addComponent(tileCollision);
+	}
+
+	public function worldMouse():Vector2{
+		return new Vector2(
+			cast Application.mouseX / 2 + gameContext.camera.x,
+			cast Application.mouseY / 2 + gameContext.camera.y
+		);
 	}
 
 	public function createItem(_x, _y):Entity
@@ -83,8 +107,6 @@ class EntFactory
 		e.addComponent(lightsource);
 		gameContext.lightSourceSystem.addComponent(lightsource);
 		
-		//var shadowSurface = 
-		
 		return e;
 	}
 
@@ -95,7 +117,7 @@ class EntFactory
 
 		var surfaceRender = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.camera;
 
 		surfaceRender.animations[0] = [4];
 		surfaceRender.animations.push([for (i in 0...12) i]);
@@ -127,7 +149,7 @@ class EntFactory
 		// SURFACE2 RENDER
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.camera;
 		
 		surfaceRender.animations[0] = [0];
 		surfaceRender.animations.push([0, 1, 0, 2]);
@@ -154,12 +176,12 @@ class EntFactory
 		// BASE ENTITY
 		var e:Entity = createActorEntity(_x, _y, 20, 20);
 		e.addComponent(ResourceFormat.surfacesets.get("shiro"));
+		e.addComponentAs(ResourceFormat.surfacesets.get("weapons"), "weapons_surface");
 		gameContext.playerEntity = e;
 		
 		// SURFACE2 RENDER
-		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
+		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC(gameContext.camera);
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.cameraRect;
 		
 		surfaceRender.animations[0] = [0]; 				 // standing
 		surfaceRender.animations.push([0, 1, 0, 2]);	 // walking
@@ -167,11 +189,18 @@ class EntFactory
 		surfaceRender.animations.push([3, 4, 3, 5]);	 // walking with weapon
 		surfaceRender.frameTime = 8;
 		surfaceRender.frame = 0;
-		
+
+		var weaponRender = new Surface2RenderComponentC(gameContext.camera, "weapons_surface", "weapon_render");
+		e.addComponent(weaponRender);
+		weaponRender.animations[0] = [0];
+		weaponRender.frame = 0;
+
+		gameContext.surface2RenderSystem.addComponent(weaponRender);
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+		gameContext.selfLitRenderSystem.addComponent(surfaceRender);
 		
 		// CONTROL
-		var rotationControl:RotationControlComponent = new RotationControlComponent(gameContext.cameraRect);
+		var rotationControl:RotationControlComponent = new RotationControlComponent(gameContext.camera);
 		e.addComponent(rotationControl);
 		gameContext.controlSystem.addComponent(rotationControl);
 
@@ -191,7 +220,7 @@ class EntFactory
 		
 		//var surfaceRenderWeapons:Surface2RenderComponentC = new Surface2RenderComponentC();
 		//we.addComponent(surfaceRenderWeapons);
-		//surfaceRenderWeapons.camera = gameContext.cameraRect;
+		//surfaceRenderWeapons.camera = gameContext.camera;
 		//surfaceRenderWeapons.animations[0] = [0];
 		//
 		//surfaceRenderWeapons.animations.push([0, 1, 0, 2]);
@@ -220,7 +249,7 @@ class EntFactory
 		
 		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.cameraRect;
+		surfaceRender.camera = gameContext.camera;
 		
 		surfaceRender.animations[0] = [0];
 		surfaceRender.animations.push([0, 1, 0, 2]);
@@ -229,7 +258,7 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		var npc = new InteractComponent(gameContext.cameraRect, function(e){
+		var npc = new InteractComponent(gameContext.camera, function(e){
 			trace("Asd");
 		});
 		e.addComponent(npc);
@@ -247,11 +276,40 @@ class EntFactory
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 
-		var tt:TooltipComponent = new TooltipComponent(gameContext.cameraRect, name, kha.Color.Pink);
+		var tt:TooltipComponent = new TooltipComponent(gameContext.camera, name, kha.Color.Pink);
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 	}
 	
+	public function createProjectile(_position:Vector2, direction:Vector2):Entity
+	{
+		var e:Entity = new Entity();
+		e.addComponent(new PositionComponent(_position.x, _position.y));
+		var t = new TransformComponent();
+		t.rotation = Math.atan2(direction.y, direction.x) * 180 / 3.1415;
+		e.addComponent(t);
+		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
+
+		var surfaceRender = new Surface2RenderComponentC(gameContext.camera);
+		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+		surfaceRender.animations[0] = [0];
+		e.addComponent(surfaceRender);
+
+		var velocity = new VelocityComponent();
+		direction.normalize();
+		direction = direction.mult(8);
+		velocity.velX = direction.x;
+		velocity.velY = direction.y;
+		e.addComponent(velocity);
+		gameContext.velocitySystem.addComponent(velocity);
+
+		var projectile = new ProjectileComponent(gameContext.currentTilemapData);
+		gameContext.hitCheckSystem.addComponent(projectile);
+		e.addComponent(projectile);
+
+		return e;
+	}
+
 	public function createTilemap(_width:Int, _height:Int, _tilesize:Int, _colIndex:Int, _data:Array<Array<Int>>, _tileset:String = "all_tiles"):Entity
 	{
 		var e:Entity = new Entity();
@@ -262,7 +320,7 @@ class EntFactory
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
 		
 		var tileRender:Surface2TileRenderComponent = new Surface2TileRenderComponent();
-		tileRender.targetCamera = gameContext.cameraRect;
+		tileRender.targetCamera = gameContext.camera;
 		e.addComponent(tileRender);
 		
 		gameContext.currentMap = tileRender;

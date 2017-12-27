@@ -2,7 +2,7 @@ package;
 
 import haxe.Json;
 import hxblit.KhaBlit;
-import hxblit.TextureAtlas.IntRect;
+import hxblit.Camera;
 import kha.Assets;
 import kha.Framebuffer;
 import refraction.core.Application;
@@ -54,7 +54,7 @@ class KhaGameState extends refraction.core.State
 			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId:0, scaleFactor:1});
 			
 			var gameCamera = 
-				new IntRect(0, 0, Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom));
+				new Camera(Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom));
 
 			// Init Game Context
 			gameContext = new GameContext(
@@ -63,7 +63,7 @@ class KhaGameState extends refraction.core.State
 			);
 			
 			// Init Ent Factory
-			entFactory = new EntFactory(gameContext);
+			entFactory = EntFactory.instance(gameContext);
 			
 			// Init Lighting 
 			var i = 1;
@@ -103,6 +103,10 @@ class KhaGameState extends refraction.core.State
 		if (button == 0)
 		{
 			gameContext.interactSystem.update();
+			var playerPos:PositionComponent = cast gameContext.playerEntity.components.get("pos_comp");
+			
+			gameContext.camera.shake(3,2);
+			gameContext.playerEntity.getComponent("inventory_comp", InventoryComponent).primary();		
 		}
 	}
 	
@@ -124,6 +128,8 @@ class KhaGameState extends refraction.core.State
 			gameContext.lightSourceSystem.update();
 			
 			gameContext.breadCrumbsSystem.update();
+
+			gameContext.hitCheckSystem.update();
 			gameContext.aiSystem.update();
 		}
 	}
@@ -132,20 +138,15 @@ class KhaGameState extends refraction.core.State
 	{
 		if (!isRenderingReady) return;
 		
+		gameContext.camera.updateShake();
+
 		var playerPos:PositionComponent = cast gameContext.playerEntity.components.get("pos_comp");
 		
-		gameContext.cameraRect.x += Std.int((playerPos.x - 200 - gameContext.cameraRect.x)/8);
-		gameContext.cameraRect.y += Std.int((playerPos.y - 100 - gameContext.cameraRect.y)/8);
+		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x)/8);
+		gameContext.camera.y += Std.int((playerPos.y - 100 - gameContext.camera.y)/8);
 		
-		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.cameraRect.x;
-		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.cameraRect.y;
-		
-		var i:Int = 0;
-		//if (Application.mouseIsDown) i = 2;
-		while(i-->0){
-			gameContext.lightingSystem.lights[i].position.x =  cast Application.mouseX / 2 + gameContext.cameraRect.x + Std.int(i/4) * 2;
-			gameContext.lightingSystem.lights[i].position.y = cast Application.mouseY / 2 + gameContext.cameraRect.y + i%4 * 2;
-		}
+		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
+		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
 		
 		var g = frame.g4;
 		
@@ -168,6 +169,17 @@ class KhaGameState extends refraction.core.State
 
 		gameContext.lightingSystem.renderHXB(gameContext);
 		
+		g.begin();
+		KhaBlit.setContext(frame.g4);
+		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
+		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
+		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases.get("all").image);
+
+		gameContext.selfLitRenderSystem.update();
+
+		KhaBlit.draw();
+
+		g.end();
 		
 		//UI
 		if (!mouse2WasDown && Application.mouse2IsDown)
@@ -182,7 +194,10 @@ class KhaGameState extends refraction.core.State
 		if(drawHitBoxes){
 			frame.g2.begin(false);
 			for(tc in gameContext.collisionSystem.components){
-				tc.drawHitbox(gameContext.cameraRect, frame.g2);
+				tc.drawHitbox(gameContext.camera, frame.g2);
+			}
+			for(p in gameContext.hitCheckSystem.components){
+				p.entity.getComponent("pos_comp", PositionComponent).drawPoint(gameContext.camera, frame.g2);
 			}
 			frame.g2.end();
 		}
@@ -190,8 +205,8 @@ class KhaGameState extends refraction.core.State
 		ui.begin(frame.g2);
 
 		if (showMenu){
-			var worldMenuX:Int = cast menuX / 2 + gameContext.cameraRect.x;
-			var worldMenuY:Int = cast menuY / 2 + gameContext.cameraRect.y;
+			var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
+			var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
 			
 			if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
 				
