@@ -8,8 +8,9 @@ import kha.Framebuffer;
 import refraction.core.Application;
 import refraction.core.State;
 import refraction.ds2d.LightSource;
-import refraction.generic.PositionComponent;
+import refraction.generic.Position;
 import refraction.tile.TilemapUtils;
+
 import kha.Color;
 import kha.input.Mouse;
 import zui.*;
@@ -39,6 +40,26 @@ class KhaGameState extends refraction.core.State
 		super();
 	}
 	
+	private function loadResources():Void{
+		ResourceFormat.init();
+		ResourceFormat.beginAtlas("all");
+
+		ResourceFormat.formatTileSheet("all_tiles", Assets.images.tilesheet, 16);
+		ResourceFormat.formatTileSheet("modern", Assets.images.modern, 16);
+
+		ResourceFormat.formatRotatedSprite("man", Assets.images.man, 26, 26).addTranslation(3,3);
+		ResourceFormat.formatRotatedSprite("weapons", Assets.images.weapons, 36, 20).addTranslation(8, 0);
+		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3);
+		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
+		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
+		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
+		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24).addTranslation(3, 4);
+		ResourceFormat.formatRotatedSprite("weapons", Assets.images.crossbow ,26,26).addTranslation(3, 3).registration(-13,-6);
+		ResourceFormat.formatRotatedSprite("projectiles", Assets.images.projectiles ,20,20).registration(10,10);
+		
+		ResourceFormat.endAtlas();
+	}
+
 	override public function load():Void 
 	{
 		super.load();
@@ -61,6 +82,11 @@ class KhaGameState extends refraction.core.State
 				gameCamera,
 				ui
 			);
+
+			Application.defaultCamera = gameCamera;
+
+			// Load resources
+			loadResources();
 			
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext);
@@ -92,7 +118,7 @@ class KhaGameState extends refraction.core.State
 		entFactory.createNPC(obj.start.x, obj.start.y, "mimi");
 		//entFactory.createZombie(obj.start.x, obj.start.y);
 		
-		for (p in TilemapUtils.computeGeometry(gameContext.currentTilemapData)){
+		for (p in TilemapUtils.computeGeometry(gameContext.tilemapData)){
 			gameContext.lightingSystem.polygons.push(p);
 		}
 		
@@ -103,10 +129,10 @@ class KhaGameState extends refraction.core.State
 		if (button == 0)
 		{
 			gameContext.interactSystem.update();
-			var playerPos:PositionComponent = cast gameContext.playerEntity.components.get("pos_comp");
+			var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 			
 			gameContext.camera.shake(3,2);
-			gameContext.playerEntity.getComponent("inventory_comp", InventoryComponent).primary();		
+			gameContext.playerEntity.getComponent(InventoryComponent).primary();		
 		}
 	}
 	
@@ -140,7 +166,7 @@ class KhaGameState extends refraction.core.State
 		
 		gameContext.camera.updateShake();
 
-		var playerPos:PositionComponent = cast gameContext.playerEntity.components.get("pos_comp");
+		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 		
 		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x)/8);
 		gameContext.camera.y += Std.int((playerPos.y - 100 - gameContext.camera.y)/8);
@@ -197,7 +223,7 @@ class KhaGameState extends refraction.core.State
 				tc.drawHitbox(gameContext.camera, frame.g2);
 			}
 			for(p in gameContext.hitCheckSystem.components){
-				p.entity.getComponent("pos_comp", PositionComponent).drawPoint(gameContext.camera, frame.g2);
+				p.entity.getComponent(Position, "pos_comp").drawPoint(gameContext.camera, frame.g2);
 			}
 			frame.g2.end();
 		}
@@ -243,7 +269,7 @@ class KhaGameState extends refraction.core.State
 		ui.end();
 		
 		frame.g2.begin(false);
-		gameContext.tooltipSystem.update(frame.g2);
+		gameContext.tooltipSystem.draw(frame.g2);
 		frame.g2.end();
 		mouse2WasDown = Application.mouse2IsDown;
 		gameContext.statusText.render(frame.g2);
