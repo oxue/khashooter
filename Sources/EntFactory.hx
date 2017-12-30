@@ -1,5 +1,4 @@
 package;
-import kha.math.FastVector2;
 import kha.math.Vector2;
 import refraction.control.BreadCrumbsComponent;
 import refraction.control.Damping;
@@ -128,7 +127,7 @@ class EntFactory
 			}
 		);
 		
-		var ai = new ZombieAI(cast gameContext.playerEntity.components.get("pos_comp"));
+		var ai = new ZombieAI(cast gameContext.playerEntity.getComponent(Position));
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
@@ -234,7 +233,7 @@ class EntFactory
 		velocity.velX = direction.x;
 		velocity.velY = direction.y;
 
-		gameContext.hitCheckSystem.procure(e, ProjectileComponent);
+		gameContext.hitCheckSystem.procure(e, ProjectileComponent).tilemapData = gameContext.tilemapData;
 
 		return e;
 	}
