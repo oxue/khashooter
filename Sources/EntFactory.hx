@@ -10,8 +10,8 @@ import refraction.generic.Dimensions;
 import refraction.generic.Position;
 import refraction.generic.Velocity;
 import refraction.tile.Surface2TileRenderComponent;
-import refraction.tile.TileCollisionComponent;
-import refraction.tile.TilemapDataComponent;
+import refraction.tile.TileCollision;
+import refraction.tile.TilemapData;
 import entbuilders.ItemBuilder;
 import refraction.generic.TooltipComponent;
 import components.InteractComponent;
@@ -90,7 +90,7 @@ class EntFactory
 
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
-		gameContext.collisionSystem.procure(e, TileCollisionComponent).autoSetup({tilemap: gameContext.tilemapData});
+		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
 		gameContext.breadCrumbsSystem.procure(e, BreadCrumbsComponent).autoSetup({
 				acceptanceRadius: 20,
 				maxAcceleration: 1
@@ -120,7 +120,7 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		gameContext.collisionSystem.procure(e, TileCollisionComponent).autoSetup({tilemap: gameContext.tilemapData});
+		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
 		gameContext.breadCrumbsSystem.procure(e, BreadCrumbsComponent).autoSetup({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
@@ -171,7 +171,7 @@ class EntFactory
 		keyControl.autoSetup({speed: 1});
 		
 		gameContext.collisionSystem
-			.procure(e, TileCollisionComponent)
+			.procure(e, TileCollision)
 			.autoSetup({tilemap: gameContext.tilemapData});
 				
 		var animationControl:AnimationControlComponent = new AnimationControlComponent();
@@ -207,7 +207,7 @@ class EntFactory
 			}
 		);
 		
-		gameContext.collisionSystem.procure(e, TileCollisionComponent).autoSetup({ tilemap: gameContext.tilemapData });
+		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({ tilemap: gameContext.tilemapData });
 		gameContext.aiSystem.procure(e, MimiAI);
 		gameContext.tooltipSystem.procure(e, TooltipComponent).autoSetup({
 			name: name,
@@ -242,7 +242,7 @@ class EntFactory
 	{
 		var e:Entity = new Entity();
 		
-		var tilemapData:TilemapDataComponent = new TilemapDataComponent(_width, _height, _tilesize, _colIndex);
+		var tilemapData:TilemapData = new TilemapData(_width, _height, _tilesize, _colIndex);
 		e.addComponent(tilemapData);
 		tilemapData.setDataIntArray(_data);
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
@@ -253,6 +253,7 @@ class EntFactory
 		
 		gameContext.currentMap = tileRender;
 		gameContext.tilemapData = tilemapData;
+		gameContext.collisionSystem.setTilemap(tilemapData);
 		
 		return e;
 	}
