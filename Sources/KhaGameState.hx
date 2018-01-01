@@ -132,7 +132,7 @@ class KhaGameState extends refraction.core.State
 			var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 			
 			gameContext.camera.shake(3,2);
-			gameContext.playerEntity.getComponent(InventoryComponent).primary();		
+			gameContext.playerEntity.getComponent(Inventory).primary();		
 		}
 	}
 	

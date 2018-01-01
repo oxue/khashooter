@@ -1,23 +1,23 @@
 package;
 import kha.math.Vector2;
-import refraction.control.BreadCrumbsComponent;
+import refraction.control.BreadCrumbs;
 import refraction.control.Damping;
-import refraction.control.KeyControlComponent;
-import refraction.control.RotationControlComponent;
+import refraction.control.KeyControl;
+import refraction.control.RotationControl;
 import refraction.core.Entity;
-import refraction.display.Surface2RenderComponentC;
+import refraction.display.AnimatedRender;
 import refraction.generic.Dimensions;
 import refraction.generic.Position;
 import refraction.generic.Velocity;
-import refraction.tile.Surface2TileRenderComponent;
+import refraction.tile.Surface2TileRender;
 import refraction.tile.TileCollision;
 import refraction.tile.TilemapData;
 import entbuilders.ItemBuilder;
-import refraction.generic.TooltipComponent;
-import components.InteractComponent;
-import components.ProjectileComponent;
+import refraction.generic.Tooltip;
+import components.Interactable;
+import components.Projectile;
 import refraction.core.Application;
-import refraction.systems.SpacingSystem.Spacing;
+import refraction.systems.SpacingSys.Spacing;
 
 /**
  * ...
@@ -78,7 +78,7 @@ class EntFactory
 
 		e.addComponent(ResourceFormat.surfacesets.get("gyo"));
 
-		var surfaceRender = new Surface2RenderComponentC();
+		var surfaceRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 
@@ -91,7 +91,7 @@ class EntFactory
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
 		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbsComponent).autoSetup({
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
 				acceptanceRadius: 20,
 				maxAcceleration: 1
 			}
@@ -108,7 +108,7 @@ class EntFactory
 		e.addComponent(ResourceFormat.surfacesets.get("zombie"));
 		
 		// SURFACE2 RENDER
-		var surfaceRender = new Surface2RenderComponentC();
+		var surfaceRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 		
@@ -121,7 +121,7 @@ class EntFactory
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
 		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbsComponent).autoSetup({
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
 			}
@@ -141,7 +141,7 @@ class EntFactory
 		gameContext.playerEntity = e;
 		
 		// SURFACE2 RENDER
-		var surfaceRender = new Surface2RenderComponentC(gameContext.camera);
+		var surfaceRender = new AnimatedRender(gameContext.camera);
 		e.addComponent(surfaceRender);
 		
 		surfaceRender.animations[0] = [0]; 				 // standing
@@ -151,7 +151,7 @@ class EntFactory
 		surfaceRender.frameTime = Consts.CHARACTER_FRAME_TIME;
 		surfaceRender.frame = 0;
 
-		var weaponRender = new Surface2RenderComponentC(gameContext.camera, "weapons_surface");
+		var weaponRender = new AnimatedRender(gameContext.camera, "weapons_surface");
 		e.addComponent(weaponRender, "weapon_render");
 		weaponRender.animations[0] = [0];
 		weaponRender.frame = 0;
@@ -160,21 +160,21 @@ class EntFactory
 		gameContext.selfLitRenderSystem.addComponent(surfaceRender);
 		
 		// CONTROL
-		var rotationControl:RotationControlComponent = new RotationControlComponent(gameContext.camera);
+		var rotationControl:RotationControl = new RotationControl(gameContext.camera);
 		e.addComponent(rotationControl);
 		gameContext.controlSystem.addComponent(rotationControl);
 
-		var inventory = new InventoryComponent();
+		var inventory = new Inventory();
 		e.addComponent(inventory);
 		
-		var keyControl = gameContext.controlSystem.procure(e, KeyControlComponent);
+		var keyControl = gameContext.controlSystem.procure(e, KeyControl);
 		keyControl.autoSetup({speed: 1});
 		
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
 			.autoSetup({tilemap: gameContext.tilemapData});
 				
-		var animationControl:AnimationControlComponent = new AnimationControlComponent();
+		var animationControl:PlayerAnimation = new PlayerAnimation();
 		e.addComponent(animationControl);
 		gameContext.controlSystem.addComponent(animationControl);
 	}
@@ -183,7 +183,7 @@ class EntFactory
 		var e:Entity = createActorEntity(_x, _y, 20, 20);
 		e.addComponent(ResourceFormat.surfacesets.get(name));
 				
-		var surfaceRender:Surface2RenderComponentC = new Surface2RenderComponentC();
+		var surfaceRender:AnimatedRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 		
@@ -194,14 +194,14 @@ class EntFactory
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		var npc = new InteractComponent(gameContext.camera, function(e){
+		var npc = new Interactable(gameContext.camera, function(e){
 			trace("Asd");
 		});
 		e.addComponent(npc);
 		
 		gameContext.interactSystem.addComponent(npc);
 		
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbsComponent).autoSetup({
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
 			}
@@ -209,7 +209,7 @@ class EntFactory
 		
 		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({ tilemap: gameContext.tilemapData });
 		gameContext.aiSystem.procure(e, MimiAI);
-		gameContext.tooltipSystem.procure(e, TooltipComponent).autoSetup({
+		gameContext.tooltipSystem.procure(e, Tooltip).autoSetup({
 			name: name,
 			color: kha.Color.Pink
 		});
@@ -221,7 +221,7 @@ class EntFactory
 		e.addComponent(new Position(_position.x, _position.y, Math.atan2(direction.y, direction.x) * Consts.RAD2A));
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 
-		var surfaceRender = new Surface2RenderComponentC(gameContext.camera);
+		var surfaceRender = new AnimatedRender(gameContext.camera);
 		//gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		gameContext.selfLitRenderSystem.addComponent(surfaceRender);
 		surfaceRender.animations[0] = [0];
@@ -233,7 +233,7 @@ class EntFactory
 		velocity.velX = direction.x;
 		velocity.velY = direction.y;
 
-		gameContext.hitCheckSystem.procure(e, ProjectileComponent).tilemapData = gameContext.tilemapData;
+		gameContext.hitCheckSystem.procure(e, Projectile).tilemapData = gameContext.tilemapData;
 
 		return e;
 	}
@@ -247,7 +247,7 @@ class EntFactory
 		tilemapData.setDataIntArray(_data);
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
 		
-		var tileRender:Surface2TileRenderComponent = new Surface2TileRenderComponent();
+		var tileRender:Surface2TileRender = new Surface2TileRender();
 		tileRender.targetCamera = gameContext.camera;
 		e.addComponent(tileRender);
 		
