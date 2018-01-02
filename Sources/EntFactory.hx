@@ -59,11 +59,13 @@ class EntFactory
 	public function createActorEntity(_x:Int = 0, _y:Int = 0, _w:Int = 20, _h:Int = 20):Entity
 	{
 		var e:Entity = new Entity();
-		e.addComponent(new Position(_x, _y));
+		var p = new Position(_x, _y, 10, 10);
+		p.autoParams({x:_x,y:_y});
+		e.addComponent(p);
 		e.addComponent(new Dimensions(_w, _h));
 		gameContext.velocitySystem.procure(e, Velocity);
-		gameContext.spacingSystem.procure(e, Spacing).autoSetup({ radius: _w/2 });
-		gameContext.dampingSystem.procure(e, Damping).autoSetup({ factor: Consts.ACTOR_DAMPING });
+		gameContext.spacingSystem.procure(e, Spacing).autoParams({ radius: _w/2 });
+		gameContext.dampingSystem.procure(e, Damping).autoParams({ factor: Consts.ACTOR_DAMPING });
 
 		//var lightsource:LightSourceComponent = new LightSourceComponent(gameContext.lightingSystem, 0xaaaaaa, cast _w/2 + 5, cast _w / 2, cast _h/2);
 		//e.addComponent(lightsource);
@@ -82,16 +84,16 @@ class EntFactory
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 
-		surfaceRender.animations[0] = [4];
-		surfaceRender.animations.push([for (i in 0...12) i]);
+		surfaceRender.animations.set("idle", [4]);
+		surfaceRender.animations.set("running", [for (i in 0...12) i]);
 		surfaceRender.frameTime = Consts.SMOOTH_FRAME_TIME;
 		surfaceRender.frame = 0;
-		surfaceRender.curAnimaition = 1;
+		surfaceRender.curAnimaition = "idle";
 
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 
-		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
+		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
 				acceptanceRadius: 20,
 				maxAcceleration: 1
 			}
@@ -112,16 +114,16 @@ class EntFactory
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 		
-		surfaceRender.animations[0] = [0];
-		surfaceRender.animations.push([0, 1, 0, 2]);
+		surfaceRender.animations.set("idle", [0]);
+		surfaceRender.animations.set("running", [0, 1, 0, 2]);
 		surfaceRender.frameTime = Consts.CHARACTER_FRAME_TIME;
 		surfaceRender.frame = 0;
-		surfaceRender.curAnimaition = 1;
+		surfaceRender.curAnimaition = "idle";
 		
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		
-		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
+		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
 			}
@@ -144,16 +146,23 @@ class EntFactory
 		var surfaceRender = new AnimatedRender(gameContext.camera);
 		e.addComponent(surfaceRender);
 		
-		surfaceRender.animations[0] = [0]; 				 // standing
-		surfaceRender.animations.push([0, 1, 0, 2]);	 // walking
-		surfaceRender.animations.push([3]);				 // standing with weapon
-		surfaceRender.animations.push([3, 4, 3, 5]);	 // walking with weapon
-		surfaceRender.frameTime = Consts.CHARACTER_FRAME_TIME;
-		surfaceRender.frame = 0;
+		surfaceRender.autoParams(
+			{
+				animations: [
+					{name: "idle", frames: [0]},
+					{name: "running", frames: [0, 1, 0, 2]},
+					{name: "idle with weapon", frames: [3]},
+					{name: "running with weapon", frames: [3, 4, 3, 5]}
+				],
+				initialAnimation: "idle",
+				frameTime: Consts.CHARACTER_FRAME_TIME
+			}
+		);
 
 		var weaponRender = new AnimatedRender(gameContext.camera, "weapons_surface");
 		e.addComponent(weaponRender, "weapon_render");
-		weaponRender.animations[0] = [0];
+		weaponRender.animations.set("crossbow", [0]);
+		weaponRender.curAnimaition = "crossbow";
 		weaponRender.frame = 0;
 
 		gameContext.surface2RenderSystem.addComponent(weaponRender);
@@ -168,11 +177,11 @@ class EntFactory
 		e.addComponent(inventory);
 		
 		var keyControl = gameContext.controlSystem.procure(e, KeyControl);
-		keyControl.autoSetup({speed: 1});
+		keyControl.autoParams({speed: 1});
 		
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
-			.autoSetup({tilemap: gameContext.tilemapData});
+			.autoParams({tilemap: gameContext.tilemapData});
 				
 		var animationControl:PlayerAnimation = new PlayerAnimation();
 		e.addComponent(animationControl);
@@ -187,8 +196,8 @@ class EntFactory
 		e.addComponent(surfaceRender);
 		surfaceRender.camera = gameContext.camera;
 		
-		surfaceRender.animations[0] = [0];
-		surfaceRender.animations.push([0, 1, 0, 2]);
+		surfaceRender.animations.set("idle", [0]);
+		surfaceRender.animations.set("running", [0, 1, 0, 2]);
 		surfaceRender.frameTime = 8;
 		surfaceRender.frame = 0;
 		
@@ -201,15 +210,15 @@ class EntFactory
 		
 		gameContext.interactSystem.addComponent(npc);
 		
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoSetup({
+		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
 			}
 		);
 		
-		gameContext.collisionSystem.procure(e, TileCollision).autoSetup({ tilemap: gameContext.tilemapData });
+		gameContext.collisionSystem.procure(e, TileCollision).autoParams({ tilemap: gameContext.tilemapData });
 		gameContext.aiSystem.procure(e, MimiAI);
-		gameContext.tooltipSystem.procure(e, Tooltip).autoSetup({
+		gameContext.tooltipSystem.procure(e, Tooltip).autoParams({
 			name: name,
 			color: kha.Color.Pink
 		});
@@ -218,13 +227,14 @@ class EntFactory
 	public function createProjectile(_position:Vector2, direction:Vector2):Entity
 	{
 		var e:Entity = new Entity();
-		e.addComponent(new Position(_position.x, _position.y, Math.atan2(direction.y, direction.x) * Consts.RAD2A));
+		e.addComponent(new Position(_position.x, _position.y, 10, 10, Math.atan2(direction.y, direction.x) * Consts.RAD2A));
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 
 		var surfaceRender = new AnimatedRender(gameContext.camera);
 		//gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		gameContext.surface2RenderSystem.addComponent(surfaceRender);
-		surfaceRender.animations[0] = [0];
+		surfaceRender.animations.set("bolt",[0]);
+		surfaceRender.curAnimaition = "bolt";
 		e.addComponent(surfaceRender);
 
 		var velocity = gameContext.velocitySystem.procure(e, Velocity);
