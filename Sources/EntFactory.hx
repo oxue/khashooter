@@ -223,7 +223,7 @@ class EntFactory
 
 		var surfaceRender = new AnimatedRender(gameContext.camera);
 		//gameContext.surface2RenderSystem.addComponent(surfaceRender);
-		gameContext.selfLitRenderSystem.addComponent(surfaceRender);
+		gameContext.surface2RenderSystem.addComponent(surfaceRender);
 		surfaceRender.animations[0] = [0];
 		e.addComponent(surfaceRender);
 

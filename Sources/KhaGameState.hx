@@ -49,12 +49,12 @@ class KhaGameState extends refraction.core.State
 
 		ResourceFormat.formatRotatedSprite("man", Assets.images.man, 26, 26).addTranslation(3,3);
 		ResourceFormat.formatRotatedSprite("weapons", Assets.images.weapons, 36, 20).addTranslation(8, 0);
-		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3);
-		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6);
-		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3);
+		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3).registration(10,10);
+		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6).registration(10,10);
+		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3).registration(10,10);
 		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
 		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24).addTranslation(3, 4);
-		ResourceFormat.formatRotatedSprite("weapons", Assets.images.crossbow ,26,26).addTranslation(3, 3).registration(-13,-6);
+		ResourceFormat.formatRotatedSprite("weapons", Assets.images.crossbow ,26,26).addTranslation(3, 3).registration(-3,5);
 		ResourceFormat.formatRotatedSprite("projectiles", Assets.images.projectiles ,20,20).registration(10,10);
 		
 		ResourceFormat.endAtlas();
@@ -169,7 +169,7 @@ class KhaGameState extends refraction.core.State
 		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 		
 		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x)/8);
-		gameContext.camera.y += Std.int((playerPos.y - 100 - gameContext.camera.y)/8);
+		gameContext.camera.y += Std.int((playerPos.y - 150 - gameContext.camera.y)/8);
 		
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
@@ -223,7 +223,7 @@ class KhaGameState extends refraction.core.State
 				tc.drawHitbox(gameContext.camera, frame.g2);
 			}
 			for(p in gameContext.hitCheckSystem.components){
-				p.entity.getComponent(Position, "pos_comp").drawPoint(gameContext.camera, frame.g2);
+				p.entity.getComponent(Position).drawPoint(gameContext.camera, frame.g2);
 			}
 			frame.g2.end();
 		}
