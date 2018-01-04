@@ -48,7 +48,6 @@ class KhaGameState extends refraction.core.State
 		ResourceFormat.formatTileSheet("modern", Assets.images.modern, 16);
 
 		ResourceFormat.formatRotatedSprite("man", Assets.images.man, 26, 26).addTranslation(3,3);
-		ResourceFormat.formatRotatedSprite("weapons", Assets.images.weapons, 36, 20).addTranslation(8, 0);
 		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3).registration(10,10);
 		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6).registration(10,10);
 		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3).registration(10,10);

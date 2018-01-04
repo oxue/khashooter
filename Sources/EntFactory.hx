@@ -47,7 +47,7 @@ class EntFactory
 	public function new(_gc:GameContext){
 		gameContext = _gc;
 		itemBuilder = new ItemBuilder(gameContext);
-		entityTemplates = parseEntityData(Assets.blobs.entities_json.toString());
+		entityTemplates = parseEntityData(Assets.blobs.entity_entities_json.toString());
 	}
 
 	public function parseEntityData(_data:String):StringMap<Dynamic>

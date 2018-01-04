@@ -3,7 +3,12 @@ var project = new Project('Empty');
 project.addSources('./Sources');
 project.addShaders('./Sources/Shaders/**');
 project.addSources('../shooter2016/src');
-project.addAssets('./Sources/bin/**');
+
+project.addAssets('Assets/**', {
+	nameBaseDir: 'Assets',
+	destination: '{dir}/{name}',
+	name: '{dir}/{name}'
+});
 project.addLibrary('zui');
 
 project.windowOptions.width = 800;
