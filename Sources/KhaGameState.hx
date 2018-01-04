@@ -187,7 +187,7 @@ class KhaGameState extends refraction.core.State
 			gameContext.currentMap.update();
 		}
 		
-		gameContext.surface2RenderSystem.update();
+		gameContext.renderSystem.update();
 		
 		KhaBlit.draw();
 

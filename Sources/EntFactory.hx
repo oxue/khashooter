@@ -18,6 +18,10 @@ import components.Interactable;
 import components.Projectile;
 import refraction.core.Application;
 import refraction.systems.SpacingSys.Spacing;
+import kha.Assets;
+import haxe.Json;
+import haxe.ds.StringMap;
+import refraction.core.Component;
 
 /**
  * ...
@@ -38,10 +42,26 @@ class EntFactory
 	public var gameContext:GameContext;
 	private var entityPrototypes:Dynamic;
 	private var itemBuilder:ItemBuilder;
+	private var entityTemplates:StringMap<Dynamic>;
 	
 	public function new(_gc:GameContext){
 		gameContext = _gc;
 		itemBuilder = new ItemBuilder(gameContext);
+		entityTemplates = parseEntityData(Assets.blobs.entities_json.toString());
+	}
+
+	public function parseEntityData(_data:String):StringMap<Dynamic>
+	{
+		var jsonObj:Dynamic = Json.parse(_data);
+		var ret = new StringMap<Dynamic>();
+		var i:Int = jsonObj.entities.length;
+
+		while(i-->0){
+			var entityName:String = jsonObj.entities[i].entity_name;
+			ret.set(entityName, jsonObj.entities[i]);
+		}
+
+		return ret;
 	}
 
 	public function worldMouse():Vector2{
@@ -82,7 +102,6 @@ class EntFactory
 
 		var surfaceRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.camera;
 
 		surfaceRender.animations.set("idle", [4]);
 		surfaceRender.animations.set("running", [for (i in 0...12) i]);
@@ -90,7 +109,7 @@ class EntFactory
 		surfaceRender.frame = 0;
 		surfaceRender.curAnimaition = "idle";
 
-		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+		gameContext.renderSystem.addComponent(surfaceRender);
 
 		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
 		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
@@ -112,7 +131,6 @@ class EntFactory
 		// SURFACE2 RENDER
 		var surfaceRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.camera;
 		
 		surfaceRender.animations.set("idle", [0]);
 		surfaceRender.animations.set("running", [0, 1, 0, 2]);
@@ -120,7 +138,7 @@ class EntFactory
 		surfaceRender.frame = 0;
 		surfaceRender.curAnimaition = "idle";
 		
-		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+		gameContext.renderSystem.addComponent(surfaceRender);
 		
 		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
 		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
@@ -133,75 +151,75 @@ class EntFactory
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
+
+	public function constructComponent(_type:String, _e:Entity, _name:String = null):Component
+	{
+		switch _type {
+			case "AnimatedRender": return cast gameContext.renderSystem.procure(_e, AnimatedRender, _name);
+			case "AnimatedRender/SelfLit": return cast gameContext.selfLitRenderSystem.procure(_e, AnimatedRender, _name);
+			case "RotationControl": return cast gameContext.controlSystem.procure(_e, RotationControl, _name);
+			case "KeyControl": return cast gameContext.controlSystem.procure(_e, KeyControl, _name);
+			case "TileCollision": return cast gameContext.collisionSystem.procure(_e, TileCollision, _name);
+			case "PlayerAnimation": return cast gameContext.controlSystem.procure(_e, PlayerAnimation, _name);
+			case "Inventory": return _e.addComponent(new Inventory());
+			case "Position": return _e.addComponent(new Position());
+			case "Dimensions": return _e.addComponent(new Dimensions());
+			case "Velocity": return cast gameContext.velocitySystem.procure(_e, Velocity, _name);
+			case "Spacing": return cast gameContext.spacingSystem.procure(_e, Spacing, _name);
+			case "Damping": return cast gameContext.dampingSystem.procure(_e, Damping, _name);
+		}
+		return null;
+	}
+
+	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component
+	{
+		if(_type == "SurfaceSet"){
+			return _e.addComponent(ResourceFormat.surfacesets.get(_settings.resource), _settings.name);
+		}
+
+		var ret:Component = constructComponent(_type, _e, _settings.name);
+		if(_settings.args != null){
+			ret.autoParams(_settings.args);
+		}
+		return ret;
+	}
+
+	public function autoBuild(_entityName:String, _e:Entity = null):Entity
+	{
+		if(entityTemplates.get(_entityName).base_entity!=null){
+			_e = autoBuild(entityTemplates.get(_entityName).base_entity);
+		}
+		if(_e == null) _e = new Entity();
+
+		var components:Array<Dynamic> = entityTemplates.get(_entityName).components;
+
+		for(component in components){
+			autoComponent(component.type, component, _e);
+		}
+		return _e;
+	}
 	
 	public function createPlayer(_x:Int = 0, _y:Int = 0):Void
 	{
-		// BASE ENTITY
-		var e:Entity = createActorEntity(_x, _y, 20, 20);
-		e.addComponent(ResourceFormat.surfacesets.get("shiro"));
-		e.addComponent(ResourceFormat.surfacesets.get("weapons"), "weapons_surface");
+		var e = autoBuild("Player");
+		e.getComponent(Position).x = _x;
+		e.getComponent(Position).y = _y;
 		gameContext.playerEntity = e;
-		
-		// SURFACE2 RENDER
-		var surfaceRender = new AnimatedRender(gameContext.camera);
-		e.addComponent(surfaceRender);
-		
-		surfaceRender.autoParams(
-			{
-				animations: [
-					{name: "idle", frames: [0]},
-					{name: "running", frames: [0, 1, 0, 2]},
-					{name: "idle with weapon", frames: [3]},
-					{name: "running with weapon", frames: [3, 4, 3, 5]}
-				],
-				initialAnimation: "idle",
-				frameTime: Consts.CHARACTER_FRAME_TIME
-			}
-		);
-
-		var weaponRender = new AnimatedRender(gameContext.camera, "weapons_surface");
-		e.addComponent(weaponRender, "weapon_render");
-		weaponRender.animations.set("crossbow", [0]);
-		weaponRender.curAnimaition = "crossbow";
-		weaponRender.frame = 0;
-
-		gameContext.surface2RenderSystem.addComponent(weaponRender);
-		gameContext.selfLitRenderSystem.addComponent(surfaceRender);
-		
-		// CONTROL
-		var rotationControl:RotationControl = new RotationControl(gameContext.camera);
-		e.addComponent(rotationControl);
-		gameContext.controlSystem.addComponent(rotationControl);
-
-		var inventory = new Inventory();
-		e.addComponent(inventory);
-		
-		var keyControl = gameContext.controlSystem.procure(e, KeyControl);
-		keyControl.autoParams({speed: 1});
-		
-		gameContext.collisionSystem
-			.procure(e, TileCollision)
-			.autoParams({tilemap: gameContext.tilemapData});
-				
-		var animationControl:PlayerAnimation = new PlayerAnimation();
-		e.addComponent(animationControl);
-		gameContext.controlSystem.addComponent(animationControl);
 	}
 	
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String){
-		var e:Entity = createActorEntity(_x, _y, 20, 20);
+		var e:Entity = autoBuild("Actor");
 		e.addComponent(ResourceFormat.surfacesets.get(name));
 				
 		var surfaceRender:AnimatedRender = new AnimatedRender();
 		e.addComponent(surfaceRender);
-		surfaceRender.camera = gameContext.camera;
 		
 		surfaceRender.animations.set("idle", [0]);
 		surfaceRender.animations.set("running", [0, 1, 0, 2]);
 		surfaceRender.frameTime = 8;
 		surfaceRender.frame = 0;
 		
-		gameContext.surface2RenderSystem.addComponent(surfaceRender);
+		gameContext.renderSystem.addComponent(surfaceRender);
 		
 		var npc = new Interactable(gameContext.camera, function(e){
 			trace("Asd");
@@ -219,7 +237,7 @@ class EntFactory
 		gameContext.collisionSystem.procure(e, TileCollision).autoParams({ tilemap: gameContext.tilemapData });
 		gameContext.aiSystem.procure(e, MimiAI);
 		gameContext.tooltipSystem.procure(e, Tooltip).autoParams({
-			name: name,
+			message: name,
 			color: kha.Color.Pink
 		});
 	}
@@ -230,12 +248,15 @@ class EntFactory
 		e.addComponent(new Position(_position.x, _position.y, 10, 10, Math.atan2(direction.y, direction.x) * Consts.RAD2A));
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 
-		var surfaceRender = new AnimatedRender(gameContext.camera);
-		//gameContext.surface2RenderSystem.addComponent(surfaceRender);
-		gameContext.surface2RenderSystem.addComponent(surfaceRender);
-		surfaceRender.animations.set("bolt",[0]);
-		surfaceRender.curAnimaition = "bolt";
-		e.addComponent(surfaceRender);
+		var surfaceRender = gameContext.renderSystem.procure(e,AnimatedRender);
+		surfaceRender.autoParams({
+			"animations": [
+				{name: "bolt", frames: [0]},
+			],
+			"initialAnimation": "bolt",
+			"surface": null,
+			"frameTime": 8
+		});
 
 		var velocity = gameContext.velocitySystem.procure(e, Velocity);
 		direction.normalize();
