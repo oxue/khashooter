@@ -1,5 +1,6 @@
 package;
 
+import haxe.macro.Expr;
 import haxe.Json;
 import hxblit.KhaBlit;
 import hxblit.Camera;
@@ -7,9 +8,11 @@ import kha.Assets;
 import kha.Framebuffer;
 import refraction.core.Application;
 import refraction.core.State;
+import refraction.core.Entity;
 import refraction.ds2d.LightSource;
 import refraction.generic.Position;
 import refraction.tile.TilemapUtils;
+
 
 import kha.Color;
 import kha.input.Mouse;
@@ -20,7 +23,7 @@ import zui.*;
  * @author 
  */
  
-class KhaGameState extends refraction.core.State
+class GameState extends refraction.core.State
 {
 
 	private var isRenderingReady:Bool;
@@ -62,7 +65,6 @@ class KhaGameState extends refraction.core.State
 	override public function load():Void 
 	{
 		super.load();
-		
 		isRenderingReady = false;
 		
 		Assets.loadEverything(function(){
@@ -90,6 +92,15 @@ class KhaGameState extends refraction.core.State
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext);
 			
+			// Init behaviours
+			gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){
+				//trace("hit!");
+			});
+			gameContext.hitTestSystem.onHit("zombie", "player_bolt", function (z:Entity, b:Entity){
+				z.remove();
+				b.notify("collided");
+			});
+
 			// Init Lighting 
 			var i = 1;
 			while(i-->0)
@@ -156,6 +167,8 @@ class KhaGameState extends refraction.core.State
 
 			gameContext.hitCheckSystem.update();
 			gameContext.aiSystem.update();
+
+			gameContext.hitTestSystem.update();
 		}
 	}
 	

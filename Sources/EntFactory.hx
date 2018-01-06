@@ -1,21 +1,16 @@
 package;
 import kha.math.Vector2;
-import refraction.control.BreadCrumbs;
-import refraction.control.Damping;
-import refraction.control.KeyControl;
-import refraction.control.RotationControl;
+import refraction.control.*;
 import refraction.core.Entity;
 import refraction.display.AnimatedRender;
-import refraction.generic.Dimensions;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.generic.*;
 import refraction.tile.Surface2TileRender;
 import refraction.tile.TileCollision;
 import refraction.tile.TilemapData;
 import entbuilders.ItemBuilder;
-import refraction.generic.Tooltip;
 import components.Interactable;
 import components.Projectile;
+import components.HitCircle;
 import refraction.core.Application;
 import refraction.systems.SpacingSys.Spacing;
 import kha.Assets;
@@ -47,18 +42,24 @@ class EntFactory
 	public function new(_gc:GameContext){
 		gameContext = _gc;
 		itemBuilder = new ItemBuilder(gameContext);
-		entityTemplates = parseEntityData(Assets.blobs.entity_entities_json.toString());
+		entityTemplates = getAllEntityTemplates(Assets.blobs.entity_entities_json.toString());
 	}
 
-	public function parseEntityData(_data:String):StringMap<Dynamic>
+	public function getEntityTemplate(_entityName:String):Dynamic
+	{
+		var entityBlob:String = Reflect.field(Assets.blobs, 'entity_${_entityName}_json').toString();
+		return Json.parse(entityBlob);
+	}
+
+	public function getAllEntityTemplates(_data:String):StringMap<Dynamic>
 	{
 		var jsonObj:Dynamic = Json.parse(_data);
 		var ret = new StringMap<Dynamic>();
 		var i:Int = jsonObj.entities.length;
 
 		while(i-->0){
-			var entityName:String = jsonObj.entities[i].entity_name;
-			ret.set(entityName, jsonObj.entities[i]);
+			var entityName:String = jsonObj.entities[i];
+			ret.set(entityName, getEntityTemplate(entityName));
 		}
 
 		return ret;
@@ -125,29 +126,10 @@ class EntFactory
 	
 	public function createZombie(_x:Int = 0, _y:Int = 0):Void
 	{
-		var e = createActorEntity(_x, _y, 20, 20);
-		e.addComponent(ResourceFormat.surfacesets.get("zombie"));
+		var e = autoBuild("Zombie");
+		e.getComponent(Position).setPosition(_x, _y);		
 		
-		// SURFACE2 RENDER
-		var surfaceRender = new AnimatedRender();
-		e.addComponent(surfaceRender);
-		
-		surfaceRender.animations.set("idle", [0]);
-		surfaceRender.animations.set("running", [0, 1, 0, 2]);
-		surfaceRender.frameTime = Consts.CHARACTER_FRAME_TIME;
-		surfaceRender.frame = 0;
-		surfaceRender.curAnimaition = "idle";
-		
-		gameContext.renderSystem.addComponent(surfaceRender);
-		
-		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
-				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
-				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL
-			}
-		);
-		
-		var ai = new ZombieAI(cast gameContext.playerEntity.getComponent(Position));
+		var ai = new ZombieAI(cast gameContext.playerEntity.getComponent(Position), gameContext.tilemapData);
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
@@ -167,6 +149,8 @@ class EntFactory
 			case "Velocity": return cast gameContext.velocitySystem.procure(_e, Velocity, _name);
 			case "Spacing": return cast gameContext.spacingSystem.procure(_e, Spacing, _name);
 			case "Damping": return cast gameContext.dampingSystem.procure(_e, Damping, _name);
+			case "HitCircle": return cast gameContext.hitTestSystem.procure(_e, HitCircle, _name);
+			case "BreadCrumbs": return cast gameContext.breadCrumbsSystem.procure(_e, BreadCrumbs, _name);
 		}
 		return null;
 	}
@@ -202,8 +186,7 @@ class EntFactory
 	public function createPlayer(_x:Int = 0, _y:Int = 0):Void
 	{
 		var e = autoBuild("Player");
-		e.getComponent(Position).x = _x;
-		e.getComponent(Position).y = _y;
+		e.getComponent(Position).setPosition(_x, _y);
 		gameContext.playerEntity = e;
 	}
 	
@@ -248,7 +231,7 @@ class EntFactory
 		e.addComponent(new Position(_position.x, _position.y, 10, 10, Math.atan2(direction.y, direction.x) * Consts.RAD2A));
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 
-		var surfaceRender = gameContext.renderSystem.procure(e,AnimatedRender);
+		var surfaceRender = gameContext.selfLitRenderSystem.procure(e,AnimatedRender);
 		surfaceRender.autoParams({
 			"animations": [
 				{name: "bolt", frames: [0]},
@@ -265,6 +248,10 @@ class EntFactory
 		velocity.velY = direction.y;
 
 		gameContext.hitCheckSystem.procure(e, Projectile).tilemapData = gameContext.tilemapData;
+		gameContext.hitTestSystem.procure(e, HitCircle).autoParams({
+			tag: "player_bolt",
+			radius: 3
+		});
 
 		return e;
 	}
