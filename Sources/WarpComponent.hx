@@ -17,7 +17,7 @@ class WarpComponent extends Component
 	
 	public function new() 
 	{
-		super("warp_comp");
+		super();
 	}
 	
 	override public function load():Void 
@@ -32,7 +32,7 @@ class WarpComponent extends Component
 		var dis2:Float = dx * dx + dy * dy;
 		if (dis2 < 160)
 		{
-			cast(Application.currentState, GameState).loadLevel(level);
+			cast(Application.currentState, GameState);//.loadLevel(level);
 		}
 	}
 	

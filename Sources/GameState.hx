@@ -90,7 +90,7 @@ class GameState extends refraction.core.State
 			loadResources();
 			
 			// Init Ent Factory
-			entFactory = EntFactory.instance(gameContext);
+			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
 			
 			// Init behaviours
 			gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){

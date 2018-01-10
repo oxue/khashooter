@@ -13,10 +13,10 @@ import components.Projectile;
 import components.HitCircle;
 import refraction.core.Application;
 import refraction.systems.SpacingSys.Spacing;
-import kha.Assets;
-import haxe.Json;
 import haxe.ds.StringMap;
 import refraction.core.Component;
+import refraction.core.ComponentFactory;
+import refraction.core.TemplateParser;
 
 /**
  * ...
@@ -26,43 +26,25 @@ class EntFactory
 {
 
 	private static var myInstance:EntFactory = null;
-
-	public static function instance(?_gc:GameContext):EntFactory{
+	public static function instance(?_gc:GameContext, ?_factory:ComponentFactory):EntFactory
+	{
 		if(myInstance == null){
-			myInstance = new EntFactory(_gc);
+			myInstance = new EntFactory(_gc, _factory);
 		}
 		return myInstance;
 	}
 
 	public var gameContext:GameContext;
+	public var factory:ComponentFactory;
 	private var entityPrototypes:Dynamic;
 	private var itemBuilder:ItemBuilder;
 	private var entityTemplates:StringMap<Dynamic>;
 	
-	public function new(_gc:GameContext){
+	public function new(_gc:GameContext, _factory:ComponentFactory){
 		gameContext = _gc;
+		factory = _factory;
 		itemBuilder = new ItemBuilder(gameContext);
-		entityTemplates = getAllEntityTemplates(Assets.blobs.entity_entities_json.toString());
-	}
-
-	public function getEntityTemplate(_entityName:String):Dynamic
-	{
-		var entityBlob:String = Reflect.field(Assets.blobs, 'entity_${_entityName}_json').toString();
-		return Json.parse(entityBlob);
-	}
-
-	public function getAllEntityTemplates(_data:String):StringMap<Dynamic>
-	{
-		var jsonObj:Dynamic = Json.parse(_data);
-		var ret = new StringMap<Dynamic>();
-		var i:Int = jsonObj.entities.length;
-
-		while(i-->0){
-			var entityName:String = jsonObj.entities[i];
-			ret.set(entityName, getEntityTemplate(entityName));
-		}
-
-		return ret;
+		entityTemplates = TemplateParser.parse();
 	}
 
 	public function worldMouse():Vector2{
@@ -133,35 +115,14 @@ class EntFactory
 		e.addComponent(ai);
 		gameContext.aiSystem.addComponent(ai);
 	}
-
-	public function constructComponent(_type:String, _e:Entity, _name:String = null):Component
-	{
-		switch _type {
-			case "AnimatedRender": return cast gameContext.renderSystem.procure(_e, AnimatedRender, _name);
-			case "AnimatedRender/SelfLit": return cast gameContext.selfLitRenderSystem.procure(_e, AnimatedRender, _name);
-			case "RotationControl": return cast gameContext.controlSystem.procure(_e, RotationControl, _name);
-			case "KeyControl": return cast gameContext.controlSystem.procure(_e, KeyControl, _name);
-			case "TileCollision": return cast gameContext.collisionSystem.procure(_e, TileCollision, _name);
-			case "PlayerAnimation": return cast gameContext.controlSystem.procure(_e, PlayerAnimation, _name);
-			case "Inventory": return _e.addComponent(new Inventory());
-			case "Position": return _e.addComponent(new Position());
-			case "Dimensions": return _e.addComponent(new Dimensions());
-			case "Velocity": return cast gameContext.velocitySystem.procure(_e, Velocity, _name);
-			case "Spacing": return cast gameContext.spacingSystem.procure(_e, Spacing, _name);
-			case "Damping": return cast gameContext.dampingSystem.procure(_e, Damping, _name);
-			case "HitCircle": return cast gameContext.hitTestSystem.procure(_e, HitCircle, _name);
-			case "BreadCrumbs": return cast gameContext.breadCrumbsSystem.procure(_e, BreadCrumbs, _name);
-		}
-		return null;
-	}
-
+	
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component
 	{
 		if(_type == "SurfaceSet"){
 			return _e.addComponent(ResourceFormat.surfacesets.get(_settings.resource), _settings.name);
 		}
 
-		var ret:Component = constructComponent(_type, _e, _settings.name);
+		var ret:Component = factory.get(_type, _e, _settings.name);
 		if(_settings.args != null){
 			ret.autoParams(_settings.args);
 		}

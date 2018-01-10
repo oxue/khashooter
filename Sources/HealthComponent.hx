@@ -17,10 +17,10 @@ class HealthComponent extends Component
 	
 	public function new() 
 	{
-		super("health_comp");
 		value = 500;
 		maxValue = 500;
 		_callback = defaultCallback;
+		super();
 	}
 	
 	private function defaultCallback():Void

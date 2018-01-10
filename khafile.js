@@ -1,7 +1,7 @@
 var project = new Project('Empty');
 
 project.addSources('./Sources');
-project.addShaders('./Sources/Shaders/**');
+project.addShaders('./Shaders/**');
 //project.addSources('../shooter2016/src');
 
 project.addAssets('Assets/**', {
@@ -12,7 +12,7 @@ project.addAssets('Assets/**', {
 project.addLibrary('zui');
 
 project.windowOptions.width = 800;
-project.windowOptions.height = 400;
+project.windowOptions.height = 600;
 
 resolve(project);
 

@@ -4,7 +4,6 @@ import kha.math.Vector2;
 import refraction.tile.TilemapData;
 import refraction.core.Component;
 import refraction.generic.Position;
-import refraction.generic.Velocity;
 
 
 /**
