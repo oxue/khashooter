@@ -7,7 +7,6 @@ import refraction.display.AnimatedRender;
 import refraction.generic.Position;
 import refraction.generic.Velocity;
 import refraction.tile.TilemapData;
-import refraction.tile.TileCollision;
 import refraction.tile.TilemapUtils;
 import refraction.utils.Interval;
 

@@ -26,6 +26,15 @@ import zui.Zui;
 
 class GameContext
 {
+	private static var myInstance:EntFactory = null;
+	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext
+	{
+		if(myInstance == null){
+			myInstance = new GameContext(_camera:Camera, _ui:Zui);
+		}
+		return myInstance;
+	}
+
 	public var camera:Camera;
 	public var currentMap:Surface2TileRender;
 	public var tilemapData:TilemapData;
