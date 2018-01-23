@@ -3,6 +3,7 @@ package refraction.tile;
 import refraction.ds2d.Face;
 import refraction.ds2d.Float2;
 import refraction.ds2d.Polygon;
+import kha.math.Vector2;
 
 /**
  * ...
@@ -104,8 +105,8 @@ class TilemapUtils
 					{
 						p.faces.push(
 										new Face(
-												new Float2(j * _t.tilesize, i * _t.tilesize),
-												new Float2(j * _t.tilesize, (i + 1) * _t.tilesize), 
+												new Vector2(j * _t.tilesize, i * _t.tilesize),
+												new Vector2(j * _t.tilesize, (i + 1) * _t.tilesize), 
 												1
 												)
 									);
@@ -114,8 +115,8 @@ class TilemapUtils
 					{
 						p.faces.push(
 										new Face(
-												new Float2((j + 1) * _t.tilesize, i * _t.tilesize), 
-												new Float2((j + 1) * _t.tilesize, (i + 1) * _t.tilesize),
+												new Vector2((j + 1) * _t.tilesize, i * _t.tilesize), 
+												new Vector2((j + 1) * _t.tilesize, (i + 1) * _t.tilesize),
 												2
 												)
 									);
@@ -124,8 +125,8 @@ class TilemapUtils
 					{
 						p.faces.push(
 										new Face(
-												new Float2(j * _t.tilesize, i * _t.tilesize), 
-												new Float2((j + 1) * _t.tilesize, i * _t.tilesize),
+												new Vector2(j * _t.tilesize, i * _t.tilesize), 
+												new Vector2((j + 1) * _t.tilesize, i * _t.tilesize),
 												3
 												)
 									);
@@ -134,8 +135,8 @@ class TilemapUtils
 					{
 						p.faces.push(
 										new Face(
-												new Float2(j * _t.tilesize, (i + 1) * _t.tilesize), 
-												new Float2((j + 1) * _t.tilesize, (i + 1) * _t.tilesize),
+												new Vector2(j * _t.tilesize, (i + 1) * _t.tilesize), 
+												new Vector2((j + 1) * _t.tilesize, (i + 1) * _t.tilesize),
 												4)
 									);
 					}

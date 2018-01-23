@@ -6,18 +6,18 @@ package refraction.ds2d;
  */
 class Float2 
 {
-	public var _0:Float;
-	public var _1:Float;
+	public var x:Float;
+	public var y:Float;
 	
-	public function new(__0:Float, __1:Float) 
+	public function new(_x:Float, _y:Float) 
 	{
-		_0 = __0;
-		_1 = __1;
+		x = _x;
+		y = _y;
 	}
 	
 	public function toString():String
 	{
-		return cast(_0,String) + ' ' + cast(_1,String) + ' ';
+		return cast(x,String) + ' ' + cast(y,String) + ' ';
 	}
 	
 }

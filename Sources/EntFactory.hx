@@ -4,7 +4,7 @@ import refraction.control.*;
 import refraction.core.Entity;
 import refraction.display.AnimatedRender;
 import refraction.generic.*;
-import refraction.tile.Surface2TileRender;
+import refraction.tile.TileRender;
 import refraction.tile.TileCollision;
 import refraction.tile.TilemapData;
 import entbuilders.ItemBuilder;
@@ -58,64 +58,7 @@ class EntFactory
 	{
 		return itemBuilder.create(_x, _y, 0);
 	}
-	
-	public function createActorEntity(_x:Int = 0, _y:Int = 0, _w:Int = 20, _h:Int = 20):Entity
-	{
-		var e:Entity = new Entity();
-		var p = new Position(_x, _y, 10, 10);
-		p.autoParams({x:_x,y:_y});
-		e.addComponent(p);
-		e.addComponent(new Dimensions(_w, _h));
-		gameContext.velocitySystem.procure(e, Velocity);
-		gameContext.spacingSystem.procure(e, Spacing).autoParams({ radius: _w/2 });
-		gameContext.dampingSystem.procure(e, Damping).autoParams({ factor: Consts.ACTOR_DAMPING });
 
-		//var lightsource:LightSourceComponent = new LightSourceComponent(gameContext.lightingSystem, 0xaaaaaa, cast _w/2 + 5, cast _w / 2, cast _h/2);
-		//e.addComponent(lightsource);
-		//gameContext.lightSourceSystem.addComponent(lightsource);
-		
-		return e;
-	}
-
-	public function createGyo(_x,_y):Entity
-	{
-		var e:Entity = createActorEntity(_x,_y,20,20);
-
-		e.addComponent(ResourceFormat.surfacesets.get("gyo"));
-
-		var surfaceRender = new AnimatedRender();
-		e.addComponent(surfaceRender);
-
-		surfaceRender.animations.set("idle", [4]);
-		surfaceRender.animations.set("running", [for (i in 0...12) i]);
-		surfaceRender.frameTime = Consts.SMOOTH_FRAME_TIME;
-		surfaceRender.frame = 0;
-		surfaceRender.curAnimaition = "idle";
-
-		gameContext.renderSystem.addComponent(surfaceRender);
-
-		gameContext.collisionSystem.procure(e, TileCollision).autoParams({tilemap: gameContext.tilemapData});
-		gameContext.breadCrumbsSystem.procure(e, BreadCrumbs).autoParams({
-				acceptanceRadius: 20,
-				maxAcceleration: 1
-			}
-		);
-
-		gameContext.aiSystem.procure(e, MimiAI);
-
-		return e;
-	}
-	
-	public function createZombie(_x:Int = 0, _y:Int = 0):Void
-	{
-		var e = autoBuild("Zombie");
-		e.getComponent(Position).setPosition(_x, _y);		
-		
-		var ai = new ZombieAI(cast gameContext.playerEntity.getComponent(Position), gameContext.tilemapData);
-		e.addComponent(ai);
-		gameContext.aiSystem.addComponent(ai);
-	}
-	
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component
 	{
 		if(_type == "SurfaceSet"){
@@ -142,13 +85,6 @@ class EntFactory
 			autoComponent(component.type, component, _e);
 		}
 		return _e;
-	}
-	
-	public function createPlayer(_x:Int = 0, _y:Int = 0):Void
-	{
-		var e = autoBuild("Player");
-		e.getComponent(Position).setPosition(_x, _y);
-		gameContext.playerEntity = e;
 	}
 	
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String){
@@ -226,7 +162,7 @@ class EntFactory
 		tilemapData.setDataIntArray(_data);
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
 		
-		var tileRender:Surface2TileRender = new Surface2TileRender();
+		var tileRender:TileRender = new TileRender();
 		tileRender.targetCamera = gameContext.camera;
 		e.addComponent(tileRender);
 		

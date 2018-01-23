@@ -9,6 +9,7 @@ import refraction.generic.Dimensions;
 import refraction.systems.SpacingSys.Spacing;
 import refraction.control.Damping;
 import components.HitCircle;
+import components.Beacon;
 import refraction.control.BreadCrumbs;
 import refraction.core.Entity;
 import refraction.core.Component;
@@ -37,6 +38,9 @@ class ShooterFactory extends ComponentFactory
 			case "Damping": return cast gameContext.dampingSystem.procure(_e, Damping, _name);
 			case "HitCircle": return cast gameContext.hitTestSystem.procure(_e, HitCircle, _name);
 			case "BreadCrumbs": return cast gameContext.breadCrumbsSystem.procure(_e, BreadCrumbs, _name);
+			case "Beacon": return cast gameContext.beaconSystem.procure(_e, Beacon, _name);
+			case "ZombieAI": return cast gameContext.aiSystem.procure(_e, ZombieAI, _name);
+			case "MimiAI": return cast gameContext.aiSystem.procure(_e, MimiAI, _name);
 		}
 		return null;
 	}

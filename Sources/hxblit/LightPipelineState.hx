@@ -28,12 +28,12 @@ class LightPipelineState extends PipelineState
 		vertexShader = Shaders.light_vert;
 		compile();
 		
-		depthWrite = true;
-		stencilReferenceValue = 2;
-		stencilMode = CompareMode.NotEqual;
-		stencilBothPass = StencilAction.Increment;
-		blendSource = BlendingFactor.BlendOne;
+		//depthWrite = true;
+		
+		blendSource = BlendingFactor.DestinationAlpha;
 		blendDestination = BlendingFactor.BlendOne;
+		alphaBlendSource = BlendingFactor.BlendOne;
+		alphaBlendDestination = BlendingFactor.BlendZero;
 	}
 	
 }

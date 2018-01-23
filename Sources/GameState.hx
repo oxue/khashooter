@@ -11,6 +11,7 @@ import refraction.core.State;
 import refraction.core.Entity;
 import refraction.ds2d.LightSource;
 import refraction.generic.Position;
+import kha.math.Vector2;
 import refraction.tile.TilemapUtils;
 
 
@@ -37,6 +38,11 @@ class GameState extends refraction.core.State
 	private var mouse2WasDown:Bool = false;
 	private var menuX:Int;
 	private var menuY:Int;
+
+	public static var v1:Float = 0;
+	public static var v2:Float = 0;
+	public static var v3:Float = 0;
+	public static var v4:Float = 0;
 	
 	public function new() 
 	{
@@ -79,11 +85,7 @@ class GameState extends refraction.core.State
 				new Camera(Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom));
 
 			// Init Game Context
-			gameContext = new GameContext(
-				gameCamera,
-				ui
-			);
-
+			gameContext = GameContext.instance(gameCamera,ui);
 			Application.defaultCamera = gameCamera;
 
 			// Load resources
@@ -102,9 +104,9 @@ class GameState extends refraction.core.State
 			});
 
 			// Init Lighting 
-			var i = 1;
+			var i = 0;
 			while(i-->0)
-			gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0x111111));
+			gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
 			
 			// load map
 			loadMap("blookd");
@@ -118,12 +120,15 @@ class GameState extends refraction.core.State
 		var obj:Dynamic = Json.parse(Assets.blobs.modern_home_json.toString());
 		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "modern");
 		
-		entFactory.createPlayer(obj.start.x, obj.start.y);
+		gameContext.playerEntity = entFactory.autoBuild("Player")
+			.getComponent(Position).setPosition(obj.start.x, obj.start.y)
+			.getEntity();
+
 		entFactory.createItem(obj.start.x, obj.start.y);
 		
 		var i:Int = obj.lights.length;
 		while (i-->0){
-			gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
+			//gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
 		}
 		entFactory.createNPC(obj.start.x, obj.start.y, "mimi");
 		//entFactory.createZombie(obj.start.x, obj.start.y);
@@ -131,13 +136,32 @@ class GameState extends refraction.core.State
 		for (p in TilemapUtils.computeGeometry(gameContext.tilemapData)){
 			gameContext.lightingSystem.polygons.push(p);
 		}
-		
+
+		//buildDebugPoly();
+	}
+
+	private function buildDebugPoly():Void
+	{
+		var poly = new refraction.ds2d.Polygon(2, 10, 100,100);
+		poly.faces = [new refraction.ds2d.Face(
+			new Vector2(100,100),
+			new Vector2(100,120)
+		),
+		new refraction.ds2d.Face(
+			new Vector2(100,125),
+			new Vector2(100,145)
+		)];
+		gameContext.lightingSystem.polygons.push(poly);
 	}
 
 	private function mouseDown(button:Int, x:Int, y:Int)
 	{
 		if (button == 0)
 		{
+			v1 += 1;
+			if(v1 > 2){
+				v1 = -1;
+			}
 			gameContext.interactSystem.update();
 			var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 			
@@ -185,6 +209,9 @@ class GameState extends refraction.core.State
 		
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
+
+		//gameContext.lightingSystem.lights[0].position.x = gameContext.worldMouseX;
+		//gameContext.lightingSystem.lights[0].position.y = gameContext.worldMouseY;
 		
 		var g = frame.g4;
 		
@@ -252,18 +279,22 @@ class GameState extends refraction.core.State
 					showMenu = false;
 					playerPos.x = worldMenuX;
 					playerPos.y = worldMenuY;
+					trace(gameContext.beaconSystem.getOne("player"));
 				}
 				
 				if (ui.button("Spawn Hell Minion")) {
 					showMenu = false;
-					entFactory.createZombie(worldMenuX,
-											worldMenuY);
+					entFactory.autoBuild("Zombie")
+						.getComponent(Position)
+						.setPosition(worldMenuX, worldMenuY);
 				}
 
 				if (ui.button("Spawn Several Gyo")) {
 					showMenu = false;
 					for(i in 0...5){
-						entFactory.createGyo(worldMenuX+Std.int(Math.random()*5), worldMenuY+Std.int(Math.random()*5));
+						entFactory.autoBuild("Gyo")
+							.getComponent(Position)
+							.setPosition(worldMenuX+Std.int(Math.random()*5), worldMenuY+Std.int(Math.random()*5));
 					}
 				}
 				
@@ -275,6 +306,16 @@ class GameState extends refraction.core.State
 				gameContext.lightingSystem.setAmbientLevel(
 					ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "Ambient Level", 0, 1, false, 100, true));
 
+				if (ui.button("Clear Lights")) {
+					showMenu = false;
+					gameContext.lightingSystem.lights = [];
+				}
+
+				/*v1 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v1", 0, 1, false, 100, true);
+				v2 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v2", 0, 1, false, 100, true);
+				v3 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v3", 0, 1, false, 100, true);
+				v4 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v4", 0, 1, false, 100, true);
+				*/
 				drawHitBoxes = ui.check(Id.handle(), "draw hitboxes");
 			}
 		}

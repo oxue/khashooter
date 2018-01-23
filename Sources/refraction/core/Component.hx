@@ -21,6 +21,11 @@ class Component
 		events = new StringMap<Dynamic->Void>();
 	}
 		
+	public function getEntity():Entity
+	{
+		return entity;
+	}
+
 	public function reset():Void
 	{
 		remove = false;

@@ -12,11 +12,12 @@ import refraction.systems.LightSourceSystem;
 import refraction.systems.RenderSys;
 import refraction.systems.SpacingSys;
 import refraction.systems.TooltipSys;
-import refraction.tile.Surface2TileRender;
+import refraction.tile.TileRender;
 import refraction.tile.TileCollisionSys;
 import refraction.tile.TilemapData;
 import systems.InteractSys;
 import systems.HitTestSys;
+import systems.BeaconSys;
 import zui.Zui;
 
 /**
@@ -26,17 +27,17 @@ import zui.Zui;
 
 class GameContext
 {
-	private static var myInstance:EntFactory = null;
+	private static var myInstance:GameContext = null;
 	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext
 	{
 		if(myInstance == null){
-			myInstance = new GameContext(_camera:Camera, _ui:Zui);
+			myInstance = new GameContext(_camera, _ui);
 		}
 		return myInstance;
 	}
 
 	public var camera:Camera;
-	public var currentMap:Surface2TileRender;
+	public var currentMap:TileRender;
 	public var tilemapData:TilemapData;
 	
 	public var playerEntity:Entity;
@@ -53,6 +54,7 @@ class GameContext
 	public var breadCrumbsSystem:BreadCrumbsSys;
 	public var aiSystem:Sys<Component>;
 	public var lightSourceSystem:LightSourceSystem;
+	public var beaconSystem:BeaconSys;
 	
 	public var spacingSystem:SpacingSys;
 	public var tooltipSystem:TooltipSys;
@@ -90,6 +92,7 @@ class GameContext
 		aiSystem = new Sys<Component>();
 		lightSourceSystem = new LightSourceSystem();
 		spacingSystem = new SpacingSys();
+		beaconSystem = new BeaconSys();
 		
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();

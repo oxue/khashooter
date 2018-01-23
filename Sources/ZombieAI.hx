@@ -35,7 +35,7 @@ class ZombieAI extends Component
 	private var scentInterval:Interval;
 	private var lastScene:Bool;
 	
-	public function new(_followTarget:Position, _tilemap:TilemapData) 
+	public function new(?_followTarget:Position, ?_tilemap:TilemapData) 
 	{
 		super();
 		
@@ -52,6 +52,7 @@ class ZombieAI extends Component
 	
 	function dropCrumb() 
 	{
+		
 		breadcrumbs.addBreadCrumb(new FastVector2(followTarget.x, followTarget.y));
 		if (breadcrumbs.breadcrumbs.length > 50) //TODO: trail length
 		{
@@ -84,7 +85,12 @@ class ZombieAI extends Component
 	//	randTargetInterval.tick();
 		
 		//AI
-		
+		if(followTarget == null){
+			followTarget = GameContext.instance().beaconSystem.getOne("player").getComponent(Position);
+		}
+		if(targetMap == null){
+			targetMap = GameContext.instance().tilemapData;
+		}
 		
 		var p:FastVector2 = new FastVector2(position.x - followTarget.x, position.y - followTarget.y);
 		var seen:Bool = !TilemapUtils.raycast(targetMap, position.x + 20, position.y + 20, followTarget.x + 20, followTarget.y + 20) &&

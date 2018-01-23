@@ -41,8 +41,8 @@ class TileCollision extends Component
 	{
 		g2.color = kha.Color.Green;
 		g2.drawRect(
-			(position.x - camera.x + 1) * 2, 
-			(position.y - camera.y - 1) * 2, 
+			(position.x - camera.x + 1 + hitboxPosition.x) * 2, 
+			(position.y - camera.y - 1 + hitboxPosition.y) * 2, 
 			(dimensions.width) * 2, 
 			(dimensions.height) * 2,
 			1.0);

@@ -7,7 +7,7 @@ import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Vector3D;*/
-import kha.math.FastVector2;
+import kha.math.Vector2;
 import kha.math.FastVector3;
 import kha.math.FastVector4;
 /**
@@ -16,7 +16,7 @@ import kha.math.FastVector4;
  */
 class LightSource 
 {
-	public var position:FastVector2;
+	public var position:Vector2;
 	
 	public var radius:Int;
 	public var color:Int;
@@ -27,7 +27,7 @@ class LightSource
 	
 	public function new(_x:Int=0, _y:Int=0, _color:Int=0xff0000, _radius:Int = 100) 
 	{
-		position = new FastVector2(_x, _y);
+		position = new Vector2(_x, _y);
 		
 		radius = _radius;
 		color = _color;

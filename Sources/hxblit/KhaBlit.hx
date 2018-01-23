@@ -164,28 +164,26 @@ class KhaBlit
 	static inline public function pushRect(_rect:FloatRect):Void
 	{
 		vertices.set(vCounter, _rect.x);
-		
 		vCounter ++;
 		vertices.set(vCounter, _rect.y);
-		
 		vCounter++;
 		vertices.set(vCounter, _rect.x + _rect.w);
 		vCounter++;
 		vertices.set(vCounter, _rect.y);
-		
 		vCounter++;
 		vertices.set(vCounter, _rect.x);
-		
 		vCounter++;
 		vertices.set(vCounter, _rect.y + _rect.h);
-		
 		vCounter ++;
 		vertices.set(vCounter, _rect.x + _rect.w);
-		
 		vCounter++;
 		vertices.set(vCounter, _rect.y + _rect.h);
 		vCounter++;
-		
+		indexQuad();
+	}
+	
+	static inline private function indexQuad():Void
+	{
 		indices[numIndices] = iCounter;
 		numIndices++;
 		indices[numIndices] = iCounter + 1;
@@ -200,53 +198,95 @@ class KhaBlit
 		numIndices++;
 		iCounter += 4;
 	}
-	
+
+	static inline private function indexTriangle():Void
+	{
+		indices[numIndices] = iCounter;
+		numIndices++;
+		indices[numIndices] = iCounter + 1;
+		numIndices++;
+		indices[numIndices] = iCounter + 2;
+		numIndices++;
+		iCounter += 3;
+	}
+
 	static inline public function pushQuad3(x1:Float, y1:Float, z1:Float,
 								   	 x2:Float, y2:Float, z2:Float,
 								   	 x4:Float, y4:Float, z4:Float,
 								   	 x3:Float, y3:Float, z3:Float)
 	{
-		vertices.set(vCounter, x1);
+		stageV3(x1,y1,z1);
+		stageV3(x2,y2,z2);
+		stageV3(x3,y3,z3);
+		stageV3(x4,y4,z4);
+		indexQuad();
+	}
+
+	static inline public function pushTriangle4(x1:Float, y1:Float, z1:Float, w1:Float,
+												x2:Float, y2:Float, z2:Float, w2:Float,
+												x3:Float, y3:Float, z3:Float, w3:Float):Void
+	{
+		stageV4(x1,y1,z1,w1);
+		stageV4(x2,y2,z2,w2);
+		stageV4(x3,y3,z3,w3);
+		indexTriangle();
+	}
+
+	static inline public function stageV3(x:Float, y:Float, z:Float):Void
+	{
+		vertices.set(vCounter, x);
 		vCounter ++;
-		vertices.set(vCounter, y1);
+		vertices.set(vCounter, y);
 		vCounter ++;
-		vertices.set(vCounter, z1);
+		vertices.set(vCounter, z);
 		vCounter ++;
-		
-		vertices.set(vCounter, x2);
+	}
+
+	static inline public function stageV4(x:Float, y:Float, z:Float, w:Float):Void
+	{
+		vertices.set(vCounter, x);
 		vCounter ++;
-		vertices.set(vCounter, y2);		
+		vertices.set(vCounter, y);
 		vCounter ++;
-		vertices.set(vCounter, z2);
+		vertices.set(vCounter, z);
 		vCounter ++;
-		
-		vertices.set(vCounter, x3);
+		vertices.set(vCounter, w);
 		vCounter ++;
-		vertices.set(vCounter, y3);		
+	}
+
+	static inline public function stageV6(x:Float, y:Float, z:Float, w:Float, u:Float, v:Float):Void
+	{
+		stageV4(x,y,z,w);
+		vertices.set(vCounter, u);
 		vCounter ++;
-		vertices.set(vCounter, z3);		
+		vertices.set(vCounter, v);
 		vCounter ++;
-		
-		vertices.set(vCounter, x4);		
-		vCounter ++;
-		vertices.set(vCounter, y4);		
-		vCounter ++;
-		vertices.set(vCounter, z4);
-		vCounter ++;
-		
-		indices[numIndices] = iCounter;
-		numIndices++;
-		indices[numIndices] = iCounter + 1;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 0;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 2;
-		numIndices++;
-		iCounter += 4;
+	}
+
+	static inline public function pushQuad6(
+		x1:Float, y1:Float, z1:Float, w1:Float, u1:Float, v1:Float,
+		x2:Float, y2:Float, z2:Float, w2:Float, u2:Float, v2:Float,
+		x4:Float, y4:Float, z4:Float, w4:Float, u4:Float, v4:Float,
+		x3:Float, y3:Float, z3:Float, w3:Float, u3:Float, v3:Float
+	)
+	{
+		stageV6(x1,y1,z1,w1,u1,v1);
+		stageV6(x2,y2,z2,w2,u2,v2);
+		stageV6(x3,y3,z3,w3,u3,v3);
+		stageV6(x4,y4,z4,w4,u4,v4);
+		indexQuad();
+	}
+
+	static inline public function pushTriangle6(
+		x1:Float, y1:Float, z1:Float, w1:Float, u1:Float, v1:Float,
+		x2:Float, y2:Float, z2:Float, w2:Float, u2:Float, v2:Float,
+		x3:Float, y3:Float, z3:Float, w3:Float, u3:Float, v3:Float
+	)
+	{
+		stageV6(x1,y1,z1,w1,u1,v1);
+		stageV6(x2,y2,z2,w2,u2,v2);
+		stageV6(x3,y3,z3,w3,u3,v3);
+		indexTriangle();
 	}
 	
 	static inline public function pushQuad4(x1:Float, y1:Float, z1:Float, w1:Float,
@@ -254,117 +294,20 @@ class KhaBlit
 											x4:Float, y4:Float, z4:Float, w4:Float,
 											x3:Float, y3:Float, z3:Float, w3:Float)
 	{
-		vertices.set(vCounter, x1);
-		vCounter ++;
-		vertices.set(vCounter, y1);
-		vCounter ++;
-		vertices.set(vCounter, z1);
-		vCounter ++;
-		vertices.set(vCounter, w1);
-		vCounter ++;
-		
-		vertices.set(vCounter, x2);
-		vCounter ++;
-		vertices.set(vCounter, y2);		
-		vCounter ++;
-		vertices.set(vCounter, z2);
-		vCounter ++;
-		vertices.set(vCounter, w2);
-		vCounter ++;
-		
-		vertices.set(vCounter, x3);
-		vCounter ++;
-		vertices.set(vCounter, y3);		
-		vCounter ++;
-		vertices.set(vCounter, z3);		
-		vCounter ++;
-		vertices.set(vCounter, w4);
-		vCounter ++;
-		
-		vertices.set(vCounter, x4);		
-		vCounter ++;
-		vertices.set(vCounter, y4);		
-		vCounter ++;
-		vertices.set(vCounter, z4);
-		vCounter ++;
-		vertices.set(vCounter, w4);
-		vCounter ++;
-		
-		indices[numIndices] = iCounter;
-		numIndices++;
-		indices[numIndices] = iCounter + 1;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 0;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 2;
-		numIndices++;
-		iCounter += 4;
+		stageV4(x1,y1,z1,w1);
+		stageV4(x2,y2,z2,w2);
+		stageV4(x3,y3,z3,w3);
+		stageV4(x4,y4,z4,w4);
+		indexQuad();
 	}
 	
 	static public function blit(_s2:Surface2, _x:Float, _y:Float):Void
 	{
-		vertices.set(vCounter, _x);
-		
-		vCounter ++;
-		vertices.set(vCounter, _y);
-		
-		vCounter++;
-		vertices.set(vCounter, _s2.vx1);
-		
-		vCounter++;
-		vertices.set(vCounter, _s2.vy1);
-		
-		vCounter++;
-		vertices.set(vCounter, _x + _s2.width);
-		vCounter++;
-		vertices.set(vCounter, _y);
-		vCounter++;
-		vertices.set(vCounter, _s2.vx2);
-		vCounter++;
-		vertices.set(vCounter, _s2.vy2);
-		
-		vCounter++;
-		vertices.set(vCounter, _x);
-		
-		vCounter++;
-		vertices.set(vCounter, _y + _s2.height);
-		
-		vCounter++;
-		vertices.set(vCounter, _s2.vx3);
-		
-		vCounter ++;
-		vertices.set(vCounter, _s2.vy3);
-		
-		vCounter ++;
-		vertices.set(vCounter, _x + _s2.width);
-		
-		vCounter++;
-		vertices.set(vCounter, _y + _s2.height);
-		
-		vCounter++;
-		vertices.set(vCounter, _s2.vx4);
-	
-		vCounter++;
-		vertices.set(vCounter, _s2.vy4);
-		vCounter ++;
-		
-		indices[numIndices] = iCounter;
-		numIndices++;
-		indices[numIndices] = iCounter + 1;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 0;
-		numIndices++;
-		indices[numIndices] = iCounter + 3;
-		numIndices++;
-		indices[numIndices] = iCounter + 2;
-		numIndices++;
-		iCounter += 4;
+		stageV4(_x, _y, _s2.vx1, _s2.vy1);
+		stageV4(_x + _s2.width, _y, _s2.vx2, _s2.vy2);
+		stageV4(_x, _y + _s2.height, _s2.vx3, _s2.vy3);
+		stageV4(_x + _s2.width, _y + _s2.height, _s2.vx4, _s2.vy4);
+		indexQuad();
 	}
 	
 	static public function getSurface(_w:Int, _h:Int):Surface2

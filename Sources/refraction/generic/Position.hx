@@ -23,10 +23,11 @@ class Position extends Component
 		super();
 	}
 
-	public function setPosition(_x:Float = 0, _y:Float = 0):Void
+	public function setPosition(_x:Float = 0, _y:Float = 0):Position
 	{
 		x = _x;
 		y = _y;
+		return this;
 	}
 
 	override public function autoParams(_args:Dynamic):Void

@@ -1,5 +1,7 @@
 package refraction.ds2d;
 
+import kha.math.Vector2;
+
 /**
  * ...
  * @author worldedit
@@ -8,12 +10,12 @@ package refraction.ds2d;
 class Face 
 {
 
-	public var v1:Float2;
-	public var v2:Float2;
+	public var v1:Vector2;
+	public var v2:Vector2;
 	public var cull:Bool;
 	public var cullNature:Int;
 	
-	public function new(_v1:Float2, _v2:Float2, _cull:Int = 0) 
+	public function new(_v1:Vector2, _v2:Vector2, _cull:Int = 0) 
 	{
 		v1 = _v1;
 		v2 = _v2;

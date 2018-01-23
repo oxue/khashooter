@@ -6,11 +6,11 @@ uniform mat4 mproj;
 uniform vec2 cpos;
 uniform float radius;
 
-out vec2 rel;
-out float reld;
+out vec2 pos2;
+out vec3 lightPosition;
 
 void kore(){
 	gl_Position = mproj * vec4(pos, 0, 1);
-	rel = vec2(pos.x,pos.y) - cpos;
-	reld = radius;
+	lightPosition = vec3(cpos.x, cpos.y, 64);
+	pos2 = pos;
 }

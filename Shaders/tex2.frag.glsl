@@ -3,9 +3,10 @@
 precision mediump float;
 
 uniform sampler2D tex;
+uniform sampler2D normalmap;
 
 in vec2 tuv;
 out vec4 fragmentColor;
 void main(){	
-    fragmentColor = texture(tex, tuv);
+    fragmentColor = texture(normalmap, tuv);
 }

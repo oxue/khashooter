@@ -21,7 +21,9 @@ class ShadowPipelineState extends PipelineState
 		super();
 		
 		var structure:VertexStructure = new VertexStructure();
-		structure.add("pos", VertexData.Float3);
+		structure.add("pos", VertexData.Float2);
+		structure.add("settings", VertexData.Float2);
+		structure.add("coords", VertexData.Float2);
 		inputLayout = [structure];
 		fragmentShader = Shaders.shadow_frag;
 		vertexShader = Shaders.shadow_vert;
@@ -29,8 +31,12 @@ class ShadowPipelineState extends PipelineState
 		
 		blendSource = BlendingFactor.BlendOne;
 		blendDestination = BlendingFactor.BlendOne;
+		alphaBlendOperation = BlendingOperation.ReverseSubtract;
+		alphaBlendDestination = BlendingFactor.BlendOne;
+		alphaBlendSource = BlendingFactor.BlendOne;
+
 		stencilMode = CompareMode.Equal;
-		stencilBothPass = StencilAction.Increment;
+		stencilBothPass = StencilAction.Keep;
 	}
 	
 }

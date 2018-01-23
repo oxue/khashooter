@@ -60,6 +60,12 @@
 				"tag": "player",
 				"radius": 10
 			}
+		},
+		{
+			"type":"Beacon",
+			"args": {
+				"tag":"player"
+			}
 		}
 	]
 }

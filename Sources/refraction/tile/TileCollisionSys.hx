@@ -66,10 +66,10 @@ class TileCollisionSys extends Sys<TileCollision>
 
 	private function getCollisionBounds(_bound:FloatRect):IntBounds
 	{
-		var bottom = Math.floor(_bound.bottom() / tilemapData.tilesize);
-		var top = Math.floor(_bound.top() / tilemapData.tilesize);
-		var right = Math.floor(_bound.right() / tilemapData.tilesize);
-		var left = Math.floor(_bound.left() / tilemapData.tilesize);
+		var bottom = Math.floor(_bound.bottom() / tilemapData.tilesize) + 1;
+		var top = Math.floor(_bound.top() / tilemapData.tilesize) - 1;
+		var right = Math.floor(_bound.right() / tilemapData.tilesize) + 1;
+		var left = Math.floor(_bound.left() / tilemapData.tilesize) - 1;
 		
 		top = clamp(top, 0, tilemapData.height - 1);
 		left = clamp(left, 0, tilemapData.width - 1);
@@ -108,8 +108,8 @@ class TileCollisionSys extends Sys<TileCollision>
 		var pushbackY = -tc.velocity.velY * (1 - data.time);
 
 		// pushback
-		tc.position.x += pushbackX * xFlag;
-		tc.position.y += pushbackY * yFlag;
+		tc.position.x += pushbackX * 0.009 * xFlag;
+		tc.position.y += pushbackY * 0.009 * yFlag;
 
 		tc.velocity.velX = -pushbackX * yFlag;
 		tc.velocity.velY = -pushbackY * xFlag;

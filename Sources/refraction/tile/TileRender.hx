@@ -10,7 +10,7 @@ import refraction.display.SurfaceSet;
  * @author qwerber
  */
 
-class Surface2TileRender extends Component
+class TileRender extends Component
 {
 	private var surface2set:SurfaceSet;
 	private var tilemapData:TilemapData;

@@ -2,6 +2,7 @@
 	"entities":[
 		"Player",
 		"Actor",
-		"Zombie"
+		"Zombie",
+		"Gyo"
 	]
 }

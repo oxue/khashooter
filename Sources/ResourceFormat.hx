@@ -4,7 +4,7 @@ import hxblit.TextureAtlas;
 import kha.Image;
 import refraction.core.Entity;
 import refraction.display.SurfaceSet;
-import refraction.tile.Surface2TileRender;
+import refraction.tile.TileRender;
 import refraction.tile.TilemapData;
 
 /**
