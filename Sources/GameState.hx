@@ -1,6 +1,5 @@
 package;
 
-import haxe.macro.Expr;
 import haxe.Json;
 import hxblit.KhaBlit;
 import hxblit.Camera;
@@ -20,6 +19,8 @@ import helpers.ZombieResourceLoader;
 import kha.Color;
 import kha.input.Mouse;
 import zui.*;
+import ui.HealthBar;
+import components.Health;
 
 /**
  * ...
@@ -41,6 +42,8 @@ class GameState extends refraction.core.State
 	private var menuX:Int;
 	private var menuY:Int;
 	
+	private var healthBar:HealthBar;
+
 	public function new() 
 	{
 		super();
@@ -105,6 +108,7 @@ class GameState extends refraction.core.State
 		gameContext.playerEntity = entFactory.autoBuild("Player")
 			.getComponent(Position).setPosition(obj.start.x, obj.start.y)
 			.getEntity();
+		healthBar = new HealthBar(gameContext.playerEntity.getComponent(Health));
 
 		entFactory.createItem(obj.start.x, obj.start.y);
 		
@@ -244,14 +248,17 @@ class GameState extends refraction.core.State
 	private function renderUI(f:Framebuffer, gc:GameContext, ui:Zui)
 	{
 		renderHitBoxes(f, gc);
-		ui.begin(f.g2);
 		renderGameUI(f, gc, ui);
+
+		ui.begin(f.g2);	
 		renderDebugMenu(f, gc, ui);
 		ui.end();
 	}
 
-	private function renderGameUI(f, gc, ui) {
-		
+	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
+		f.g2.begin(false);
+		healthBar.render(f);
+		f.g2.end();
 	}
 	
 	private function renderDebugMenu(f:Framebuffer, gc:GameContext, ui:Zui)
