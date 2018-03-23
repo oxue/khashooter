@@ -40,11 +40,6 @@ class GameState extends refraction.core.State
 	private var mouse2WasDown:Bool = false;
 	private var menuX:Int;
 	private var menuY:Int;
-
-	public static var v1:Float = 0;
-	public static var v2:Float = 0;
-	public static var v3:Float = 0;
-	public static var v4:Float = 0;
 	
 	public function new() 
 	{
@@ -145,10 +140,6 @@ class GameState extends refraction.core.State
 	{
 		if (button == 0)
 		{
-			v1 += 1;
-			if(v1 > 2){
-				v1 = -1;
-			}
 			gameContext.interactSystem.update();
 			var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 			
@@ -197,9 +188,6 @@ class GameState extends refraction.core.State
 		
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
-
-		//gameContext.lightingSystem.lights[0].position.x = gameContext.worldMouseX;
-		//gameContext.lightingSystem.lights[0].position.y = gameContext.worldMouseY;
 		
 		var g = frame.g4;
 		
