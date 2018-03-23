@@ -34,7 +34,6 @@ class HealthComponent extends Component
 		if (value <= 0)
 		{
 			_callback();
-			_callback();
 		}
 	}
 }

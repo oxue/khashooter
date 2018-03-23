@@ -141,9 +141,8 @@ class GameState extends refraction.core.State
 		if (button == 0)
 		{
 			gameContext.interactSystem.update();
-			var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
+			//var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 			
-			gameContext.camera.shake(3,2);
 			gameContext.playerEntity.getComponent(Inventory).primary();		
 		}
 	}
@@ -232,19 +231,32 @@ class GameState extends refraction.core.State
 		
 		
 		// ========== UI BEGIN ==========
-		if(drawHitBoxes){
-			frame.g2.begin(false);
-			for(tc in gameContext.collisionSystem.components){
-				tc.drawHitbox(gameContext.camera, frame.g2);
-			}
-			for(p in gameContext.hitCheckSystem.components){
-				p.entity.getComponent(Position).drawPoint(gameContext.camera, frame.g2);
-			}
-			frame.g2.end();
-		}
+		renderUI(frame, gameContext, ui);
+		
+		frame.g2.begin(false);
+		gameContext.tooltipSystem.draw(frame.g2);
+		frame.g2.end();
+		mouse2WasDown = Application.mouse2IsDown;
+		gameContext.statusText.render(frame.g2);
+		
+	}
 
-		ui.begin(frame.g2);
+	private function renderUI(f:Framebuffer, gc:GameContext, ui:Zui)
+	{
+		renderHitBoxes(f, gc);
+		ui.begin(f.g2);
+		renderGameUI(f, gc, ui);
+		renderDebugMenu(f, gc, ui);
+		ui.end();
+	}
 
+	private function renderGameUI(f, gc, ui) {
+		
+	}
+	
+	private function renderDebugMenu(f:Framebuffer, gc:GameContext, ui:Zui)
+	{
+		var playerPos:Position = cast gc.playerEntity.getComponent(Position);
 		if (showMenu){
 			var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
 			var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
@@ -300,22 +312,23 @@ class GameState extends refraction.core.State
 					gameContext.lightingSystem.lights = [];
 				}
 
-				/*v1 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v1", 0, 1, false, 100, true);
-				v2 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v2", 0, 1, false, 100, true);
-				v3 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v3", 0, 1, false, 100, true);
-				v4 = ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "v4", 0, 1, false, 100, true);
-				*/
 				drawHitBoxes = ui.check(Id.handle(), "draw hitboxes");
 			}
 		}
-		ui.end();
-		
-		frame.g2.begin(false);
-		gameContext.tooltipSystem.draw(frame.g2);
-		frame.g2.end();
-		mouse2WasDown = Application.mouse2IsDown;
-		gameContext.statusText.render(frame.g2);
-		
+	}
+
+	private function renderHitBoxes(f:Framebuffer, gc:GameContext)
+	{
+		if(drawHitBoxes){
+			f.g2.begin(false);
+			for(tc in gc.collisionSystem.components){
+				tc.drawHitbox(gc.camera, f.g2);
+			}
+			for(p in gc.hitCheckSystem.components){
+				p.entity.getComponent(Position).drawPoint(gc.camera, f.g2);
+			}
+			f.g2.end();
+		}
 	}
 	
 }

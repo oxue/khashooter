@@ -55,6 +55,7 @@ class Inventory extends Component
 		if(currentWeapon == null) {
 			return;
 		}
+		Application.defaultCamera.shake(3,2);
 		EntFactory.instance().createProjectile(muzzlePositon(), muzzleDirection());
 	}
 }
