@@ -66,6 +66,12 @@
 			"args": {
 				"tag":"player"
 			}
+		},
+		{
+			"type":"Health",
+			"args": {
+				"maxValue": 100
+			}
 		}
 	]
 }

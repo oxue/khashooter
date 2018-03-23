@@ -1,6 +1,4 @@
-package ;
-import flash.events.Event;
-import refraction.core.Application;
+package components;
 import refraction.core.Component;
 
 /**
@@ -8,19 +6,25 @@ import refraction.core.Component;
  * @author worldedit
  */
 
-class HealthComponent extends Component
+class Health extends Component
 {
 
 	public var value:Int;
 	public var maxValue:Int;
 	public var _callback:Void->Void;
 	
-	public function new() 
+	public function new(_maxValue = 100, _value = 100) 
 	{
-		value = 500;
-		maxValue = 500;
+		value = _value;
+		maxValue = _maxValue;
 		_callback = defaultCallback;
 		super();
+	}
+
+	override public function autoParams(_args:Dynamic):Void
+	{
+		value = _args.maxValue;
+		maxValue = _args.maxValue;
 	}
 	
 	private function defaultCallback():Void

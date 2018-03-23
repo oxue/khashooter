@@ -14,6 +14,7 @@ import refraction.control.BreadCrumbs;
 import components.Particle;
 import refraction.core.Entity;
 import refraction.core.Component;
+import components.Health;
 
 class ShooterFactory extends ComponentFactory
 {
@@ -43,6 +44,7 @@ class ShooterFactory extends ComponentFactory
 			case "ZombieAI": return cast gameContext.aiSystem.procure(_e, ZombieAI, _name);
 			case "MimiAI": return cast gameContext.aiSystem.procure(_e, MimiAI, _name);
 			case "Particle": return cast gameContext.particleSystem.procure(_e, Particle, _name);
+			case "Health": return _e.addComponent(new Health());
 		}
 		return null;
 	}
