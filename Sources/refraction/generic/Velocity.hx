@@ -10,16 +10,26 @@ import kha.math.Vector2;
 
 class Velocity extends Component
 {
-	
 	private var position:Position;
-	public var velX:Float;
-	public var velY:Float;
+	private var velX:Float;
+	private var velY:Float;
+	
+	private var publiclyTwipLocked:Bool = true;
 
 	public function new() 
 	{
 		velX = velY = 0;
 		super();
 	}
+
+	public function getVelX():Float { return (publiclyTwipLocked && Math.abs(velX) < 0.05) ? 0 : velX; }
+	public function getVelY():Float { return (publiclyTwipLocked && Math.abs(velY) < 0.05) ? 0 : velY; }
+	public function setVelX(_value:Float):Void { velX = _value; }
+	public function setVelY(_value:Float):Void { velY = _value; }
+	public function addVelX(_value:Float):Void { velX += _value; }
+	public function addVelY(_value:Float):Void { velY += _value; }
+	public function timesVelX(_value:Float):Void { velX *= _value; }
+	public function timesVelY(_value:Float):Void { velY *= _value; }
 	
 	override public function load():Void 
 	{
@@ -28,13 +38,13 @@ class Velocity extends Component
 	
 	public function vec():Vector2
 	{
-		return new Vector2(velX, velY);
+		return new Vector2(getVelX(), getVelY());
 	}
 
 	override public function update():Void 
 	{
-		position.x += velX;
-		position.y += velY;
+		position.x += getVelX();
+		position.y += getVelY();
 	}
 	
 	public function interpolate(speed:Float) 
@@ -45,7 +55,6 @@ class Velocity extends Component
 		}
 		velX = velX / len * speed; 
 		velY = velY / len * speed;
-		trace(velX);
 	}
 	
 }

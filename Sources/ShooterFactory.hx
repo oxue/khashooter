@@ -11,6 +11,7 @@ import refraction.control.Damping;
 import components.HitCircle;
 import components.Beacon;
 import refraction.control.BreadCrumbs;
+import components.Particle;
 import refraction.core.Entity;
 import refraction.core.Component;
 
@@ -41,6 +42,7 @@ class ShooterFactory extends ComponentFactory
 			case "Beacon": return cast gameContext.beaconSystem.procure(_e, Beacon, _name);
 			case "ZombieAI": return cast gameContext.aiSystem.procure(_e, ZombieAI, _name);
 			case "MimiAI": return cast gameContext.aiSystem.procure(_e, MimiAI, _name);
+			case "Particle": return cast gameContext.particleSystem.procure(_e, Particle, _name);
 		}
 		return null;
 	}

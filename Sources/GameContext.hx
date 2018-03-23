@@ -19,6 +19,7 @@ import systems.InteractSys;
 import systems.HitTestSys;
 import systems.BeaconSys;
 import zui.Zui;
+import systems.ParticleSys;
 
 /**
  * ...
@@ -55,6 +56,7 @@ class GameContext
 	public var aiSystem:Sys<Component>;
 	public var lightSourceSystem:LightSourceSystem;
 	public var beaconSystem:BeaconSys;
+	public var particleSystem:ParticleSys;
 	
 	public var spacingSystem:SpacingSys;
 	public var tooltipSystem:TooltipSys;
@@ -93,6 +95,7 @@ class GameContext
 		lightSourceSystem = new LightSourceSystem();
 		spacingSystem = new SpacingSys();
 		beaconSystem = new BeaconSys();
+		particleSystem = new ParticleSys();
 		
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();

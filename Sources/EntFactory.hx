@@ -17,6 +17,7 @@ import haxe.ds.StringMap;
 import refraction.core.Component;
 import refraction.core.ComponentFactory;
 import refraction.core.TemplateParser;
+import refraction.display.ResourceFormat;
 
 /**
  * ...
@@ -141,8 +142,8 @@ class EntFactory
 		var velocity = gameContext.velocitySystem.procure(e, Velocity);
 		direction.normalize();
 		direction = direction.mult(Consts.CROSSBOW_PROJECTILE_SPEED);
-		velocity.velX = direction.x;
-		velocity.velY = direction.y;
+		velocity.setVelX(direction.x);
+		velocity.setVelY(direction.y);
 
 		gameContext.hitCheckSystem.procure(e, Projectile).tilemapData = gameContext.tilemapData;
 		gameContext.hitTestSystem.procure(e, HitCircle).autoParams({

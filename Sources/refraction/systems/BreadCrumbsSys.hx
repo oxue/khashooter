@@ -26,8 +26,8 @@ class BreadCrumbsSys extends Sys<BreadCrumbs>
 			direction.normalize();
 			direction = direction.mult(comp.maxAcceleration);
 			
-			comp.velocity.velX += direction.x;
-			comp.velocity.velY += direction.y;
+			comp.velocity.addVelX(direction.x);
+			comp.velocity.addVelY(direction.y);
 			
 			var s = Math.atan2(direction.y, direction.x);
 			var targetRotation = s * 57.3;

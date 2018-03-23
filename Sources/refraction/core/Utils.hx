@@ -10,6 +10,8 @@ import kha.math.Vector2;
 class Utils 
 {
 
+	public static var TWIP:Float = 0.05;
+
 	public static inline function posDis2(_pos1:Position, _pos2:Position):Float
 	{
 		var dx:Float = _pos1.x - _pos2.x;

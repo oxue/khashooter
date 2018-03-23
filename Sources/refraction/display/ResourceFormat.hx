@@ -1,11 +1,8 @@
-package;
-import hxblit.Surface2;
+package refraction.display;
+
 import hxblit.TextureAtlas;
 import kha.Image;
-import refraction.core.Entity;
 import refraction.display.SurfaceSet;
-import refraction.tile.TileRender;
-import refraction.tile.TilemapData;
 
 /**
  * ...

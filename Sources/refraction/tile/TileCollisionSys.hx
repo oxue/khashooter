@@ -81,8 +81,8 @@ class TileCollisionSys extends Sys<TileCollision>
 
 	private function sweptRect(tc:TileCollision):FloatRect
 	{
-		var previousX = tc.position.x - tc.velocity.velX;
-		var previousY = tc.position.y - tc.velocity.velY;
+		var previousX = tc.position.x - tc.velocity.getVelX();
+		var previousY = tc.position.y - tc.velocity.getVelY();
 
 		var hx = tc.hitboxPosition.x;
 		var hy = tc.hitboxPosition.y;
@@ -104,15 +104,15 @@ class TileCollisionSys extends Sys<TileCollision>
 		var xFlag = 1 - data.nature;
 		var yFlag = data.nature;
 		
-		var pushbackX = -tc.velocity.velX * (1 - data.time);
-		var pushbackY = -tc.velocity.velY * (1 - data.time);
+		var pushbackX = -tc.velocity.getVelX() * (1 - data.time);
+		var pushbackY = -tc.velocity.getVelY() * (1 - data.time);
 
 		// pushback
-		tc.position.x += pushbackX * 0.009 * xFlag;
-		tc.position.y += pushbackY * 0.009 * yFlag;
+		tc.position.x += pushbackX * xFlag;
+		tc.position.y += pushbackY * yFlag;
 
-		tc.velocity.velX = -pushbackX * yFlag;
-		tc.velocity.velY = -pushbackY * xFlag;
+		tc.velocity.setVelX(-pushbackX * yFlag);
+		tc.velocity.setVelY(-pushbackY * xFlag);
 	}
 
 	private function getCollisionsInBound(tc:TileCollision, bounds:IntBounds):Array<CollisionData>
@@ -173,7 +173,7 @@ class TileCollisionSys extends Sys<TileCollision>
 		var dtxd = 0.0;
 		var dtyd = 0.0;
 		
-		if (_tc.velocity.velX < 0)
+		if (_tc.velocity.getVelX() < 0)
 		{
 			dtxc = _tx + _tw - previous.x;
 			dtxd = _tx - previous.x - dimensions.width;

@@ -1,7 +1,6 @@
 package refraction.ds2d;
 
 
-import haxe.ds.Vector;
 import hxblit.DecrementPipeline;
 import hxblit.KhaBlit;
 import hxblit.ShadowPipelineState;
@@ -13,12 +12,11 @@ import hxblit.LightPipelineState;
 import hxblit.TextureAtlas.FloatRect;
 import kha.graphics4.DepthStencilFormat;
 import kha.Image;
-import kha.math.FastMatrix3;
 import kha.math.Vector2;
 import kha.math.FastVector2;
 import kha.math.FastVector3;
 
-import refraction.core.Application;
+import refraction.display.ResourceFormat;
 
 /**
  * ...

@@ -3,6 +3,7 @@
 		"Player",
 		"Actor",
 		"Zombie",
-		"Gyo"
+		"Gyo",
+		"Blood"
 	]
 }

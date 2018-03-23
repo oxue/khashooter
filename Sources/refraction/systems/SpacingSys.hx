@@ -84,8 +84,8 @@ class SpacingSys extends Sys<Spacing>
 					}
 				}
 			}
-			components[i].v.velX += cx / 8; // 30;
-			components[i].v.velY += cy / 8; //30;
+			components[i].v.addVelX(cx / 8); // 30;
+			components[i].v.addVelX(cy / 8); //30;
 		}
 	}
 	

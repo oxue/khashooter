@@ -116,7 +116,7 @@ class ZombieAI extends Component
 		scentInterval.tick();
 		
 		//ANIMATION
-		if (Math.round(velocity.velX) == 0 && Math.round(velocity.velY) == 0)
+		if (Math.round(velocity.getVelX()) == 0 && Math.round(velocity.getVelY()) == 0)
 		{
 			blc.curAnimaition = "idle";
 			blc.frame = 0;

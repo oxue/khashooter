@@ -5,6 +5,7 @@ import refraction.generic.Dimensions;
 import refraction.display.AnimatedRender;
 import refraction.generic.Tooltip;
 import components.Interactable;
+import refraction.display.ResourceFormat;
 
 /**
  * ...

@@ -31,7 +31,7 @@ class PlayerAnimation extends Component
 	
 	private function notMoving():Bool
 	{
-		return Math.round(velocity.velX) == 0 && Math.round(velocity.velY) == 0;
+		return Math.round(velocity.getVelX()) == 0 && Math.round(velocity.getVelY()) == 0;
 	}
 	
 	override public function update():Void 

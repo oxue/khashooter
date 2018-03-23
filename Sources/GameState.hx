@@ -10,11 +10,13 @@ import refraction.core.Application;
 import refraction.core.State;
 import refraction.core.Entity;
 import refraction.ds2d.LightSource;
+import refraction.display.ResourceFormat;
 import refraction.generic.Position;
 import kha.math.Vector2;
 import refraction.tile.TilemapUtils;
 
-
+import components.Particle;
+import helpers.ZombieResourceLoader;
 import kha.Color;
 import kha.input.Mouse;
 import zui.*;
@@ -50,22 +52,7 @@ class GameState extends refraction.core.State
 	}
 	
 	private function loadResources():Void{
-		ResourceFormat.init();
-		ResourceFormat.beginAtlas("all");
-
-		ResourceFormat.formatTileSheet("all_tiles", Assets.images.tilesheet, 16);
-		ResourceFormat.formatTileSheet("modern", Assets.images.modern, 16);
-
-		ResourceFormat.formatRotatedSprite("man", Assets.images.man, 26, 26).addTranslation(3,3);
-		ResourceFormat.formatRotatedSprite("mimi", Assets.images.mimi, 26, 26).addTranslation(3, 3).registration(10,10);
-		ResourceFormat.formatRotatedSprite("zombie", Assets.images.zombie, 32, 32).addTranslation(6, 6).registration(10,10);
-		ResourceFormat.formatRotatedSprite("shiro", Assets.images.shiro, 26, 26).addTranslation(3, 3).registration(10,10);
-		ResourceFormat.formatRotatedSprite("items", Assets.images.items, 32, 32);
-		ResourceFormat.formatRotatedSprite("gyo", Assets.images.gyo, 29, 24).addTranslation(3, 4);
-		ResourceFormat.formatRotatedSprite("weapons", Assets.images.crossbow ,26,26).addTranslation(3, 3).registration(-3,5);
-		ResourceFormat.formatRotatedSprite("projectiles", Assets.images.projectiles ,20,20).registration(10,10);
-		
-		ResourceFormat.endAtlas();
+		ZombieResourceLoader.load();
 	}
 
 	override public function load():Void 
@@ -117,8 +104,8 @@ class GameState extends refraction.core.State
 	
 	public function loadMap(_name:String)
 	{
-		var obj:Dynamic = Json.parse(Assets.blobs.modern_home_json.toString());
-		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "modern");
+		var obj:Dynamic = Json.parse(Assets.blobs.rooms_json.toString());
+		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "all_tiles");
 		
 		gameContext.playerEntity = entFactory.autoBuild("Player")
 			.getComponent(Position).setPosition(obj.start.x, obj.start.y)
@@ -128,7 +115,7 @@ class GameState extends refraction.core.State
 		
 		var i:Int = obj.lights.length;
 		while (i-->0){
-			//gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
+			gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
 		}
 		entFactory.createNPC(obj.start.x, obj.start.y, "mimi");
 		//entFactory.createZombie(obj.start.x, obj.start.y);
@@ -186,6 +173,7 @@ class GameState extends refraction.core.State
 			gameContext.velocitySystem.update();
 			gameContext.collisionSystem.update();
 			gameContext.lightSourceSystem.update();
+			gameContext.particleSystem.update();
 			
 			gameContext.breadCrumbsSystem.update();
 
@@ -303,6 +291,19 @@ class GameState extends refraction.core.State
 					gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY,
 						[Color.Cyan, Color.Orange, Color.Pink, Color.White,Color.Green, Color.Yellow, Color.Red][Std.int(Math.random() * 7)].value & 0xFFFFFF));
 				}
+
+				if (ui.button("Blood Particles")) {
+					showMenu = false;
+					for (i in 0...10) {
+						entFactory.autoBuild("Blood")
+						.getComponent(Position)
+						.setPosition(worldMenuX, worldMenuY)
+						.getEntity()
+						.getComponent(Particle)
+						.randomDirection(Math.random() * 10 + 5); 
+					}
+				}
+
 				gameContext.lightingSystem.setAmbientLevel(
 					ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "Ambient Level", 0, 1, false, 100, true));
 

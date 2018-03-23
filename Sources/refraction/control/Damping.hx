@@ -31,8 +31,8 @@ class Damping extends Component
 	
 	override public function update():Void 
 	{
-		velocity.velX *= factor;
-		velocity.velY *= factor;
+		velocity.timesVelX(factor);
+		velocity.timesVelY(factor);
 	}
 	
 }

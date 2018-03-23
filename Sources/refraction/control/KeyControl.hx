@@ -50,8 +50,8 @@ class KeyControl extends Component
 		acc.normalize();
 		acc = acc.mult(speed);
 		
-		velocity.velX += acc.x;
-		velocity.velY += acc.y;
+		velocity.addVelX(acc.x);
+		velocity.addVelY(acc.y);
 	}
 	
 }
