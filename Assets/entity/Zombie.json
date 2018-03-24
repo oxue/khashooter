@@ -40,6 +40,12 @@
 				"maxAcceleration": 1
 			}
 		},
-		{ "type": "ZombieAI" }
+		{ "type": "ZombieAI" },
+		{
+			"type":"Health",
+			"args": {
+				"maxValue": 25
+			}
+		}
 	]
 }

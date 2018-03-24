@@ -30,6 +30,8 @@ class Position extends Component
 		return this;
 	}
 
+	public function setFromPosition(_p:Position):Position { return setPosition(_p.x, _p.y);	}
+
 	override public function autoParams(_args:Dynamic):Void
 	{
 		//x = _args.x;

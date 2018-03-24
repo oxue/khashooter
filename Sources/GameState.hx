@@ -79,14 +79,8 @@ class GameState extends refraction.core.State
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
 			
-			// Init behaviours
-			gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){
-				//trace("hit!");
-			});
-			gameContext.hitTestSystem.onHit("zombie", "player_bolt", function (z:Entity, b:Entity){
-				z.remove();
-				b.notify("collided");
-			});
+			// Init collision behaviours
+			defineCollisionBehaviours();
 
 			// Init Lighting 
 			var i = 0;
@@ -97,6 +91,24 @@ class GameState extends refraction.core.State
 			loadMap("blookd");
 			
 			isRenderingReady = true;
+		});
+	}
+
+	private function defineCollisionBehaviours():Void {
+		gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){
+			p.notify("damage", {amount: -1});
+		});
+		gameContext.hitTestSystem.onHit("zombie", "player_bolt", function (z:Entity, b:Entity){
+			z.notify("damage", {amount: -10});
+			b.notify("collided");
+			for (i in 0...10) {
+				entFactory.autoBuild("Blood")
+				.getComponent(Position)
+				.setFromPosition(z.getComponent(Position))
+				.getEntity()
+				.getComponent(Particle)
+				.randomDirection(Math.random() * 10 + 5); 
+			}
 		});
 	}
 	

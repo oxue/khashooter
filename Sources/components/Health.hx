@@ -26,6 +26,13 @@ class Health extends Component
 		value = _args.maxValue;
 		maxValue = _args.maxValue;
 	}
+
+	override public function load():Void
+	{
+		on("damage", function(args:Dynamic) {
+			applyHealth(args.amount);
+		});
+	}
 	
 	private function defaultCallback():Void
 	{

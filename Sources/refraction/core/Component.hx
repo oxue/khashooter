@@ -1,5 +1,6 @@
 package refraction.core;
 import haxe.ds.StringMap;
+import helpers.DebugLogger;
 
 /**
  * ...
@@ -42,6 +43,12 @@ class Component
 	public function notify(_msgType:String, _msgData:Dynamic):Void
 	{
 		if(events.exists(_msgType)){
+			DebugLogger.info("NOTIFY", {
+				recipientClass: Type.getClassName(Type.getClass(this)),
+				messageType: _msgType,
+				messageData: _msgData
+			});
+
 			var handler = events.get(_msgType);
 			handler(_msgData);
 		}
