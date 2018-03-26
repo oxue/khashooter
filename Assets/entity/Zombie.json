@@ -37,7 +37,7 @@
 			"type": "BreadCrumbs",
 			"args": {
 				"acceptanceRadius": 20,
-				"maxAcceleration": 1
+				"maxAcceleration": 0.8
 			}
 		},
 		{ "type": "ZombieAI" },

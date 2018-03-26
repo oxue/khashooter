@@ -89,7 +89,10 @@ class EntFactory
 	}
 	
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String){
-		var e:Entity = autoBuild("Actor");
+		var e:Entity = autoBuild("Actor")
+			.getComponent(Position)
+			.setPosition(_x, _y)
+			.getEntity();
 		e.addComponent(ResourceFormat.surfacesets.get(name));
 				
 		var surfaceRender:AnimatedRender = new AnimatedRender();

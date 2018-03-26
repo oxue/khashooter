@@ -9,6 +9,7 @@ import refraction.generic.Velocity;
 import refraction.tile.TilemapData;
 import refraction.tile.TilemapUtils;
 import refraction.utils.Interval;
+import helpers.DebugLogger;
 
 /**
  * ...
@@ -52,7 +53,6 @@ class ZombieAI extends Component
 	
 	function dropCrumb() 
 	{
-		
 		breadcrumbs.addBreadCrumb(new FastVector2(followTarget.x, followTarget.y));
 		if (breadcrumbs.breadcrumbs.length > 50) //TODO: trail length
 		{
@@ -85,8 +85,13 @@ class ZombieAI extends Component
 	//	randTargetInterval.tick();
 		
 		//AI
-		if(followTarget == null){
+		if(followTarget == null || followTarget.remove){
+			breadcrumbs.clear();
 			followTarget = GameContext.instance().beaconSystem.getOne("player").getComponent(Position);
+			DebugLogger.info("AI", {
+				what: "retargeting zombie target",
+				target: followTarget
+			});
 		}
 		if(targetMap == null){
 			targetMap = GameContext.instance().tilemapData;

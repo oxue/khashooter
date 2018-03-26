@@ -20,4 +20,5 @@ class Consts
 	public static inline var RAD2A:Float = 180 / 3.1415926;
 	public static inline var A2RAD:Float = 1 / RAD2A;
 	
+	public static inline var BEACON_SWEEP_INTERVAL = 300;
 }

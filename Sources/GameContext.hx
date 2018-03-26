@@ -20,6 +20,7 @@ import systems.HitTestSys;
 import systems.BeaconSys;
 import zui.Zui;
 import systems.ParticleSys;
+import ui.HealthBar;
 
 /**
  * ...
@@ -72,6 +73,7 @@ class GameContext
 	public var worldMouseY:Int;
 
 	public var ui:Zui;
+	public var healthBar:HealthBar;
 	
 	public function new(_camera:Camera, _ui:Zui) 
 	{

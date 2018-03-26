@@ -44,6 +44,7 @@ class Health extends Component
 		value += _value;
 		if (value <= 0)
 		{
+			this.entity.notify("death", { reason: "health is 0."});
 			_callback();
 		}
 	}

@@ -21,6 +21,7 @@ import kha.input.Mouse;
 import zui.*;
 import ui.HealthBar;
 import components.Health;
+import helpers.LevelLoader;
 
 /**
  * ...
@@ -42,7 +43,7 @@ class GameState extends refraction.core.State
 	private var menuX:Int;
 	private var menuY:Int;
 	
-	private var healthBar:HealthBar;
+	private var levelLoader:LevelLoader;
 
 	public function new() 
 	{
@@ -79,8 +80,6 @@ class GameState extends refraction.core.State
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
 			
-			// Init collision behaviours
-			defineCollisionBehaviours();
 
 			// Init Lighting 
 			var i = 0;
@@ -88,13 +87,17 @@ class GameState extends refraction.core.State
 			gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
 			
 			// load map
-			loadMap("blookd");
+			levelLoader = new LevelLoader(entFactory, gameContext);
+			levelLoader.loadMap("blood");
+
+			// Init collision behaviours
+			defineBehaviours();
 			
 			isRenderingReady = true;
 		});
 	}
 
-	private function defineCollisionBehaviours():Void {
+	private function defineBehaviours():Void {
 		gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){
 			p.notify("damage", {amount: -1});
 		});
@@ -112,32 +115,6 @@ class GameState extends refraction.core.State
 		});
 	}
 	
-	public function loadMap(_name:String)
-	{
-		var obj:Dynamic = Json.parse(Assets.blobs.rooms_json.toString());
-		entFactory.createTilemap(obj.data[0].length, obj.data.length, obj.tilesize, 1, obj.data, "all_tiles");
-		
-		gameContext.playerEntity = entFactory.autoBuild("Player")
-			.getComponent(Position).setPosition(obj.start.x, obj.start.y)
-			.getEntity();
-		healthBar = new HealthBar(gameContext.playerEntity.getComponent(Health));
-
-		entFactory.createItem(obj.start.x, obj.start.y);
-		
-		var i:Int = obj.lights.length;
-		while (i-->0){
-			gameContext.lightingSystem.addLightSource(new LightSource(obj.lights[i].x, obj.lights[i].y, obj.lights[i].color, obj.lights[i].radius));
-		}
-		entFactory.createNPC(obj.start.x, obj.start.y, "mimi");
-		//entFactory.createZombie(obj.start.x, obj.start.y);
-		
-		for (p in TilemapUtils.computeGeometry(gameContext.tilemapData)){
-			gameContext.lightingSystem.polygons.push(p);
-		}
-
-		//buildDebugPoly();
-	}
-
 	private function buildDebugPoly():Void
 	{
 		var poly = new refraction.ds2d.Polygon(2, 10, 100,100);
@@ -187,6 +164,7 @@ class GameState extends refraction.core.State
 			gameContext.aiSystem.update();
 
 			gameContext.hitTestSystem.update();
+			gameContext.beaconSystem.update();
 		}
 	}
 	
@@ -269,7 +247,7 @@ class GameState extends refraction.core.State
 
 	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
 		f.g2.begin(false);
-		healthBar.render(f);
+		gameContext.healthBar.render(f);
 		f.g2.end();
 	}
 	

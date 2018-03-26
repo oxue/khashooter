@@ -36,6 +36,10 @@ class BreadCrumbs extends Component
 		breadcrumbs.push(_v);
 	}
 	
+	public function clear():Void {
+		breadcrumbs = new Array();
+	}
+
 	override public function load():Void 
 	{
 		position = entity.getComponent(Position);

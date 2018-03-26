@@ -20,7 +20,7 @@ class DebugLogger {
 		linearLogs.push(logObject);
 
 		if(traceLogs) {
-			trace(logObject);
+			trace('[${logObject.tag}] ${logObject.message}');
 		}
 	}
 }

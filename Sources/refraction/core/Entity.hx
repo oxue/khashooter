@@ -1,5 +1,6 @@
 package refraction.core;
-//import flash.Vector;
+import haxe.ds.StringMap;
+import helpers.DebugLogger;
 
 /**
  * ...
@@ -9,10 +10,13 @@ package refraction.core;
 class Entity 
 {
 	public var components:Map<String, Component>;
+
+	private var events:StringMap<Dynamic->Void>;
 	
 	public function new() 
 	{
 		components = new Map<String, Component>();
+		events = new StringMap<Dynamic->Void>();
 	}
 	
 	public inline function addComponent(_comp:Component, ?_name:String):Component
@@ -24,8 +28,28 @@ class Entity
 		return _comp;
 	}
 
+	public function on(_msgType:String, _msgHandler:Dynamic->Void):Void
+	{
+		events.set(_msgType, _msgHandler);
+	}
+
+	private function notifySelf(_msgType:String, _msgData:Dynamic = null) {
+		if(events.exists(_msgType)){
+			DebugLogger.info("NOTIFY", {
+				recipientClass: Type.getClassName(Type.getClass(this)),
+				messageType: _msgType,
+				messageData: _msgData
+			});
+
+			var handler = events.get(_msgType);
+			handler(_msgData);
+		}
+	}
+
 	public function notify(_msgType:String, _msgData:Dynamic = null):Void
 	{
+		notifySelf(_msgType, _msgData);
+
 		for (comp in components)
 		{
 			comp.notify(_msgType, _msgData);
