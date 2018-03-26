@@ -1,9 +1,0 @@
-{
-	"entities":[
-		"Player",
-		"Actor",
-		"Zombie",
-		"Gyo",
-		"Blood"
-	]
-}

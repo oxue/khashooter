@@ -10,6 +10,7 @@ project.addAssets('Assets/**', {
 	name: '{dir}/{name}'
 });
 project.addLibrary('zui');
+project.addLibrary("yaml")
 
 project.windowOptions.width = 800;
 project.windowOptions.height = 600;

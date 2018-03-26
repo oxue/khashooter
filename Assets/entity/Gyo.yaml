@@ -1,0 +1,30 @@
+---
+entity_name: Gyo
+base_entity: Actor
+components:
+- type: SurfaceSet
+  resource: gyo
+- type: AnimatedRender
+  name: 
+  args:
+    animations:
+    - name: idle
+      frames: [4]
+    - name: running
+      frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    initialAnimation: idle
+    surface: 
+    frameTime: 2
+- type: TileCollision
+  args:
+    hitboxX: -10
+    hitboxY: -10
+- type: HitCircle
+  args:
+    tag: gyo
+    radius: 15
+- type: BreadCrumbs
+  args:
+    acceptanceRadius: 20
+    maxAcceleration: 1
+- type: MimiAI
