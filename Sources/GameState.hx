@@ -88,7 +88,7 @@ class GameState extends refraction.core.State
 			
 			// load map
 			levelLoader = new LevelLoader(entFactory, gameContext);
-			levelLoader.loadMap("blood");
+			levelLoader.loadMap("modern_home");
 
 			// Init collision behaviours
 			defineBehaviours();

@@ -32,6 +32,9 @@ class LevelLoader {
 	}
 
 	private function spawnLights() {
+		if(levelData.lights == null) {
+			return;
+		}
 		var i:Int = levelData.lights.length;
 		while (i-->0){
 			gc.lightingSystem.addLightSource(new LightSource(levelData.lights[i].x, levelData.lights[i].y, levelData.lights[i].color, levelData.lights[i].radius));
@@ -67,6 +70,7 @@ class LevelLoader {
 	}
 
 	private function getLevelData(_name:String) {
-		levelData = Json.parse(Assets.blobs.rooms_json.toString());
+		var levelPath = Reflect.field(Assets.blobs, 'map_${_name}_json').toString();
+		levelData = Json.parse(levelPath);
 	}
 }
