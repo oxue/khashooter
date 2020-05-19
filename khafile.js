@@ -1,7 +1,7 @@
 var project = new Project('Empty');
 
 project.addSources('./Sources');
-project.addShaders('./Shaders/**');
+project.addShaders('./Shaders');
 //project.addSources('../shooter2016/src');
 
 project.addAssets('Assets/**', {

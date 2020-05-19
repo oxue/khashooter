@@ -82,13 +82,13 @@ class GameState extends refraction.core.State
 			
 
 			// Init Lighting 
-			var i = 0;
-			while(i-->0)
-			gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
+			// var i = 0;
+			// while(i-->0)
+			// gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
 			
 			// load map
 			levelLoader = new LevelLoader(entFactory, gameContext);
-			levelLoader.loadMap("modern_home");
+			levelLoader.loadMap("bloodstrike_zm");
 
 			// Init collision behaviours
 			defineBehaviours();

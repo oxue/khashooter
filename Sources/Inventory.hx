@@ -47,7 +47,10 @@ class Inventory extends Component
 	}
 
 	public function muzzleDirection():Vector2 {
-		return Utils.rotateVec2(EntFactory.instance().worldMouse().sub(position.vec().add(new Vector2(0,0))), Math.random() * 0.1);
+		var worldMouse = EntFactory.instance().worldMouse(); 
+		// TODO: paramterize this later
+		return Utils.rotateVec2(
+			worldMouse.sub(position.vec().add(new Vector2(0,0))), Math.random() * 0.1);
 	}
 
 	public function primary():Void

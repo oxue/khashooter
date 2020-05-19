@@ -1,14 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
     "configurations": [
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "program": "${file}"
+        },
+        {
+            "type": "electron",
+            "request": "launch",
+            "name": "Kha: HTML5",
+            "appDir": "${workspaceFolder}/build/debug-html5",
+            "sourceMaps": true,
+            "preLaunchTask": "Kha: Build for Debug HTML5"
+        },
+        {
+            "type": "krom",
+            "request": "launch",
+            "name": "Kha: Krom",
+            "preLaunchTask": "Kha: Build for Krom"
         }
-    ]
+    ],
+    "compounds": [],
+    "version": "0.2.0"
 }

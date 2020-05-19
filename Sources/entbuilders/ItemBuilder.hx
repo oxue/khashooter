@@ -51,6 +51,16 @@ class ItemBuilder
 		return e;
 	}
 
+	public function create2(_x = 0, _y = 0, _itemId:Int):Entity
+	{
+		var e = new Entity()
+	
+	}
+
+	public function makebaseItem(e:Entity):Entity {
+		
+	}
+
 	public function new(_gameContext:GameContext)
 	{
 		gameContext = _gameContext;

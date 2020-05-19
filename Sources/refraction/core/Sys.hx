@@ -11,7 +11,7 @@ class NullSystem<T:Component>
 	}
 
 	@:generic
-	public function procure<G:(Constructible<Dynamic>, T)>(e:Entity, _type:Class<G>):G
+	public function procure<G:Constructible<Dynamic>&T>(e:Entity, _type:Class<G>):G
 	{
 		var ret:G = new G();
 		e.addComponent(ret);
@@ -35,7 +35,7 @@ class Sys<T:Component>
 	}
 
 	@:generic
-	public function procure<G:(Constructible<Dynamic>, T, Component)>(e:Entity, _type:Class<G>, _name:String = null):G
+	public function procure<G:Constructible<Dynamic>&T&Component>(e:Entity, _type:Class<G>, _name:String = null):G
 	{
 		var ret:G = cast produce();
 		if(ret == null)

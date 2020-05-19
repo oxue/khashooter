@@ -1,5 +1,5 @@
 package ;
-import flash.geom.Point;
+import kha.math.Vector2;
 import refraction.core.Application;
 import refraction.display.AnimatedRender;
 import refraction.ds2d.LightSource;
@@ -25,7 +25,6 @@ class FlameThrower extends Weapon
 	
 	override public function getAmmo(_i:Inventory):Void 
 	{
-		ammo = _i.primaryAmmo;
 	}
 	
 	override public function setAnimation(_anim:AnimatedRender):Void 
@@ -48,11 +47,11 @@ class FlameThrower extends Weapon
 	{
 		if (!canCast)
 		return;
-		var p:Point = new Point(Application.mouseX / 2 + cast(Application.currentState, GameState).canvas.camera.x - _position.x - 10, 
+		var p:Vector2 = new Vector2(Application.mouseX / 2 + cast(Application.currentState, GameState).canvas.camera.x - _position.x - 10, 
 								Application.mouseY / 2 + cast(Application.currentState, GameState).canvas.camera.y - _position.y - 10);
 		p.x *= 400;
 		p.y *= 400;
-		var p3:Point = p.clone();
+		var p3:Vector2 = p.fast();
 		p3.normalize(6);
 		var px:Int = cast _position.x + 10 - p3.y + p3.x;
 		var py:Int = cast _position.y + 10 + p3.x + p3.y;

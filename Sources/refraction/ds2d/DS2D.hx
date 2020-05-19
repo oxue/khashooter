@@ -11,6 +11,7 @@ import kha.math.FastMatrix4;
 import hxblit.LightPipelineState;
 import hxblit.TextureAtlas.FloatRect;
 import kha.graphics4.DepthStencilFormat;
+import kha.graphics4.StencilValue;
 import kha.Image;
 import kha.math.Vector2;
 import kha.math.FastVector2;
@@ -109,7 +110,7 @@ class DS2D
 			var lx = l.position.x;
 			var ly = l.position.y;
 
-			sshader.stencilReferenceValue = rv;
+			sshader.stencilReferenceValue = Static(rv);
 			KhaBlit.setPipeline(sshader, "ShadowPipelineState");
 			KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
 			var cpos = l.position.sub(camPos);
