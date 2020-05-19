@@ -13,25 +13,25 @@ import haxe.ds.StringMap;
  * ...
  * @author worldedit
  */
-
-class AnimatedRender extends Component
-{
-
+class AnimatedRender extends Component {
 	public var frameTime:Int;
+
 	private var time:Int;
+
 	public var frame:Int;
 	public var animations:StringMap<Array<Int>>;
+
 	private var coordX:Int;
 	private var coordY:Int;
 	private var surface2Set:SurfaceSet;
 	private var position:Position;
+
 	public var numRot:Int;
 	public var curAnimaition:String;
-	
+
 	private var surface:String;
-	
-	public function new(_surface:String = null) 
-	{
+
+	public function new(_surface:String = null) {
 		super();
 		surface = _surface;
 		numRot = 32;
@@ -42,11 +42,10 @@ class AnimatedRender extends Component
 		curAnimaition = "";
 		frame = 0;
 	}
-	
-	override public function autoParams(_args:Dynamic):Void
-	{
+
+	override public function autoParams(_args:Dynamic):Void {
 		var i:Int = _args.animations.length;
-		while(i-->0){
+		while (i-- > 0) {
 			var item = _args.animations[i];
 			animations.set(item.name, item.frames);
 		}
@@ -56,30 +55,27 @@ class AnimatedRender extends Component
 		surface2Set = entity.getComponent(SurfaceSet, surface);
 	}
 
-	override public function load():Void 
-	{
+	override public function load():Void {
 		surface2Set = entity.getComponent(SurfaceSet, surface);
 		position = entity.getComponent(Position);
 	}
-	
-	 public function draw(camera:Camera):Void 
-	{
+
+	public function draw(camera:Camera):Void {
 		time++;
-		if (time == frameTime)
-		{
+		if (time == frameTime) {
 			time = 0;
-			frame ++;
-			if (frame == animations.get(curAnimaition).length)
-			{
+			frame++;
+			if (frame == animations
+				.get(curAnimaition)
+				.length
+			) {
 				frame = 0;
 			}
 			coordY = animations.get(curAnimaition)[frame];
 		}
-		if (position.rotation < 0)
-		{
+		if (position.rotation < 0) {
 			position.rotation += 360;
-		}else if (position.rotation >= 360)
-		{
+		} else if (position.rotation >= 360) {
 			position.rotation -= 360;
 		}
 		var offsetX = 0.0;
@@ -87,14 +83,13 @@ class AnimatedRender extends Component
 
 		coordX = Math.round(position.rotation / 360 * numRot) % numRot;
 
-		if(surface2Set.registrationX != 0 || surface2Set.registrationY != 0){
-
+		if (surface2Set.registrationX != 0 || surface2Set.registrationY != 0) {
 			var halfs = new Vector2(surface2Set.surfaces[0].width / 2, surface2Set.surfaces[0].height / 2);
 			var translation = new Vector2(surface2Set.translateX, surface2Set.translateY);
 			var center = halfs.sub(translation);
 			var reg = center.sub(new Vector2(surface2Set.registrationX, surface2Set.registrationY));
 
-			var a = coordX/numRot * 2 * 3.1415;
+			var a = coordX / numRot * 2 * 3.1415;
 			var cs = Math.cos(a);
 			var sn = Math.sin(a);
 			offsetX = reg.x * cs - reg.y * sn;
@@ -104,9 +99,8 @@ class AnimatedRender extends Component
 			offsetY -= center.y;
 		}
 
-		KhaBlit.blit(surface2Set.surfaces[cast coordX + coordY * numRot], 
-					cast (Math.round(position.x - surface2Set.translateX) - camera.X() + offsetX),
-					cast (Math.round(position.y - surface2Set.translateY) - camera.Y() + offsetY));
+		KhaBlit.blit(surface2Set.surfaces[cast coordX + coordY * numRot],
+			cast(Math.round(position.x - surface2Set.translateX) - camera.X() + offsetX),
+			cast(Math.round(position.y - surface2Set.translateY) - camera.Y() + offsetY));
 	}
-	
 }

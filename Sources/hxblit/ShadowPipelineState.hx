@@ -11,15 +11,12 @@ import kha.graphics4.VertexStructure;
 
 /**
  * ...
- * @author 
+ * @author
  */
-class ShadowPipelineState extends PipelineState
-{
-
-	public function new() 
-	{
+class ShadowPipelineState extends PipelineState {
+	public function new() {
 		super();
-		
+
 		var structure:VertexStructure = new VertexStructure();
 		structure.add("pos", VertexData.Float2);
 		structure.add("settings", VertexData.Float2);
@@ -28,7 +25,7 @@ class ShadowPipelineState extends PipelineState
 		fragmentShader = Shaders.shadow_frag;
 		vertexShader = Shaders.shadow_vert;
 		compile();
-		
+
 		blendSource = BlendingFactor.BlendOne;
 		blendDestination = BlendingFactor.BlendOne;
 		alphaBlendOperation = BlendingOperation.ReverseSubtract;
@@ -38,5 +35,4 @@ class ShadowPipelineState extends PipelineState
 		stencilMode = CompareMode.Equal;
 		stencilBothPass = StencilAction.Keep;
 	}
-	
 }

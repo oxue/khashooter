@@ -13,13 +13,15 @@ class DebugLogger {
 			tag: _tag,
 			message: _message
 		}
-		if(!tagLogs.exists(_tag)) {
+		if (!tagLogs.exists(_tag)) {
 			tagLogs.set(_tag, new Array<Dynamic>());
 		}
-		tagLogs.get(_tag).push(logObject);
+		tagLogs
+			.get(_tag)
+			.push(logObject);
 		linearLogs.push(logObject);
 
-		if(traceLogs) {
+		if (traceLogs) {
 			trace('[${logObject.tag}] ${logObject.message}');
 		}
 	}

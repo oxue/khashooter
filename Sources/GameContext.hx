@@ -1,4 +1,5 @@
 package;
+
 import hxblit.Camera;
 import refraction.control.Damping;
 import refraction.core.Application;
@@ -24,15 +25,13 @@ import ui.HealthBar;
 
 /**
  * ...
- * @author 
+ * @author
  */
-
-class GameContext
-{
+class GameContext {
 	private static var myInstance:GameContext = null;
-	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext
-	{
-		if(myInstance == null){
+
+	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext {
+		if (myInstance == null) {
 			myInstance = new GameContext(_camera, _ui);
 		}
 		return myInstance;
@@ -41,11 +40,11 @@ class GameContext
 	public var camera:Camera;
 	public var currentMap:TileRender;
 	public var tilemapData:TilemapData;
-	
+
 	public var playerEntity:Entity;
-	
+
 	public var statusText:StatusText;
-	
+
 	public var renderSystem:RenderSys;
 	public var selfLitRenderSystem:RenderSys;
 	public var controlSystem:Sys<Component>;
@@ -58,7 +57,7 @@ class GameContext
 	public var lightSourceSystem:LightSourceSystem;
 	public var beaconSystem:BeaconSys;
 	public var particleSystem:ParticleSys;
-	
+
 	public var spacingSystem:SpacingSys;
 	public var tooltipSystem:TooltipSys;
 	public var lightingSystem:DS2D;
@@ -67,24 +66,23 @@ class GameContext
 	public var hitTestSystem:HitTestSys;
 
 	public var nullSystem:Sys<Component>;
-	
+
 	// TODO: Deprecate these ones.
 	public var worldMouseX:Int;
 	public var worldMouseY:Int;
 
 	public var ui:Zui;
 	public var healthBar:HealthBar;
-	
-	public function new(_camera:Camera, _ui:Zui) 
-	{
+
+	public function new(_camera:Camera, _ui:Zui) {
 		camera = _camera;
 		currentMap = null;
 		ui = _ui;
-		
+
 		statusText = new StatusText();
-		
+
 		worldMouseX = worldMouseY = 0;
-		
+
 		renderSystem = new RenderSys(camera);
 		selfLitRenderSystem = new RenderSys(camera);
 		controlSystem = new Sys<Component>();
@@ -98,12 +96,12 @@ class GameContext
 		spacingSystem = new SpacingSys();
 		beaconSystem = new BeaconSys();
 		particleSystem = new ParticleSys();
-		
+
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();
 
-		lightingSystem = new DS2D(Std.int(Application.width / Application.zoom), Std.int(Application.height / Application.zoom));
+		lightingSystem = new DS2D(Std.int(Application.width / Application.zoom),
+			Std.int(Application.height / Application.zoom));
 		tooltipSystem = new TooltipSys(ui);
 	}
-	
 }

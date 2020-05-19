@@ -1,36 +1,19 @@
 package refraction.core;
+
 import kha.Framebuffer;
 
 /**
  * ...
  * @author worldedit
  */
+class State {
+	public function new() {}
 
-class State 
-{
+	public function load():Void {}
 
-	public function new() 
-	{
-		
-	}
-	
-	public function load():Void
-	{
-		
-	}
-	
-	public function unload():Void
-	{
-		
-	}
-	
-	public function update():Void
-	{
-		
-	}
-	
-	public function render(frame:Framebuffer)
-	{
-		
-	}
+	public function unload():Void {}
+
+	public function update():Void {}
+
+	public function render(frame:Framebuffer) {}
 }

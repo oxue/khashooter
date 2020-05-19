@@ -13,7 +13,6 @@ import refraction.display.ResourceFormat;
 import refraction.generic.Position;
 import kha.math.Vector2;
 import refraction.tile.TilemapUtils;
-
 import components.Particle;
 import helpers.ZombieResourceLoader;
 import kha.Color;
@@ -25,131 +24,121 @@ import helpers.LevelLoader;
 
 /**
  * ...
- * @author 
+ * @author
  */
- 
-class GameState extends refraction.core.State
-{
-
+class GameState extends refraction.core.State {
 	private var isRenderingReady:Bool;
-	
+
 	private var gameContext:GameContext;
 	private var entFactory:EntFactory;
-	
+
 	private var ui:Zui;
 	private var showMenu:Bool = false;
 	private var drawHitBoxes:Bool = false;
 	private var mouse2WasDown:Bool = false;
 	private var menuX:Int;
 	private var menuY:Int;
-	
+
 	private var levelLoader:LevelLoader;
 
-	public function new() 
-	{
+	public function new() {
 		super();
 	}
-	
-	private function loadResources():Void{
+
+	private function loadResources():Void {
 		ZombieResourceLoader.load();
 	}
 
-	override public function load():Void 
-	{
+	override public function load():Void {
 		super.load();
 		isRenderingReady = false;
-		
-		Assets.loadEverything(function(){
+
+		Assets.loadEverything(function() {
 			// Init Rendering
 			KhaBlit.init(Application.width, Application.height, Application.zoom);
-			
-			Mouse.get().notify(mouseDown, null, null, null);
 
-			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId:0, scaleFactor:1});
-			
-			var gameCamera = 
-				new Camera(Std.int(Application.width/Application.zoom), Std.int(Application.height/Application.zoom));
+			Mouse
+				.get()
+				.notify(mouseDown, null, null, null);
+
+			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId: 0, scaleFactor: 1});
+
+			var gameCamera = new Camera(Std.int(Application.width / Application.zoom),
+				Std.int(Application.height / Application.zoom));
 
 			// Init Game Context
-			gameContext = GameContext.instance(gameCamera,ui);
+			gameContext = GameContext.instance(gameCamera, ui);
 			Application.defaultCamera = gameCamera;
 
 			// Load resources
 			loadResources();
-			
+
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
-			
 
-			// Init Lighting 
+			// Init Lighting
 			// var i = 0;
 			// while(i-->0)
 			// gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
-			
+
 			// load map
 			levelLoader = new LevelLoader(entFactory, gameContext);
 			levelLoader.loadMap("bloodstrike_zm");
 
 			// Init collision behaviours
 			defineBehaviours();
-			
+
 			isRenderingReady = true;
 		});
 	}
 
 	private function defineBehaviours():Void {
-		gameContext.hitTestSystem.onHit("zombie", "player", function (z:Entity, p:Entity){
+		gameContext.hitTestSystem.onHit("zombie", "player", function(z:Entity, p:Entity) {
 			p.notify("damage", {amount: -1});
 		});
-		gameContext.hitTestSystem.onHit("zombie", "player_bolt", function (z:Entity, b:Entity){
+		gameContext.hitTestSystem.onHit("zombie", "player_bolt", function(z:Entity, b:Entity) {
 			z.notify("damage", {amount: -10});
 			b.notify("collided");
 			for (i in 0...10) {
-				entFactory.autoBuild("Blood")
-				.getComponent(Position)
-				.setFromPosition(z.getComponent(Position))
-				.getEntity()
-				.getComponent(Particle)
-				.randomDirection(Math.random() * 10 + 5); 
+				entFactory
+					.autoBuild("Blood")
+					.getComponent(Position)
+					.setFromPosition(z.getComponent(Position))
+					.getEntity()
+					.getComponent(Particle)
+					.randomDirection(Math.random() * 10 + 5);
 			}
 		});
 	}
-	
-	private function buildDebugPoly():Void
-	{
-		var poly = new refraction.ds2d.Polygon(2, 10, 100,100);
-		poly.faces = [new refraction.ds2d.Face(
-			new Vector2(100,100),
-			new Vector2(100,120)
-		),
-		new refraction.ds2d.Face(
-			new Vector2(100,125),
-			new Vector2(100,145)
-		)];
+
+	private function buildDebugPoly():Void {
+		var poly = new refraction.ds2d.Polygon(2, 10, 100, 100);
+		poly.faces = [
+			new refraction.ds2d.Face(new Vector2(100, 100), new Vector2(100, 120)),
+			new refraction.ds2d.Face(new Vector2(100, 125), new Vector2(100, 145))
+		];
 		gameContext.lightingSystem.polygons.push(poly);
 	}
 
-	private function mouseDown(button:Int, x:Int, y:Int)
-	{
-		if (button == 0)
-		{
+	private function mouseDown(button:Int, x:Int, y:Int) {
+		if (button == 0) {
 			gameContext.interactSystem.update();
-			//var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
-			
-			gameContext.playerEntity.getComponent(Inventory).primary();		
+			// var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
+
+			gameContext.playerEntity
+				.getComponent(Inventory)
+				.primary();
 		}
 	}
-	
+
 	// =========
-	// MAIN LOOP 
+	// MAIN LOOP
 	// =========
-	
-	override public function update():Void 
-	{
+
+	override public function update():Void {
 		super.update();
-		
-		if (gameContext != null){
-			
+
+		if (gameContext != null) {
 			gameContext.controlSystem.update();
 			gameContext.spacingSystem.update();
 			gameContext.dampingSystem.update();
@@ -157,7 +146,7 @@ class GameState extends refraction.core.State
 			gameContext.collisionSystem.update();
 			gameContext.lightSourceSystem.update();
 			gameContext.particleSystem.update();
-			
+
 			gameContext.breadCrumbsSystem.update();
 
 			gameContext.hitCheckSystem.update();
@@ -167,80 +156,82 @@ class GameState extends refraction.core.State
 			gameContext.beaconSystem.update();
 		}
 	}
-	
-	override public function render(frame:Framebuffer) 
-	{
-		if (!isRenderingReady) return;
-		
+
+	override public function render(frame:Framebuffer) {
+		if (!isRenderingReady)
+			return;
+
 		gameContext.camera.updateShake();
 
 		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
-		
-		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x)/8);
-		gameContext.camera.y += Std.int((playerPos.y - 150 - gameContext.camera.y)/8);
-		
+
+		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x) / 8);
+		gameContext.camera.y += Std.int((playerPos.y - 150 - gameContext.camera.y) / 8);
+
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
-		
+
 		var g = frame.g4;
-		
+
 		g.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
 		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
 		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases.get("all").image);
-		
-		if(gameContext.currentMap != null){
+		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+			.get("all")
+			.image
+		);
+
+		if (gameContext.currentMap != null) {
 			gameContext.currentMap.update();
 		}
-		
+
 		gameContext.renderSystem.update();
-		
+
 		KhaBlit.draw();
 
 		g.end();
 
 		gameContext.lightingSystem.renderHXB(gameContext);
-		
+
 		g.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
 		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases.get("all").image);
+		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+			.get("all")
+			.image
+		);
 
 		gameContext.selfLitRenderSystem.update();
 
 		KhaBlit.draw();
 
 		g.end();
-		
-		//UI
-		if (!mouse2WasDown && Application.mouse2IsDown)
-		{
+
+		// UI
+		if (!mouse2WasDown && Application.mouse2IsDown) {
 			showMenu = !showMenu;
 			menuX = Application.mouseX + 5;
 			menuY = Application.mouseY;
 		}
-		
-		
+
 		// ========== UI BEGIN ==========
 		renderUI(frame, gameContext, ui);
-		
+
 		frame.g2.begin(false);
 		gameContext.tooltipSystem.draw(frame.g2);
 		frame.g2.end();
 		mouse2WasDown = Application.mouse2IsDown;
 		gameContext.statusText.render(frame.g2);
-		
 	}
 
-	private function renderUI(f:Framebuffer, gc:GameContext, ui:Zui)
-	{
+	private function renderUI(f:Framebuffer, gc:GameContext, ui:Zui) {
 		renderHitBoxes(f, gc);
 		renderGameUI(f, gc, ui);
 
-		ui.begin(f.g2);	
+		ui.begin(f.g2);
 		renderDebugMenu(f, gc, ui);
 		ui.end();
 	}
@@ -250,59 +241,69 @@ class GameState extends refraction.core.State
 		gameContext.healthBar.render(f);
 		f.g2.end();
 	}
-	
-	private function renderDebugMenu(f:Framebuffer, gc:GameContext, ui:Zui)
-	{
+
+	private function renderDebugMenu(f:Framebuffer, gc:GameContext, ui:Zui) {
 		var playerPos:Position = cast gc.playerEntity.getComponent(Position);
-		if (showMenu){
+		if (showMenu) {
 			var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
 			var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
-			
+
 			if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
-				
-				if (ui.button("Teleport Here")){
+				if (ui.button("Teleport Here")) {
 					showMenu = false;
 					playerPos.x = worldMenuX;
 					playerPos.y = worldMenuY;
 					trace(gameContext.beaconSystem.getOne("player"));
 				}
-				
+
 				if (ui.button("Spawn Hell Minion")) {
 					showMenu = false;
-					entFactory.autoBuild("Zombie")
+					entFactory
+						.autoBuild("Zombie")
 						.getComponent(Position)
 						.setPosition(worldMenuX, worldMenuY);
 				}
 
 				if (ui.button("Spawn Several Gyo")) {
 					showMenu = false;
-					for(i in 0...5){
-						entFactory.autoBuild("Gyo")
+					for (i in 0...5) {
+						entFactory
+							.autoBuild("Gyo")
 							.getComponent(Position)
-							.setPosition(worldMenuX+Std.int(Math.random()*5), worldMenuY+Std.int(Math.random()*5));
+							.setPosition(worldMenuX + Std.int(Math.random() * 5),
+								worldMenuY + Std.int(Math.random() * 5));
 					}
 				}
-				
+
 				if (ui.button("Spawn light Source")) {
 					showMenu = false;
-					gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY,
-						[Color.Cyan, Color.Orange, Color.Pink, Color.White,Color.Green, Color.Yellow, Color.Red][Std.int(Math.random() * 7)].value & 0xFFFFFF));
+					gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY, [
+						Color.Cyan,
+						Color.Orange,
+						Color.Pink,
+						Color.White,
+						Color.Green,
+						Color.Yellow,
+						Color.Red
+					][Std.int(Math.random() * 7)].value & 0xFFFFFF));
 				}
 
 				if (ui.button("Blood Particles")) {
 					showMenu = false;
 					for (i in 0...10) {
-						entFactory.autoBuild("Blood")
-						.getComponent(Position)
-						.setPosition(worldMenuX, worldMenuY)
-						.getEntity()
-						.getComponent(Particle)
-						.randomDirection(Math.random() * 10 + 5); 
+						entFactory
+							.autoBuild("Blood")
+							.getComponent(Position)
+							.setPosition(worldMenuX, worldMenuY)
+							.getEntity()
+							.getComponent(Particle)
+							.randomDirection(Math.random() * 10 + 5);
 					}
 				}
 
-				gameContext.lightingSystem.setAmbientLevel(
-					ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}), "Ambient Level", 0, 1, false, 100, true));
+				gameContext.lightingSystem.setAmbientLevel(ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}),
+					"Ambient Level", 0, 1,
+					false, 100, true));
 
 				if (ui.button("Clear Lights")) {
 					showMenu = false;
@@ -314,18 +315,18 @@ class GameState extends refraction.core.State
 		}
 	}
 
-	private function renderHitBoxes(f:Framebuffer, gc:GameContext)
-	{
-		if(drawHitBoxes){
+	private function renderHitBoxes(f:Framebuffer, gc:GameContext) {
+		if (drawHitBoxes) {
 			f.g2.begin(false);
-			for(tc in gc.collisionSystem.components){
+			for (tc in gc.collisionSystem.components) {
 				tc.drawHitbox(gc.camera, f.g2);
 			}
-			for(p in gc.hitCheckSystem.components){
-				p.entity.getComponent(Position).drawPoint(gc.camera, f.g2);
+			for (p in gc.hitCheckSystem.components) {
+				p.entity
+					.getComponent(Position)
+					.drawPoint(gc.camera, f.g2);
 			}
 			f.g2.end();
 		}
 	}
-	
 }

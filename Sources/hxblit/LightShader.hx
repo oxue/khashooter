@@ -1,10 +1,9 @@
 package hxblit;
 
 class LightShader extends hxsl.Shader {
-
 	static var SRC = {
-		var input : {
-			pos : Float2,
+		var input:{
+			pos:Float2,
 		};
 		var rel:Float4;
 		var reld:Float;
@@ -23,5 +22,4 @@ class LightShader extends hxsl.Shader {
 			out = g;
 		}
 	};
-
 }

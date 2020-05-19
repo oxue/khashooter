@@ -4,16 +4,12 @@ package refraction.tile;
  * ...
  * @author worldedit
  */
-
-class Tile 
-{
+class Tile {
 	public var imageIndex:Int;
 	public var solid:Bool;
-	
-	public function new() 
-	{
+
+	public function new() {
 		imageIndex = 0;
 		solid = false;
 	}
-	
 }

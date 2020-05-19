@@ -1,26 +1,24 @@
 package;
+
 import kha.Assets;
 import kha.graphics2.Graphics;
 
 /**
  * ...
- * @author 
+ * @author
  */
-class StatusText
-{
+class StatusText {
 	public var text:String;
 	public var x:Int;
 	public var y:Int;
 
-	public function new()
-	{
+	public function new() {
 		x = y = 0;
 		text = "";
 	}
-	
-	public function render(g2:Graphics)
-	{
-		if(text != ""){
+
+	public function render(g2:Graphics) {
+		if (text != "") {
 			g2.begin(false);
 			g2.font = Assets.fonts.OpenSans;
 			g2.fontSize = 32;
