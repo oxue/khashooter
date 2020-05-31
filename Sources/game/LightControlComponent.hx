@@ -1,4 +1,4 @@
-package;
+package game;
 
 import refraction.core.Component;
 import refraction.ds2d.LightSource;

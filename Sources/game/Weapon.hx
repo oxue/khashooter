@@ -1,4 +1,4 @@
-package;
+package game;
 
 import refraction.display.AnimatedRender;
 import refraction.generic.Position;

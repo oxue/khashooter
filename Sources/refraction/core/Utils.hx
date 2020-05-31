@@ -1,5 +1,6 @@
 package refraction.core;
 
+import game.Consts;
 import refraction.generic.Position;
 import kha.math.Vector2;
 
@@ -20,6 +21,10 @@ class Utils {
 
 	public static inline function floatEq(f1:Float, f2:Float, precision:Float = 1e-12) {
 		return Math.abs(f1 - f2) <= precision;
+	}
+
+	public static inline function direction2Degrees(_dir:Vector2):Float {
+		return Math.atan2(_dir.y, _dir.x) * Consts.RAD2A;
 	}
 
 	public static inline function rotateVec2(_vec:Vector2, rad:Float):Vector2 {

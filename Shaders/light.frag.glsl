@@ -6,6 +6,7 @@ uniform sampler2D normalmap;
 
 in vec2 pos2;
 in vec3 lightPosition;
+in float l_radius;
 
 out vec4 fragColor;
 
@@ -20,7 +21,7 @@ void main(){
 	vec3 lightDirUnit = lightDirection / lightDistance;
 	float dp = dot(lightDirUnit, normal);
 	float reflection = dp < 0 ? 0 : dp;
-	float f = lightDistance / 100;
+	float f = lightDistance / l_radius;
 	float attenuation = 1 / (f * f);
 
 	fragColor = vec4(color.xyz * attenuation, 1);// * reflection;

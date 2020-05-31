@@ -1,0 +1,8 @@
+---
+flamethrower_grow_util: 20
+flamethrower_grow_rate: 0.5
+flamethrower_total_particle_life: 60
+flamethrower_shrink_after: 20
+flamethrower_shrink_rate: 1
+flamethrower_starting_size: 5
+flamethrower_damping: 0.97

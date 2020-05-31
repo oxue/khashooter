@@ -1,6 +1,7 @@
 package;
 
 import refraction.core.Application;
+import game.GameState;
 
 class Main {
 	public static function main() {

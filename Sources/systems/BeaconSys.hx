@@ -5,6 +5,7 @@ import components.Beacon;
 import refraction.utils.Interval;
 import refraction.core.Entity;
 import helpers.DebugLogger;
+import game.Consts;
 
 class BeaconSys extends Sys<Beacon> {
 	private var sweepTicker:Interval;

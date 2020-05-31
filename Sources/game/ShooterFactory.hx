@@ -1,3 +1,5 @@
+package game;
+
 import refraction.core.ComponentFactory;
 import refraction.display.AnimatedRender;
 import refraction.control.RotationControl;
@@ -15,6 +17,8 @@ import components.Particle;
 import refraction.core.Entity;
 import refraction.core.Component;
 import components.Health;
+import game.GameContext;
+import game.Inventory;
 
 class ShooterFactory extends ComponentFactory {
 	public function new(_gameContext:GameContext) {

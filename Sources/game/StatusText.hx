@@ -1,4 +1,4 @@
-package;
+package game;
 
 import kha.Assets;
 import kha.graphics2.Graphics;

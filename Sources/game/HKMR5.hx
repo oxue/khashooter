@@ -1,4 +1,4 @@
-package;
+package game;
 
 import flash.filters.ConvolutionFilter;
 import flash.geom.Point;

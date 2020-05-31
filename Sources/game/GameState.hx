@@ -1,5 +1,7 @@
-package;
+package game;
 
+import refraction.core.TemplateParser;
+import haxe.Timer;
 import haxe.Json;
 import hxblit.KhaBlit;
 import hxblit.Camera;
@@ -21,6 +23,10 @@ import zui.*;
 import ui.HealthBar;
 import components.Health;
 import helpers.LevelLoader;
+import game.GameContext;
+import game.EntFactory;
+import game.Inventory;
+import game.ShooterFactory;
 
 /**
  * ...
@@ -96,7 +102,7 @@ class GameState extends refraction.core.State {
 		gameContext.hitTestSystem.onHit("zombie", "player", function(z:Entity, p:Entity) {
 			p.notify("damage", {amount: -1});
 		});
-		gameContext.hitTestSystem.onHit("zombie", "player_bolt", function(z:Entity, b:Entity) {
+		gameContext.hitTestSystem.onHit("zombie", Consts.PLAYER_BOLT, function(z:Entity, b:Entity) {
 			z.notify("damage", {amount: -10});
 			b.notify("collided");
 			for (i in 0...10) {
@@ -144,6 +150,7 @@ class GameState extends refraction.core.State {
 			gameContext.dampingSystem.update();
 			gameContext.velocitySystem.update();
 			gameContext.collisionSystem.update();
+			gameContext.environmentSystem.update();
 			gameContext.lightSourceSystem.update();
 			gameContext.particleSystem.update();
 
@@ -154,6 +161,12 @@ class GameState extends refraction.core.State {
 
 			gameContext.hitTestSystem.update();
 			gameContext.beaconSystem.update();
+
+			if (Application.mouseIsDown) {
+				gameContext.playerEntity
+					.getComponent(Inventory)
+					.persist();
+			}
 		}
 	}
 
@@ -262,6 +275,18 @@ class GameState extends refraction.core.State {
 						.autoBuild("Zombie")
 						.getComponent(Position)
 						.setPosition(worldMenuX, worldMenuY);
+				}
+
+				if (ui.button("Reload Entity Blobs")) {
+					showMenu = false;
+					EntFactory
+						.instance()
+						.reloadEntityBlobs();
+				}
+
+				if (ui.button("Reload Config Blobs")) {
+					showMenu = false;
+					gameContext.reloadConfigs();
 				}
 
 				if (ui.button("Spawn Several Gyo")) {

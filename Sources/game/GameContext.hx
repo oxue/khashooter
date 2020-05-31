@@ -1,5 +1,7 @@
-package;
+package game;
 
+import helpers.DebugLogger;
+import refraction.core.TemplateParser;
 import hxblit.Camera;
 import refraction.control.Damping;
 import refraction.core.Application;
@@ -57,6 +59,7 @@ class GameContext {
 	public var lightSourceSystem:LightSourceSystem;
 	public var beaconSystem:BeaconSys;
 	public var particleSystem:ParticleSys;
+	public var environmentSystem:Sys<Component>;
 
 	public var spacingSystem:SpacingSys;
 	public var tooltipSystem:TooltipSys;
@@ -73,6 +76,8 @@ class GameContext {
 
 	public var ui:Zui;
 	public var healthBar:HealthBar;
+
+	public var configurations:Dynamic;
 
 	public function new(_camera:Camera, _ui:Zui) {
 		camera = _camera;
@@ -96,6 +101,7 @@ class GameContext {
 		spacingSystem = new SpacingSys();
 		beaconSystem = new BeaconSys();
 		particleSystem = new ParticleSys();
+		environmentSystem = new Sys<Component>();
 
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();
@@ -103,5 +109,14 @@ class GameContext {
 		lightingSystem = new DS2D(Std.int(Application.width / Application.zoom),
 			Std.int(Application.height / Application.zoom));
 		tooltipSystem = new TooltipSys(ui);
+
+		configurations = TemplateParser.parseConfig();
+	}
+
+	public function reloadConfigs():Void {
+		TemplateParser.reloadConfigurations("../../Assets", (config) -> {
+			DebugLogger.info("config", config);
+			this.configurations = config;
+		});
 	}
 }

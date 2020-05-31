@@ -25,8 +25,11 @@ class LightSourceComponent extends Component {
 	}
 
 	override public function load():Void {
-		position = cast entity.components.get("pos_comp");
+		position = entity.getComponent(Position);
 	}
 
 	// TODO : remove funct
+	override public function unload():Void {
+		light.remove = true;
+	}
 }

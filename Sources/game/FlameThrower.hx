@@ -1,4 +1,4 @@
-package;
+package game;
 
 import kha.math.Vector2;
 import refraction.core.Application;

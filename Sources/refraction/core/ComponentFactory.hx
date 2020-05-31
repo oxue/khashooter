@@ -1,6 +1,7 @@
 package refraction.core;
 
 import refraction.core.Component;
+import game.GameContext;
 
 class ComponentFactory {
 	private var gameContext:GameContext;

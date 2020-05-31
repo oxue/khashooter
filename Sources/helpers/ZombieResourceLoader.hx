@@ -1,10 +1,12 @@
 package helpers;
 
+import haxe.Timer;
 import kha.Assets;
 import refraction.display.ResourceFormat;
 
 class ZombieResourceLoader {
 	public static function load():Void {
+		var t = Timer.stamp();
 		ResourceFormat.init();
 		ResourceFormat.beginAtlas("all");
 
@@ -42,5 +44,6 @@ class ZombieResourceLoader {
 			.registration(8, 8);
 
 		ResourceFormat.endAtlas();
+		DebugLogger.info("PERF", {time: Timer.stamp() - t});
 	}
 }

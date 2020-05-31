@@ -43,6 +43,10 @@ class AnimatedRender extends Component {
 		frame = 0;
 	}
 
+	public inline function setCurrentAnimation(_animation) {
+		this.curAnimaition = _animation;
+	}
+
 	override public function autoParams(_args:Dynamic):Void {
 		var i:Int = _args.animations.length;
 		while (i-- > 0) {

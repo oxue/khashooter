@@ -1,4 +1,4 @@
-package;
+package game;
 
 import refraction.core.Component;
 import refraction.core.Application;
@@ -50,13 +50,24 @@ class Inventory extends Component {
 		), Math.random() * 0.1);
 	}
 
+	public function persist():Void {
+		if (currentWeapon == null) {
+			return;
+		}
+
+		EntFactory
+			.instance()
+			.createFireball(muzzlePositon(), muzzleDirection());
+	}
+
 	public function primary():Void {
 		if (currentWeapon == null) {
 			return;
 		}
-		Application.defaultCamera.shake(3, 2);
-		EntFactory
-			.instance()
-			.createProjectile(muzzlePositon(), muzzleDirection());
+
+		// Application.defaultCamera.shake(3, 2);
+		// EntFactory
+		// 	.instance()
+		// 	.createFireball(muzzlePositon(), muzzleDirection());
 	}
 }

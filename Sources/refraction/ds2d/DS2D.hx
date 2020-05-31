@@ -15,6 +15,7 @@ import kha.math.Vector2;
 import kha.math.FastVector2;
 import kha.math.FastVector3;
 import refraction.display.ResourceFormat;
+import game.GameContext;
 
 /**
  * ...
@@ -108,6 +109,11 @@ class DS2D {
 		var rv:Int = 1;
 		while (i-- > 0) {
 			var l:LightSource = lights[i];
+			if (l.remove) {
+				lights[i] = lights[lights.length - 1];
+				lights.pop();
+				continue;
+			}
 
 			var camPos:Vector2 = new Vector2(gameContext.camera.X(), gameContext.camera.Y());
 
@@ -119,7 +125,6 @@ class DS2D {
 			KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
 			var cpos = l.position.sub(camPos);
 			KhaBlit.setUniformVec2("cpos", new FastVector2(cpos.x, cpos.y));
-			KhaBlit.setUniformVec4("color", l.v3Color);
 			KhaBlit.setUniformTexture("normalmap", kha.Assets.images.normalmap);
 
 			var j:Int = polygons.length;

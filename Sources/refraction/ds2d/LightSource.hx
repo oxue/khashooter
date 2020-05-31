@@ -8,7 +8,6 @@ package refraction.ds2d;
 	import flash.geom.Point;
 	import flash.geom.Vector3D; */
 import kha.math.Vector2;
-import kha.math.FastVector3;
 import kha.math.FastVector4;
 
 /**
@@ -18,7 +17,7 @@ import kha.math.FastVector4;
 class LightSource {
 	public var position:Vector2;
 
-	public var radius:Int;
+	public var radius:Float;
 	public var color:Int;
 
 	public var remove:Bool;

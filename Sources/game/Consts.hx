@@ -1,4 +1,4 @@
-package;
+package game;
 
 /**
  * ...
@@ -19,4 +19,7 @@ class Consts {
 	public static inline var A2RAD:Float = 1 / RAD2A;
 
 	public static inline var BEACON_SWEEP_INTERVAL = 300;
+
+	// HITGROUPS
+	public static inline var PLAYER_BOLT = "player_bolt";
 }

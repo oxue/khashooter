@@ -39,7 +39,7 @@ class Application {
 		mouseX = mouseY = 0;
 		mouseIsDown = false;
 
-		System.init({title: _title, width: _width, height: _height}, function() {
+		System.start({title: _title, width: _width, height: _height}, (window) -> {
 			Mouse
 				.get()
 				.notify(mouseDown, mouseUp, mouseMove, null);
@@ -48,7 +48,7 @@ class Application {
 				.notify(keyDown, keyUp);
 
 			Scheduler.addTimeTask(update, 0, 1 / 60);
-			System.notifyOnRender(render);
+			System.notifyOnFrames(render);
 
 			lastTime = Scheduler.time();
 
@@ -99,7 +99,7 @@ class Application {
 		currentState.update();
 	}
 
-	public static function render(frame:Framebuffer) {
-		currentState.render(frame);
+	public static function render(frame:Array<Framebuffer>) {
+		currentState.render(frame[0]);
 	}
 }

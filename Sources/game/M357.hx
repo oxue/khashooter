@@ -1,4 +1,4 @@
-package;
+package game;
 
 import flash.geom.Point;
 import refraction.core.Component;

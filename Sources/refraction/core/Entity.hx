@@ -68,6 +68,7 @@ class Entity {
 
 	public function remove():Void {
 		for (comp in components) {
+			comp.unload();
 			comp.remove = true;
 		}
 	}

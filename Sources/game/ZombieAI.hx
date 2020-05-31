@@ -1,4 +1,4 @@
-package;
+package game;
 
 import kha.math.FastVector2;
 import refraction.control.BreadCrumbs;

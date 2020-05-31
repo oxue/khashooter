@@ -1,4 +1,4 @@
-package;
+package game;
 
 /**
  * assuming this class is correct

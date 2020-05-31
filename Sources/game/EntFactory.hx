@@ -1,5 +1,8 @@
-package;
+package game;
 
+import helpers.DebugLogger;
+import refraction.core.Utils;
+import refraction.display.LightSourceComponent;
 import kha.math.Vector2;
 import refraction.control.*;
 import refraction.core.Entity;
@@ -19,6 +22,9 @@ import refraction.core.Component;
 import refraction.core.ComponentFactory;
 import refraction.core.TemplateParser;
 import refraction.display.ResourceFormat;
+import game.GameContext;
+import game.EntFactory;
+import game.Consts;
 
 /**
  * ...
@@ -48,13 +54,20 @@ class EntFactory {
 		entityTemplates = TemplateParser.parse();
 	}
 
+	public function reloadEntityBlobs():Void {
+		TemplateParser.reloadEntityBlobs("../../Assets/entity", (templateMap) -> {
+			this.entityTemplates = templateMap;
+			DebugLogger.info("IO", "Entity Blobs Reloaded");
+		});
+	}
+
 	public function worldMouse():Vector2 {
 		return new Vector2(cast Application.mouseX / 2 + gameContext.camera.x,
 			cast Application.mouseY / 2 + gameContext.camera.y);
 	}
 
 	public function createItem(_x, _y):Entity {
-		return itemBuilder.create(_x, _y, 0);
+		return itemBuilder.create2(_x, _y, 0);
 	}
 
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component {
@@ -135,11 +148,35 @@ class EntFactory {
 			});
 	}
 
+	public function createFireball(_position:Vector2, direction:Vector2):Entity {
+		var e = new Entity();
+		var e:Entity = new Entity();
+		e.addComponent(new Position(_position.x, _position.y, 10, 10, Utils.direction2Degrees(direction)));
+		var lightSource = new LightSourceComponent(gameContext.lightingSystem, 0x5500ff,
+			gameContext.configurations.flamethrower_starting_size, 0, 0);
+		e.addComponent(lightSource);
+		gameContext.lightSourceSystem.addComponent(lightSource);
+
+		var velocity = gameContext.velocitySystem.procure(e, Velocity);
+		direction.normalize();
+		direction = direction.mult(Consts.CROSSBOW_PROJECTILE_SPEED);
+		velocity.setVelX(direction.x);
+		velocity.setVelY(direction.y);
+		var damping = gameContext.dampingSystem.procure(e, Damping);
+		DebugLogger.info("DAMPING", gameContext.configurations);
+		damping.autoParams({factor: gameContext.configurations.flamethrower_damping});
+		gameContext.environmentSystem.procure(e, FireComponent);
+
+		return e;
+	}
+
 	public function createProjectile(_position:Vector2, direction:Vector2):Entity {
 		var e:Entity = new Entity();
-		e.addComponent(new Position(_position.x, _position.y, 10, 10,
-			Math.atan2(direction.y, direction.x) * Consts.RAD2A));
+		e.addComponent(new Position(_position.x, _position.y, 10, 10, Utils.direction2Degrees(direction)));
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
+		var lightSource = new LightSourceComponent(gameContext.lightingSystem, 0x2222ff, 10, 0, 0);
+		e.addComponent(lightSource);
+		gameContext.lightSourceSystem.addComponent(lightSource);
 
 		var surfaceRender = gameContext.selfLitRenderSystem.procure(e, AnimatedRender);
 		surfaceRender.autoParams({
@@ -161,7 +198,7 @@ class EntFactory {
 		gameContext.hitTestSystem
 			.procure(e, HitCircle)
 			.autoParams({
-				tag: "player_bolt",
+				tag: Consts.PLAYER_BOLT,
 				radius: 3
 			});
 

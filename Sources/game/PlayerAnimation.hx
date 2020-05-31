@@ -1,8 +1,9 @@
-package;
+package game;
 
 import refraction.core.Component;
 import refraction.display.AnimatedRender;
 import refraction.generic.Velocity;
+import game.Inventory;
 
 /**
  * ...

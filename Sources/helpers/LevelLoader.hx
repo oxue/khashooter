@@ -7,6 +7,8 @@ import ui.HealthBar;
 import components.Health;
 import refraction.ds2d.LightSource;
 import refraction.tile.TilemapUtils;
+import game.GameContext;
+import game.EntFactory;
 
 class LevelLoader {
 	private var levelData:Dynamic;
@@ -26,6 +28,7 @@ class LevelLoader {
 		spawnLights();
 
 		// hardcode
+		trace("create");
 		ef.createItem(levelData.start.x, levelData.start.y);
 		ef.createNPC(levelData.start.x, levelData.start.y, "mimi");
 		// ef.createZombie(levelData.start.x, levelData.start.y);
