@@ -1,8 +1,6 @@
 package game;
 
-import refraction.core.TemplateParser;
-import haxe.Timer;
-import haxe.Json;
+import helpers.DebugLogger;
 import hxblit.KhaBlit;
 import hxblit.Camera;
 import kha.Assets;
@@ -14,19 +12,20 @@ import refraction.ds2d.LightSource;
 import refraction.display.ResourceFormat;
 import refraction.generic.Position;
 import kha.math.Vector2;
-import refraction.tile.TilemapUtils;
 import components.Particle;
 import helpers.ZombieResourceLoader;
 import kha.Color;
 import kha.input.Mouse;
 import zui.*;
-import ui.HealthBar;
-import components.Health;
 import helpers.LevelLoader;
 import game.GameContext;
 import game.EntFactory;
 import game.Inventory;
 import game.ShooterFactory;
+import pgr.dconsole.DC;
+import game.Console;
+import game.ConsoleInput;
+import game.dialogue.DialogueManager;
 
 /**
  * ...
@@ -37,6 +36,7 @@ class GameState extends refraction.core.State {
 
 	private var gameContext:GameContext;
 	private var entFactory:EntFactory;
+	private var dialogueManager:DialogueManager;
 
 	private var ui:Zui;
 	private var showMenu:Bool = false;
@@ -47,7 +47,11 @@ class GameState extends refraction.core.State {
 
 	private var levelLoader:LevelLoader;
 
-	public function new() {
+	private var console:Console;
+	private var defaultMap:String;
+
+	public function new(defaultMap:String) {
+		this.defaultMap = defaultMap;
 		super();
 	}
 
@@ -60,14 +64,18 @@ class GameState extends refraction.core.State {
 		isRenderingReady = false;
 
 		Assets.loadEverything(function() {
-			// Init Rendering
-			KhaBlit.init(Application.width, Application.height, Application.zoom);
-
 			Mouse
 				.get()
 				.notify(mouseDown, null, null, null);
 
-			ui = new Zui({font: Assets.fonts.OpenSans, khaWindowId: 0, scaleFactor: 1});
+			ui = new Zui({font: Assets.fonts.monaco, khaWindowId: 0, scaleFactor: 1});
+
+			console = new Console((s)->{
+				DebugLogger.info("CONSOLE", s);
+			}, ui);
+
+			DC.init(300,"DOWN",null,new ConsoleInput(),console);
+			DC.log("This text will be logged.");
 
 			var gameCamera = new Camera(Std.int(Application.width / Application.zoom),
 				Std.int(Application.height / Application.zoom));
@@ -81,6 +89,8 @@ class GameState extends refraction.core.State {
 
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
+			dialogueManager = new DialogueManager("../../Assets/dialogue");
+			dialogueManager.loadDialogue("dialogue1");
 
 			// Init Lighting
 			// var i = 0;
@@ -89,13 +99,27 @@ class GameState extends refraction.core.State {
 
 			// load map
 			levelLoader = new LevelLoader(entFactory, gameContext);
-			levelLoader.loadMap("bloodstrike_zm");
+			levelLoader.loadMap(defaultMap);
 
 			// Init collision behaviours
 			defineBehaviours();
 
+			DC.registerObject(gameContext.configurations, "config");
+			DC.registerObject(levelLoader, "loader");
+			DC.registerObject(Application, "app");
+			DC.registerFunction(newState, "loadGameState", "reload the game state with the provided map");
+			DC.registerObject(this, "gameState");
+			// TODO: reset DC stuff
+
 			isRenderingReady = true;
 		});
+	}
+
+	public function newState(map:String) {
+		EntFactory.destroyInstance();
+		GameContext.destroyInstance();
+		Application.resetKeyListeners();
+		Application.setState(new GameState(map));
 	}
 
 	private function defineBehaviours():Void {
@@ -178,8 +202,8 @@ class GameState extends refraction.core.State {
 
 		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 
-		gameContext.camera.x += Std.int((playerPos.x - 200 - gameContext.camera.x) / 8);
-		gameContext.camera.y += Std.int((playerPos.y - 150 - gameContext.camera.y) / 8);
+		gameContext.camera.x += Std.int((playerPos.x + gameContext.configurations.camera_offset.x - gameContext.camera.x) / 8);
+		gameContext.camera.y += Std.int((playerPos.y + gameContext.configurations.camera_offset.y - gameContext.camera.y) / 8);
 
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
@@ -245,23 +269,29 @@ class GameState extends refraction.core.State {
 		renderGameUI(f, gc, ui);
 
 		ui.begin(f.g2);
-		renderDebugMenu(f, gc, ui);
+		renderDebugMenu(gc, ui);
+		console.draw();
 		ui.end();
 	}
 
 	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
 		f.g2.begin(false);
 		gameContext.healthBar.render(f);
+		dialogueManager.render(f);
 		f.g2.end();
 	}
 
-	private function renderDebugMenu(f:Framebuffer, gc:GameContext, ui:Zui) {
+	private function renderDebugMenu(gc:GameContext, ui:Zui) {
 		var playerPos:Position = cast gc.playerEntity.getComponent(Position);
 		if (showMenu) {
 			var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
 			var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
 
 			if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
+				if (ui.button("dia")) {
+					dialogueManager.playDialogue("dialogue1");
+				}
+
 				if (ui.button("Teleport Here")) {
 					showMenu = false;
 					playerPos.x = worldMenuX;
@@ -333,6 +363,10 @@ class GameState extends refraction.core.State {
 				if (ui.button("Clear Lights")) {
 					showMenu = false;
 					gameContext.lightingSystem.lights = [];
+				}
+
+				if (ui.button("Hide Menu")) {
+					showMenu = false;
 				}
 
 				drawHitBoxes = ui.check(Id.handle(), "draw hitboxes");

@@ -1,5 +1,6 @@
 package refraction.core;
 
+import pgr.dconsole.DC;
 import hxblit.Camera;
 import kha.Framebuffer;
 import kha.input.KeyCode;
@@ -27,6 +28,9 @@ class Application {
 
 	private static var lastTime:Float;
 
+	private static var keyDownListeners:Array<KeyCode -> Void>;
+	private static var keyUpListeners:Array<KeyCode -> Void>;
+
 	public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
 			__callback:Void->Void):Void {
 		currentState = new State();
@@ -38,6 +42,9 @@ class Application {
 
 		mouseX = mouseY = 0;
 		mouseIsDown = false;
+		 
+		keyDownListeners = [];
+		keyUpListeners = [];
 
 		System.start({title: _title, width: _width, height: _height}, (window) -> {
 			Mouse
@@ -51,9 +58,12 @@ class Application {
 			System.notifyOnFrames(render);
 
 			lastTime = Scheduler.time();
-
 			__callback();
 		});
+	}
+
+	static public function resetKeyListeners() {
+		keyDownListeners = keyUpListeners = [];
 	}
 
 	static public function mouseCoords():Vector2 {
@@ -82,11 +92,17 @@ class Application {
 	static private function keyDown(key:KeyCode) {
 		// if (char != null)
 		keys.set(key, true);
+		for(method in keyDownListeners) {
+			method(key);
+		}
 	}
 
 	static private function keyUp(key:KeyCode) {
 		// if(char != null)
 		keys.set(key, false);
+		for(method in keyUpListeners) {
+			method(key);
+		}
 	}
 
 	public static function setState(_state:State) {
@@ -102,4 +118,14 @@ class Application {
 	public static function render(frame:Array<Framebuffer>) {
 		currentState.render(frame[0]);
 	}
+
+	public static function addKeyUpListener(method:KeyCode->Void){
+		keyUpListeners.push(method);
+	}
+
+	public static function addKeyDownListener(method:KeyCode->Void){
+		keyDownListeners.push(method);
+	}
 }
+
+

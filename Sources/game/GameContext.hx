@@ -39,6 +39,10 @@ class GameContext {
 		return myInstance;
 	}
 
+	public static function destroyInstance() {
+		myInstance = null;
+	}
+
 	public var camera:Camera;
 	public var currentMap:TileRender;
 	public var tilemapData:TilemapData;

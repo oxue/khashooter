@@ -9,7 +9,7 @@
         {
             "type": "electron",
             "request": "launch",
-            "name": "Kha: HTML5",
+            "name": "Kha: HTML5 Debug",
             "appDir": "${workspaceFolder}/build/debug-html5",
             "sourceMaps": true,
             "preLaunchTask": "Kha: Build for Debug HTML5"

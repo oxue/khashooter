@@ -13,9 +13,11 @@ class ResourceFormat {
 
 	public static var atlases:Map<String, TextureAtlas>;
 	public static var surfacesets:Map<String, SurfaceSet>;
+	public static var images:Map<String, Image>;
 
 	public static function init() {
 		atlases = new Map<String, TextureAtlas>();
+		images = new Map<String, Image>();
 	}
 
 	public static function getSurfaceSet(_name:String):SurfaceSet {

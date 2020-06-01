@@ -1,17 +1,9 @@
 package hxblit;
 
 import haxe.ds.Vector;
-import hxblit.TextureAtlas.ANode;
-import hxblit.TextureAtlas.ARect;
-import hxblit.TextureAtlas.FloatRect;
 import kha.Color;
 import kha.Image;
-import kha.Scaler.TargetRectangle;
 import kha.graphics2.Graphics;
-import kha.graphics4.Graphics2;
-import kha.graphics4.TextureFormat;
-import kha.graphics4.hxsl.Types.Vec;
-import kha.math.FastVector2;
 import kha.math.Vector2;
 import refraction.display.SurfaceSet;
 

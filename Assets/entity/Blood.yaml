@@ -7,14 +7,14 @@ components:
   args:
     factor: 0.7
 - type: SurfaceSet
-  resource: mimi
+  resource: gibs
 - type: AnimatedRender
   name: 
   args:
     animations:
     - name: blood
       frames:
-      - 1
+      - 0
     initialAnimation: blood
     surface: 
     frameTime: 2

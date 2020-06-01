@@ -41,9 +41,9 @@ class FireComponent extends Component {
 				.instance()
 				.configurations.flamethrower_grow_rate;
 
-		lightSource.light.v3Color.x += (1 - lightSource.light.v3Color.x) / 60;
-		lightSource.light.v3Color.y += (0.6 - lightSource.light.v3Color.y) / 60;
-		lightSource.light.v3Color.z -= 0.040;
+		lightSource.light.v3Color.x += (1*0.3 - lightSource.light.v3Color.x) / 60;
+		lightSource.light.v3Color.y += (0.6*0.3 - lightSource.light.v3Color.y) / 60;
+		lightSource.light.v3Color.z -= 0.12;
 
 		if (t > GameContext
 			.instance()
