@@ -35,6 +35,22 @@ class DialogueManager {
 		DebugLogger.info("DEBUG", {play:playing});
 	}
 
+	private function stopDialogue():Void {
+		currentDialogue = null;
+		currentPhrase = 0;
+		playing = false;
+	}
+
+	public function advanceDialogue():Void {
+		if (!playing) {
+			return;
+		}
+		currentPhrase += 1;
+		if (currentPhrase >= dialogues.get(currentDialogue).phrases.length) {
+			stopDialogue();
+		}
+	}
+
 	public function render(f:Framebuffer) {
 		if (!playing) {
 			return;
@@ -42,9 +58,7 @@ class DialogueManager {
 		var dialogue = dialogues.get(currentDialogue);
 		var phrase = dialogue.phrases[currentPhrase];
 		
-
-		DebugLogger.info("DEBUG", "drawing dialgoei");
-		f.g2.color = Color.Blue;
+		f.g2.color = 0xffaaaaaa;
 		f.g2.fillRect(280,280,168,168);
 		f.g2.color = Color.White;
 		f.g2.drawScaledImage(
@@ -52,11 +66,12 @@ class DialogueManager {
 			300,300,
 			128,128
 		);
-		f.g2.color = Color.Blue;
+		f.g2.color = 0xffaaaaaa;
 		f.g2.fillRect(448,280,600,168);
 		f.g2.color = Color.Black;
 		trace(phrase.phrase);
-		f.g2.drawString(phrase.phrase, 448, 300);
+		f.g2.font = Assets.fonts.monaco;
+		f.g2.drawString(phrase.phrase, 468, 300);
 		
 	}
 

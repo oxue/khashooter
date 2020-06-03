@@ -24,6 +24,7 @@ import systems.BeaconSys;
 import zui.Zui;
 import systems.ParticleSys;
 import ui.HealthBar;
+import game.dialogue.DialogueManager;
 
 /**
  * ...
@@ -82,6 +83,9 @@ class GameContext {
 	public var healthBar:HealthBar;
 
 	public var configurations:Dynamic;
+	public var dialogueManager:DialogueManager;
+
+	public var shouldDrawHitBoxes:Bool;
 
 	public function new(_camera:Camera, _ui:Zui) {
 		camera = _camera;
@@ -114,6 +118,7 @@ class GameContext {
 			Std.int(Application.height / Application.zoom));
 		tooltipSystem = new TooltipSys(ui);
 
+		dialogueManager = new DialogueManager("../../Assets/dialogue");
 		configurations = TemplateParser.parseConfig();
 	}
 

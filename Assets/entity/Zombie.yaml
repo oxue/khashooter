@@ -3,7 +3,8 @@ entity_name: Zombie
 base_entity: Actor
 components:
 - type: SurfaceSet
-  resource: shiro
+  resource: zombie
+  
 - type: AnimatedRender
   name: 
   args:

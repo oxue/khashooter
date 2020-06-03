@@ -26,7 +26,9 @@ class TemplateParser {
 	}
 
 	public static function parseConfig():StringMap<Dynamic> {
-		return Yaml.parse(Assets.blobs.config_yaml.toString(), Parser
+
+		var str = Assets.blobs.config_yaml.toString();
+		return Yaml.parse(str, Parser
 			.options()
 			.useObjects()
 		);

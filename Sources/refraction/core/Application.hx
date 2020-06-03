@@ -22,6 +22,11 @@ class Application {
 	public static var mouseX:Int;
 	public static var mouseY:Int;
 
+	public static var mouseJustDown:Bool;
+	public static var mouse2JustDown:Bool;
+	public static var mouseJustUp:Bool;
+	public static var mouse2JustUp:Bool;
+
 	public static var defaultCamera:Camera;
 
 	public static var keys:Map<Int, Bool>;
@@ -30,6 +35,9 @@ class Application {
 
 	private static var keyDownListeners:Array<KeyCode -> Void>;
 	private static var keyUpListeners:Array<KeyCode -> Void>;
+
+	private static var mouseWasDown:Bool;
+	private static var mouse2WasDown:Bool;
 
 	public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
 			__callback:Void->Void):Void {
@@ -41,7 +49,7 @@ class Application {
 		zoom = _zoom;
 
 		mouseX = mouseY = 0;
-		mouseIsDown = false;
+		mouseIsDown = mouseWasDown = mouse2IsDown = mouse2WasDown = false;
 		 
 		keyDownListeners = [];
 		keyUpListeners = [];
@@ -112,7 +120,17 @@ class Application {
 	}
 
 	private static function update() {
+		var m2 = mouse2IsDown;
+		var m = mouseIsDown;
 		currentState.update();
+		mouse2JustDown = m2 && !mouse2WasDown;
+		mouseJustDown = m && !mouseWasDown;
+
+		mouse2JustUp = !m2 && mouse2WasDown;
+		mouseJustUp = !m && mouseWasDown;
+
+		mouse2WasDown = m2;
+		mouseWasDown = m;
 	}
 
 	public static function render(frame:Array<Framebuffer>) {

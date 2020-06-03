@@ -1,5 +1,6 @@
 package game;
 
+import kha.input.KeyCode;
 import helpers.DebugLogger;
 import hxblit.KhaBlit;
 import hxblit.Camera;
@@ -26,6 +27,7 @@ import pgr.dconsole.DC;
 import game.Console;
 import game.ConsoleInput;
 import game.dialogue.DialogueManager;
+import game.debug.DebugMenu;
 
 /**
  * ...
@@ -40,10 +42,12 @@ class GameState extends refraction.core.State {
 
 	private var ui:Zui;
 	private var showMenu:Bool = false;
-	private var drawHitBoxes:Bool = false;
+	private var shouldDrawHitBoxes:Bool = false;
 	private var mouse2WasDown:Bool = false;
 	private var menuX:Int;
 	private var menuY:Int;
+
+	private var debugMenu:DebugMenu;
 
 	private var levelLoader:LevelLoader;
 
@@ -67,7 +71,6 @@ class GameState extends refraction.core.State {
 			Mouse
 				.get()
 				.notify(mouseDown, null, null, null);
-
 			ui = new Zui({font: Assets.fonts.monaco, khaWindowId: 0, scaleFactor: 1});
 
 			console = new Console((s)->{
@@ -89,8 +92,6 @@ class GameState extends refraction.core.State {
 
 			// Init Ent Factory
 			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
-			dialogueManager = new DialogueManager("../../Assets/dialogue");
-			dialogueManager.loadDialogue("dialogue1");
 
 			// Init Lighting
 			// var i = 0;
@@ -110,6 +111,18 @@ class GameState extends refraction.core.State {
 			DC.registerFunction(newState, "loadGameState", "reload the game state with the provided map");
 			DC.registerObject(this, "gameState");
 			// TODO: reset DC stuff
+
+			debugMenu = new DebugMenu();
+			Application.addKeyDownListener((code) -> {
+				if (KeyCode.F9 == code) {
+					gameContext.reloadConfigs();
+					DebugLogger.info("RESOURCE", "reloading configs");
+				}
+				if (KeyCode.F10 == code) {
+					entFactory.reloadEntityBlobs();
+					DebugLogger.info("RESOURCE", "reloading entities");
+				}
+			});
 
 			isRenderingReady = true;
 		});
@@ -248,10 +261,8 @@ class GameState extends refraction.core.State {
 		g.end();
 
 		// UI
-		if (!mouse2WasDown && Application.mouse2IsDown) {
-			showMenu = !showMenu;
-			menuX = Application.mouseX + 5;
-			menuY = Application.mouseY;
+		if (Application.mouse2JustDown) {
+			debugMenu.toggleMenu();
 		}
 
 		// ========== UI BEGIN ==========
@@ -264,12 +275,12 @@ class GameState extends refraction.core.State {
 		gameContext.statusText.render(frame.g2);
 	}
 
-	private function renderUI(f:Framebuffer, gc:GameContext, ui:Zui) {
-		renderHitBoxes(f, gc);
-		renderGameUI(f, gc, ui);
+	private function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
+		renderHitBoxes(f, context);
+		renderGameUI(f, context, ui);
 
 		ui.begin(f.g2);
-		renderDebugMenu(gc, ui);
+		debugMenu.render(context, ui);
 		console.draw();
 		ui.end();
 	}
@@ -277,105 +288,12 @@ class GameState extends refraction.core.State {
 	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
 		f.g2.begin(false);
 		gameContext.healthBar.render(f);
-		dialogueManager.render(f);
+		gameContext.dialogueManager.render(f);
 		f.g2.end();
 	}
 
-	private function renderDebugMenu(gc:GameContext, ui:Zui) {
-		var playerPos:Position = cast gc.playerEntity.getComponent(Position);
-		if (showMenu) {
-			var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-			var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
-
-			if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
-				if (ui.button("dia")) {
-					dialogueManager.playDialogue("dialogue1");
-				}
-
-				if (ui.button("Teleport Here")) {
-					showMenu = false;
-					playerPos.x = worldMenuX;
-					playerPos.y = worldMenuY;
-					trace(gameContext.beaconSystem.getOne("player"));
-				}
-
-				if (ui.button("Spawn Hell Minion")) {
-					showMenu = false;
-					entFactory
-						.autoBuild("Zombie")
-						.getComponent(Position)
-						.setPosition(worldMenuX, worldMenuY);
-				}
-
-				if (ui.button("Reload Entity Blobs")) {
-					showMenu = false;
-					EntFactory
-						.instance()
-						.reloadEntityBlobs();
-				}
-
-				if (ui.button("Reload Config Blobs")) {
-					showMenu = false;
-					gameContext.reloadConfigs();
-				}
-
-				if (ui.button("Spawn Several Gyo")) {
-					showMenu = false;
-					for (i in 0...5) {
-						entFactory
-							.autoBuild("Gyo")
-							.getComponent(Position)
-							.setPosition(worldMenuX + Std.int(Math.random() * 5),
-								worldMenuY + Std.int(Math.random() * 5));
-					}
-				}
-
-				if (ui.button("Spawn light Source")) {
-					showMenu = false;
-					gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY, [
-						Color.Cyan,
-						Color.Orange,
-						Color.Pink,
-						Color.White,
-						Color.Green,
-						Color.Yellow,
-						Color.Red
-					][Std.int(Math.random() * 7)].value & 0xFFFFFF));
-				}
-
-				if (ui.button("Blood Particles")) {
-					showMenu = false;
-					for (i in 0...10) {
-						entFactory
-							.autoBuild("Blood")
-							.getComponent(Position)
-							.setPosition(worldMenuX, worldMenuY)
-							.getEntity()
-							.getComponent(Particle)
-							.randomDirection(Math.random() * 10 + 5);
-					}
-				}
-
-				gameContext.lightingSystem.setAmbientLevel(ui.slider(Id.handle({value: gameContext.lightingSystem.getAmbientLevel()}),
-					"Ambient Level", 0, 1,
-					false, 100, true));
-
-				if (ui.button("Clear Lights")) {
-					showMenu = false;
-					gameContext.lightingSystem.lights = [];
-				}
-
-				if (ui.button("Hide Menu")) {
-					showMenu = false;
-				}
-
-				drawHitBoxes = ui.check(Id.handle(), "draw hitboxes");
-			}
-		}
-	}
-
 	private function renderHitBoxes(f:Framebuffer, gc:GameContext) {
-		if (drawHitBoxes) {
+		if (shouldDrawHitBoxes) {
 			f.g2.begin(false);
 			for (tc in gc.collisionSystem.components) {
 				tc.drawHitbox(gc.camera, f.g2);
