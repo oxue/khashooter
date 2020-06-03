@@ -18,10 +18,10 @@ class Dimensions extends Component {
 	}
 
 	/**
-	Auto_params
-	@param w     width
-	@param h     height
-	*/
+		Auto_params
+		@param w     width
+		@param h     height
+	 */
 	override public function autoParams(_args:Dynamic):Void {
 		width = _args.w;
 		height = _args.h;

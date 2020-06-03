@@ -8,15 +8,16 @@ import helpers.DebugLogger;
 import pgr.dconsole.DConsole;
 import pgr.dconsole.ui.DCInterface;
 
-class Console implements DCInterface
-{
+class Console implements DCInterface {
 	public var console:DConsole;
 
 	private var logger:String->Void;
 
 	private var consoleText:Zui->Void;
 	private var consoleTextVisible:Bool = true;
+
 	public var consoleTextHandle:Handle;
+
 	private var consoleWindowHandle:Handle;
 
 	private var promptText:Zui->Void;
@@ -44,22 +45,22 @@ class Console implements DCInterface
 	function createConsoleDisplay() {
 		consoleTextHandle = Id.handle();
 		consoleWindowHandle = Id.handle();
-		this.consoleText = (ui)->{
+		this.consoleText = (ui) -> {
 			if (!consoleTextVisible) {
 				return;
 			}
-			if (ui.window(consoleWindowHandle, 0, 0, 600,600, false)) {
+			if (ui.window(consoleWindowHandle, 0, 0, 600, 600, false)) {
 				Ext.textArea(ui, consoleTextHandle);
 			}
 		}
 
 		promptHandle = Id.handle();
 		promptWindowHandle = Id.handle();
-		this.promptText = (ui)->{
+		this.promptText = (ui) -> {
 			if (!promptTextVisible) {
 				return;
 			}
-			if (ui.window(promptWindowHandle, 0 ,600, 600,100, false)) {
+			if (ui.window(promptWindowHandle, 0, 600, 600, 100, false)) {
 				ui.textInput(promptHandle);
 			}
 		}
@@ -83,7 +84,9 @@ class Console implements DCInterface
 	public function log(data:Dynamic, color:Int) {
 		var strData = Std.string(data);
 		consoleTextHandle.text += (strData + '\n');
-		var textHeight = consoleTextHandle.text.split('\n').length * ui.ELEMENT_H();
+		var textHeight = consoleTextHandle.text
+			.split('\n')
+			.length * ui.ELEMENT_H();
 		if (textHeight >= 600) {
 			consoleWindowHandle.scrollOffset = 600 - textHeight;
 		}
@@ -93,44 +96,35 @@ class Console implements DCInterface
 			var l = strData.length;
 		} else {
 			consoleTextHandle.color = Color.White;
-		}	
-
+		}
 	}
 
-	public function setPromptFont(font:String = null, embed:Bool = false, size:Int = 16, bold:Bool = false, ?italic:Bool = false, underline:Bool = false ){
+	public function setPromptFont(font:String = null, embed:Bool = false, size:Int = 16, bold:Bool = false,
+		?italic:Bool = false, underline:Bool = false) {}
 
-	}
-	
-	public function setProfilerFont(font:String = null, embed:Bool = false, size:Int = 14, bold:Bool = false, ?italic:Bool = false, underline:Bool = false ){
-	}
-	
-	public function setMonitorFont(font:String = null, embed:Bool = false, size:Int = 14, bold:Bool = false, ?italic:Bool = false, underline:Bool = false ){
-	}
+	public function setProfilerFont(font:String = null, embed:Bool = false, size:Int = 14,
+		bold:Bool = false, ?italic:Bool = false, underline:Bool = false) {}
 
-	public function writeMonitorOutput(output:Array<String>) {
-	}
-	
-	public function showMonitor() {
-	}
-	public function hideMonitor() {
-	}
+	public function setMonitorFont(font:String = null, embed:Bool = false, size:Int = 14, bold:Bool = false,
+		?italic:Bool = false, underline:Bool = false) {}
 
-	public function writeProfilerOutput(output:String) {
-	}
-	
-	public function showProfiler() {
-	}
-	
-	public function hideProfiler() {
-	}
+	public function writeMonitorOutput(output:Array<String>) {}
 
-	public function moveCarretToEnd() {
-		
-	}
+	public function showMonitor() {}
 
-	public function scrollConsoleUp(){
+	public function hideMonitor() {}
+
+	public function writeProfilerOutput(output:String) {}
+
+	public function showProfiler() {}
+
+	public function hideProfiler() {}
+
+	public function moveCarretToEnd() {}
+
+	public function scrollConsoleUp() {
 		consoleTextHandle.scrollOffset += ui.ELEMENT_H();
-		if (consoleTextHandle.scrollOffset > 0){
+		if (consoleTextHandle.scrollOffset > 0) {
 			consoleTextHandle.scrollOffset = 0;
 		}
 	}
@@ -140,18 +134,18 @@ class Console implements DCInterface
 	}
 
 	function scrollToBottom() {
-		var textHeight = consoleTextHandle.text.split('\n').length * ui.ELEMENT_H();
+		var textHeight = consoleTextHandle.text
+			.split('\n')
+			.length * ui.ELEMENT_H();
 		if (textHeight >= 600) {
 			consoleWindowHandle.scrollOffset = 600 - textHeight;
 		}
 	}
 
-	public function toFront() {
+	public function toFront() {}
 
-	}
-
-	public function setConsoleFont(font:String = null, embed:Bool = false, size:Int = 14, bold:Bool = false, italic:Bool = false, underline:Bool = false ){
-	}
+	public function setConsoleFont(font:String = null, embed:Bool = false, size:Int = 14, bold:Bool = false,
+		italic:Bool = false, underline:Bool = false) {}
 
 	public function inputRemoveLastChar() {
 		if (promptHandle.text.length > 0) {
@@ -164,32 +158,28 @@ class Console implements DCInterface
 		redraw();
 		return promptHandle.text;
 	}
-	
-	
+
 	public function setInputTxt(string:String) {
 		promptHandle.text = string;
 		redraw();
 	}
-	
-	
+
 	public function getConsoleText():String {
 		return consoleTextHandle.text;
 	}
-	
+
 	public function getMonitorText() {
 		return {
-			col1:"", 
-			col2:"", 
+			col1: "",
+			col2: "",
 		}
 	}
-	
-	
+
 	public function clearInput() {
 		promptHandle.text = "";
 		redraw();
 	}
-	
-	
+
 	public function clearConsole() {
 		consoleTextHandle.text = "";
 		redraw();

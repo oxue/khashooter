@@ -155,11 +155,11 @@ class EntFactory {
 	public function createFireball(_position:Vector2, direction:Vector2):Entity {
 		var e = new Entity();
 		var e:Entity = new Entity();
-		var offsetLight = Std.int(gameContext.configurations.flamethrower_fireball_size / 2);
+		var offsetLight = Std.int(gameContext.config.flamethrower_fireball_size / 2);
 
 		e.addComponent(new Position(_position.x, _position.y, 10, 10, Utils.direction2Degrees(direction)));
 		var lightSource = new LightSourceComponent(gameContext.lightingSystem, 0x5500ff,
-			gameContext.configurations.flamethrower_starting_size, offsetLight, offsetLight);
+			gameContext.config.flamethrower_starting_size, offsetLight, offsetLight);
 		e.addComponent(lightSource);
 		gameContext.lightSourceSystem.addComponent(lightSource);
 
@@ -169,16 +169,14 @@ class EntFactory {
 		velocity.setVelX(direction.x);
 		velocity.setVelY(direction.y);
 
-		var dimensions = new Dimensions(
-			gameContext.configurations.flamethrower_fireball_size,
-			gameContext.configurations.flamethrower_fireball_size
-		);
+		var dimensions = new Dimensions(gameContext.config.flamethrower_fireball_size,
+			gameContext.config.flamethrower_fireball_size);
 
 		e.addComponent(dimensions);
 
 		var damping = gameContext.dampingSystem.procure(e, Damping);
-		DebugLogger.info("DAMPING", gameContext.configurations);
-		damping.autoParams({factor: gameContext.configurations.flamethrower_damping});
+		DebugLogger.info("DAMPING", gameContext.config);
+		damping.autoParams({factor: gameContext.config.flamethrower_damping});
 		gameContext.environmentSystem.procure(e, FireComponent);
 		gameContext.collisionSystem
 			.procure(e, TileCollision)

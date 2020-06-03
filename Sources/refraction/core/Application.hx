@@ -33,8 +33,8 @@ class Application {
 
 	private static var lastTime:Float;
 
-	private static var keyDownListeners:Array<KeyCode -> Void>;
-	private static var keyUpListeners:Array<KeyCode -> Void>;
+	private static var keyDownListeners:Array<KeyCode->Void>;
+	private static var keyUpListeners:Array<KeyCode->Void>;
 
 	private static var mouseWasDown:Bool;
 	private static var mouse2WasDown:Bool;
@@ -50,7 +50,7 @@ class Application {
 
 		mouseX = mouseY = 0;
 		mouseIsDown = mouseWasDown = mouse2IsDown = mouse2WasDown = false;
-		 
+
 		keyDownListeners = [];
 		keyUpListeners = [];
 
@@ -100,7 +100,7 @@ class Application {
 	static private function keyDown(key:KeyCode) {
 		// if (char != null)
 		keys.set(key, true);
-		for(method in keyDownListeners) {
+		for (method in keyDownListeners) {
 			method(key);
 		}
 	}
@@ -108,7 +108,7 @@ class Application {
 	static private function keyUp(key:KeyCode) {
 		// if(char != null)
 		keys.set(key, false);
-		for(method in keyUpListeners) {
+		for (method in keyUpListeners) {
 			method(key);
 		}
 	}
@@ -137,13 +137,11 @@ class Application {
 		currentState.render(frame[0]);
 	}
 
-	public static function addKeyUpListener(method:KeyCode->Void){
+	public static function addKeyUpListener(method:KeyCode->Void) {
 		keyUpListeners.push(method);
 	}
 
-	public static function addKeyDownListener(method:KeyCode->Void){
+	public static function addKeyDownListener(method:KeyCode->Void) {
 		keyDownListeners.push(method);
 	}
 }
-
-

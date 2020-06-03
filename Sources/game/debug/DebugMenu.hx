@@ -10,7 +10,6 @@ import refraction.generic.Position;
 import zui.Zui;
 
 class DebugMenu {
-
 	private var showMenu:Bool;
 	private var menuX:Int;
 	private var menuY:Int;
@@ -41,7 +40,7 @@ class DebugMenu {
 				context.dialogueManager.playDialogue("dialogue1");
 				showMenu = false;
 			}
-			
+
 			if (ui.button("Advance Dialogue")) {
 				context.dialogueManager.advanceDialogue();
 				showMenu = false;
@@ -56,7 +55,8 @@ class DebugMenu {
 
 			if (ui.button("Spawn Hell Minion")) {
 				showMenu = false;
-				EntFactory.instance()
+				EntFactory
+					.instance()
 					.autoBuild("Zombie")
 					.getComponent(Position)
 					.setPosition(worldMenuX, worldMenuY);
@@ -102,7 +102,8 @@ class DebugMenu {
 			if (ui.button("Blood Particles")) {
 				showMenu = false;
 				for (i in 0...10) {
-					EntFactory.instance()
+					EntFactory
+						.instance()
 						.autoBuild("Blood")
 						.getComponent(Position)
 						.setPosition(worldMenuX, worldMenuY)
@@ -113,8 +114,8 @@ class DebugMenu {
 			}
 
 			context.lightingSystem.setAmbientLevel(ui.slider(Id.handle({value: context.lightingSystem.getAmbientLevel()}),
-				"Ambient Level", 0, 1,
-				false, 100, true));
+				"Ambient Level", 0, 1, false,
+				100, true));
 
 			if (ui.button("Clear Lights")) {
 				showMenu = false;

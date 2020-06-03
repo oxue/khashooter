@@ -1,5 +1,6 @@
 package game;
 
+import pgr.dconsole.DC;
 import helpers.DebugLogger;
 import refraction.core.TemplateParser;
 import hxblit.Camera;
@@ -25,6 +26,7 @@ import zui.Zui;
 import systems.ParticleSys;
 import ui.HealthBar;
 import game.dialogue.DialogueManager;
+import game.debug.DebugMenu;
 
 /**
  * ...
@@ -82,12 +84,16 @@ class GameContext {
 	public var ui:Zui;
 	public var healthBar:HealthBar;
 
-	public var configurations:Dynamic;
+	public var config:Dynamic;
 	public var dialogueManager:DialogueManager;
+	public var debugMenu:DebugMenu;
+	public var console:Console;
 
 	public var shouldDrawHitBoxes:Bool;
 
 	public function new(_camera:Camera, _ui:Zui) {
+		config = TemplateParser.parseConfig();
+
 		camera = _camera;
 		currentMap = null;
 		ui = _ui;
@@ -119,13 +125,31 @@ class GameContext {
 		tooltipSystem = new TooltipSys(ui);
 
 		dialogueManager = new DialogueManager("../../Assets/dialogue");
-		configurations = TemplateParser.parseConfig();
+		debugMenu = new DebugMenu();
+		initConsole();
+	}
+
+	private function initConsole() {
+		console = new Console((s) -> {
+			DebugLogger.info("CONSOLE", s);
+		}, ui);
+
+		DC.init(300, "DOWN", null, new ConsoleInput(), console);
+
+		DC.registerObject(config, "config");
+		DC.registerObject(Application, "app");
+		DC.registerObject(this, "context");
+
+		DC.log("- Objects Available");
+		DC.log("    - context:GameContext");
+		DC.log("    - app:Application");
+		DC.log("    - config:Application");
 	}
 
 	public function reloadConfigs():Void {
-		TemplateParser.reloadConfigurations("../../Assets", (config) -> {
-			DebugLogger.info("config", config);
-			this.configurations = config;
+		TemplateParser.reloadConfigurations("../../Assets", (c) -> {
+			DebugLogger.info("config", c);
+			config = c;
 		});
 	}
 }

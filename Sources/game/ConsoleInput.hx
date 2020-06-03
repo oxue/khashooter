@@ -19,17 +19,11 @@ class ConsoleInput implements DCInput {
 		enable();
 	}
 
-	public function enable() {
+	public function enable() {}
 
-	}
+	public function disable() {}
 
-	public function disable() {
-
-	}
-
-	public function onKeyUp(key:KeyCode) {
-
-	}
+	public function onKeyUp(key:KeyCode) {}
 
 	public function onKeyDown(key:KeyCode) {
 		if (Std.int(key) == console.consoleKey.keycode) {
@@ -40,8 +34,7 @@ class ConsoleInput implements DCInput {
 				console.showConsole();
 			}
 			return;
-		}
-		else if(!console.visible) {
+		} else if (!console.visible) {
 			return;
 		}
 

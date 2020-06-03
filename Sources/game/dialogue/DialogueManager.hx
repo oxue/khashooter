@@ -7,12 +7,12 @@ import helpers.DebugLogger;
 import yaml.Parser;
 import yaml.Yaml;
 import kha.Assets;
+
 /**
  * assuming this class is correct
  * @author qwerber
  */
 class DialogueManager {
-
 	private var rootDir:String;
 	private var dialogues:Map<String, Dialogue>;
 	private var currentDialogue:String;
@@ -31,8 +31,8 @@ class DialogueManager {
 		currentDialogue = dialogueName;
 		currentPhrase = 0;
 		playing = true;
-		DebugLogger.info("DEBUG", {dia:currentDialogue});
-		DebugLogger.info("DEBUG", {play:playing});
+		DebugLogger.info("DEBUG", {dia: currentDialogue});
+		DebugLogger.info("DEBUG", {play: playing});
 	}
 
 	private function stopDialogue():Void {
@@ -46,7 +46,10 @@ class DialogueManager {
 			return;
 		}
 		currentPhrase += 1;
-		if (currentPhrase >= dialogues.get(currentDialogue).phrases.length) {
+		if (currentPhrase >= dialogues
+			.get(currentDialogue)
+			.phrases.length
+		) {
 			stopDialogue();
 		}
 	}
@@ -55,36 +58,34 @@ class DialogueManager {
 		if (!playing) {
 			return;
 		}
+		if (!dialogues.exists(currentDialogue)) {
+			return;
+		}
 		var dialogue = dialogues.get(currentDialogue);
+
 		var phrase = dialogue.phrases[currentPhrase];
-		
+
 		f.g2.color = 0xffaaaaaa;
-		f.g2.fillRect(280,280,168,168);
+		f.g2.fillRect(280, 280, 168, 168);
 		f.g2.color = Color.White;
-		f.g2.drawScaledImage(
-			ResourceFormat.images.get(phrase.portrait),
-			300,300,
-			128,128
-		);
+		f.g2.drawScaledImage(ResourceFormat.images.get(phrase.portrait), 300, 300, 128, 128);
 		f.g2.color = 0xffaaaaaa;
-		f.g2.fillRect(448,280,600,168);
+		f.g2.fillRect(448, 280, 600, 168);
 		f.g2.color = Color.Black;
 		trace(phrase.phrase);
 		f.g2.font = Assets.fonts.monaco;
 		f.g2.drawString(phrase.phrase, 468, 300);
-		
 	}
 
 	public function loadDialogue(dialogueName:String):Void {
 		Assets.loadBlobFromPath('${rootDir}/${dialogueName}.yaml', (blob) -> {
-			dialogues.set(
-				dialogueName,
-				new Dialogue(Yaml.parse(blob.toString(), Parser.options().useObjects()))
-			);
+			dialogues.set(dialogueName,
+				new Dialogue(Yaml.parse(blob.toString(), Parser
+					.options()
+					.useObjects()
+				)));
 
 			DebugLogger.info("DEBUG", dialogues);
-
 		});
-
 	}
 }

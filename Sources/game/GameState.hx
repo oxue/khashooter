@@ -9,13 +9,11 @@ import kha.Framebuffer;
 import refraction.core.Application;
 import refraction.core.State;
 import refraction.core.Entity;
-import refraction.ds2d.LightSource;
 import refraction.display.ResourceFormat;
 import refraction.generic.Position;
 import kha.math.Vector2;
 import components.Particle;
 import helpers.ZombieResourceLoader;
-import kha.Color;
 import kha.input.Mouse;
 import zui.*;
 import helpers.LevelLoader;
@@ -23,11 +21,6 @@ import game.GameContext;
 import game.EntFactory;
 import game.Inventory;
 import game.ShooterFactory;
-import pgr.dconsole.DC;
-import game.Console;
-import game.ConsoleInput;
-import game.dialogue.DialogueManager;
-import game.debug.DebugMenu;
 
 /**
  * ...
@@ -38,20 +31,13 @@ class GameState extends refraction.core.State {
 
 	private var gameContext:GameContext;
 	private var entFactory:EntFactory;
-	private var dialogueManager:DialogueManager;
 
 	private var ui:Zui;
 	private var showMenu:Bool = false;
 	private var shouldDrawHitBoxes:Bool = false;
-	private var mouse2WasDown:Bool = false;
-	private var menuX:Int;
-	private var menuY:Int;
-
-	private var debugMenu:DebugMenu;
 
 	private var levelLoader:LevelLoader;
 
-	private var console:Console;
 	private var defaultMap:String;
 
 	public function new(defaultMap:String) {
@@ -72,13 +58,6 @@ class GameState extends refraction.core.State {
 				.get()
 				.notify(mouseDown, null, null, null);
 			ui = new Zui({font: Assets.fonts.monaco, khaWindowId: 0, scaleFactor: 1});
-
-			console = new Console((s)->{
-				DebugLogger.info("CONSOLE", s);
-			}, ui);
-
-			DC.init(300,"DOWN",null,new ConsoleInput(),console);
-			DC.log("This text will be logged.");
 
 			var gameCamera = new Camera(Std.int(Application.width / Application.zoom),
 				Std.int(Application.height / Application.zoom));
@@ -105,14 +84,8 @@ class GameState extends refraction.core.State {
 			// Init collision behaviours
 			defineBehaviours();
 
-			DC.registerObject(gameContext.configurations, "config");
-			DC.registerObject(levelLoader, "loader");
-			DC.registerObject(Application, "app");
-			DC.registerFunction(newState, "loadGameState", "reload the game state with the provided map");
-			DC.registerObject(this, "gameState");
 			// TODO: reset DC stuff
 
-			debugMenu = new DebugMenu();
 			Application.addKeyDownListener((code) -> {
 				if (KeyCode.F9 == code) {
 					gameContext.reloadConfigs();
@@ -215,8 +188,12 @@ class GameState extends refraction.core.State {
 
 		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 
-		gameContext.camera.x += Std.int((playerPos.x + gameContext.configurations.camera_offset.x - gameContext.camera.x) / 8);
-		gameContext.camera.y += Std.int((playerPos.y + gameContext.configurations.camera_offset.y - gameContext.camera.y) / 8);
+		gameContext.camera.x += Std.int((playerPos.x
+			+ gameContext.config.camera_offset.x
+			- gameContext.camera.x) / 8);
+		gameContext.camera.y += Std.int((playerPos.y
+			+ gameContext.config.camera_offset.y
+			- gameContext.camera.y) / 8);
 
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
@@ -262,7 +239,7 @@ class GameState extends refraction.core.State {
 
 		// UI
 		if (Application.mouse2JustDown) {
-			debugMenu.toggleMenu();
+			gameContext.debugMenu.toggleMenu();
 		}
 
 		// ========== UI BEGIN ==========
@@ -271,39 +248,39 @@ class GameState extends refraction.core.State {
 		frame.g2.begin(false);
 		gameContext.tooltipSystem.draw(frame.g2);
 		frame.g2.end();
-		mouse2WasDown = Application.mouse2IsDown;
 		gameContext.statusText.render(frame.g2);
 	}
 
 	private function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
+		// === Custom UI ===
+		f.g2.begin(false);
 		renderHitBoxes(f, context);
 		renderGameUI(f, context, ui);
+		f.g2.end();
 
+		// === ZUI ===
 		ui.begin(f.g2);
-		debugMenu.render(context, ui);
-		console.draw();
+		gameContext.debugMenu.render(context, ui);
+		gameContext.console.draw();
 		ui.end();
 	}
 
 	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
-		f.g2.begin(false);
 		gameContext.healthBar.render(f);
 		gameContext.dialogueManager.render(f);
-		f.g2.end();
 	}
 
 	private function renderHitBoxes(f:Framebuffer, gc:GameContext) {
-		if (shouldDrawHitBoxes) {
-			f.g2.begin(false);
-			for (tc in gc.collisionSystem.components) {
-				tc.drawHitbox(gc.camera, f.g2);
-			}
-			for (p in gc.hitCheckSystem.components) {
-				p.entity
-					.getComponent(Position)
-					.drawPoint(gc.camera, f.g2);
-			}
-			f.g2.end();
+		if (!shouldDrawHitBoxes) {
+			return;
+		}
+		for (tc in gc.collisionSystem.components) {
+			tc.drawHitbox(gc.camera, f.g2);
+		}
+		for (p in gc.hitCheckSystem.components) {
+			p.entity
+				.getComponent(Position)
+				.drawPoint(gc.camera, f.g2);
 		}
 	}
 }

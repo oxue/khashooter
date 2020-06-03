@@ -24,7 +24,7 @@ class FireComponent extends Component {
 		lightSource = entity.getComponent(LightSourceComponent);
 		timer = GameContext
 			.instance()
-			.configurations.flamethrower_total_particle_life;
+			.config.flamethrower_total_particle_life;
 	}
 
 	override public function update():Void {
@@ -35,23 +35,23 @@ class FireComponent extends Component {
 		}
 		if (t < GameContext
 			.instance()
-			.configurations.flamethrower_grow_util
+			.config.flamethrower_grow_util
 		)
 			lightSource.light.radius += GameContext
 				.instance()
-				.configurations.flamethrower_grow_rate;
+				.config.flamethrower_grow_rate;
 
-		lightSource.light.v3Color.x += (1*0.3 - lightSource.light.v3Color.x) / 60;
-		lightSource.light.v3Color.y += (0.6*0.3 - lightSource.light.v3Color.y) / 60;
+		lightSource.light.v3Color.x += (1 * 0.3 - lightSource.light.v3Color.x) / 60;
+		lightSource.light.v3Color.y += (0.6 * 0.3 - lightSource.light.v3Color.y) / 60;
 		lightSource.light.v3Color.z -= 0.12;
 
 		if (t > GameContext
 			.instance()
-			.configurations.flamethrower_shrink_after
+			.config.flamethrower_shrink_after
 		) {
 			lightSource.light.radius -= GameContext
 				.instance()
-				.configurations.flamethrower_shrink_rate;
+				.config.flamethrower_shrink_rate;
 		}
 	}
 }
