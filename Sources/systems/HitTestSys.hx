@@ -2,7 +2,6 @@ package systems;
 
 import refraction.core.Sys;
 import refraction.core.Entity;
-import refraction.utils.Pair;
 import refraction.core.Utils;
 import components.HitCircle;
 import haxe.ds.StringMap;

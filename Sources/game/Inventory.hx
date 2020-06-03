@@ -1,10 +1,12 @@
 package game;
 
+import helpers.DebugLogger;
+import entbuilders.ItemBuilder.Items;
 import refraction.core.Component;
-import refraction.core.Application;
 import refraction.generic.Position;
 import kha.math.Vector2;
 import refraction.core.Utils;
+import game.WeaponFactory;
 
 /**
  * ...
@@ -24,8 +26,9 @@ class Inventory extends Component {
 
 	override public function update():Void {}
 
-	public function pickup(_itemId:Int):Void {
-		currentWeapon = new Weapon();
+	public function pickup(_itemId:Items):Void {
+		currentWeapon = WeaponFactory.create(_itemId);
+		DebugLogger.info("DEBUB", "weapon picked up " + Std.string(currentWeapon.type));
 		currentWeapon.muzzleOffset = new Vector2(14, 7);
 	}
 

@@ -99,7 +99,7 @@ class GameState extends refraction.core.State {
 					entFactory.reloadEntityBlobs();
 					DebugLogger.info("RESOURCE", "reloading entities");
 				}
-				if(KeyCode.F11 == code) {
+				if (KeyCode.F11 == code) {
 					mapEditor.toggle();
 				}
 			});
@@ -122,8 +122,8 @@ class GameState extends refraction.core.State {
 		gameContext.hitTestSystem.onHit(Consts.NEUTRAL_HP, Consts.FIRE, (n, f) -> {
 			trace("HIT");
 			n.notify("damage", {
-				amount: -2, 
-				type:Consts.FIRE
+				amount: -2,
+				type: Consts.FIRE
 			});
 		});
 		gameContext.hitTestSystem.onHit(Consts.ZOMBIE, Consts.PLAYER_BOLT, function(z:Entity, b:Entity) {

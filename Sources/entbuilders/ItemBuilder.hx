@@ -20,8 +20,8 @@ class ItemBuilder {
 
 	private var gameContext:GameContext;
 
-	public function create(_x = 0, _y = 0, _itemId:Int):Entity {
-		var e:Entity = makebaseItem(new Entity(), _x = 0, _y = 0);
+	public function createHuntersCrossbow(_x = 0, _y = 0):Entity {
+		var e:Entity = makebaseItem(_x, _y);
 
 		var animatedRender = e.getComponent(AnimatedRender);
 		animatedRender.animations.set(CROSSBOW_DEFAULT_ANIMATION, [0]);
@@ -34,10 +34,9 @@ class ItemBuilder {
 		gameContext.tooltipSystem.addComponent(tt);
 
 		var ic = new Interactable(gameContext.camera, function(e:Entity) {
-			trace(_itemId);
 			gameContext.playerEntity
 				.getComponent(Inventory)
-				.pickup(_itemId);
+				.pickup(Items.HuntersCrossbow);
 			e.remove();
 		});
 		gameContext.interactSystem.addComponent(ic);
@@ -46,10 +45,10 @@ class ItemBuilder {
 		return e;
 	}
 
-	public function create2(_x = 0, _y = 0, _itemId:Int):Entity {
-		var e = makebaseItem(new Entity());
+	public function createFlameThrower(_x = 0, _y = 0):Entity {
+		var e = makebaseItem(_x, _y);
 		var animatedRender = e.getComponent(AnimatedRender);
-		animatedRender.animations.set(FLAMETHROWER_DEFAULT_ANIMATION, [1]);
+		animatedRender.animations.set(FLAMETHROWER_DEFAULT_ANIMATION, [5]);
 		animatedRender.setCurrentAnimation(FLAMETHROWER_DEFAULT_ANIMATION);
 		animatedRender.frame = 0;
 		gameContext.renderSystem.addComponent(animatedRender);
@@ -59,10 +58,9 @@ class ItemBuilder {
 		gameContext.tooltipSystem.addComponent(tt);
 
 		var ic = new Interactable(gameContext.camera, function(e:Entity) {
-			trace(_itemId);
 			gameContext.playerEntity
 				.getComponent(Inventory)
-				.pickup(_itemId);
+				.pickup(Items.Flamethrower);
 			e.remove();
 		});
 		gameContext.interactSystem.addComponent(ic);
@@ -71,7 +69,8 @@ class ItemBuilder {
 		return e;
 	}
 
-	public function makebaseItem(e:Entity, _x = 0, _y = 0):Entity {
+	public function makebaseItem(_x = 0, _y = 0):Entity {
+		var e:Entity = new Entity();
 		e.addComponent(new Position(_x, _y));
 		e.addComponent(new Dimensions(32, 32));
 		e.addComponent(ResourceFormat.getSurfaceSet("items"));
@@ -84,4 +83,9 @@ class ItemBuilder {
 	public function new(_gameContext:GameContext) {
 		gameContext = _gameContext;
 	}
+}
+
+enum Items {
+	HuntersCrossbow;
+	Flamethrower;
 }

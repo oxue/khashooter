@@ -9,6 +9,8 @@ import refraction.ds2d.LightSource;
 import refraction.tile.TilemapUtils;
 import game.GameContext;
 import game.EntFactory;
+import entbuilders.ItemBuilder;
+import entbuilders.ItemBuilder.Items;
 
 class LevelLoader {
 	private var levelData:Dynamic;
@@ -29,7 +31,10 @@ class LevelLoader {
 
 		// hardcode
 		trace("create");
-		ef.createItem(levelData.start.x, levelData.start.y);
+
+		ef.createItem(levelData.start.x, levelData.start.y, Items.HuntersCrossbow);
+
+		ef.createItem(levelData.start.x + 30, levelData.start.y, Items.Flamethrower);
 		ef.createNPC(levelData.start.x, levelData.start.y, "mimi");
 		// ef.createZombie(levelData.start.x, levelData.start.y);
 	}

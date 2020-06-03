@@ -12,18 +12,17 @@ import refraction.tile.TileRender;
 import refraction.tile.TileCollision;
 import refraction.tile.TilemapData;
 import entbuilders.ItemBuilder;
+import entbuilders.ItemBuilder.Items;
 import components.Interactable;
 import components.Projectile;
 import components.HitCircle;
 import refraction.core.Application;
-import refraction.systems.SpacingSys.Spacing;
 import haxe.ds.StringMap;
 import refraction.core.Component;
 import refraction.core.ComponentFactory;
 import refraction.core.TemplateParser;
 import refraction.display.ResourceFormat;
 import game.GameContext;
-import game.EntFactory;
 import game.Consts;
 
 /**
@@ -70,8 +69,16 @@ class EntFactory {
 			cast Application.mouseY / 2 + gameContext.camera.y);
 	}
 
-	public function createItem(_x, _y):Entity {
-		return itemBuilder.create2(_x, _y, 0);
+	public function createItem(_x, _y, itemType:Items):Entity {
+		if (itemType == Items.Flamethrower) {
+			return itemBuilder.createFlameThrower(_x, _y);
+		}
+
+		if (itemType == Items.HuntersCrossbow) {
+			return itemBuilder.createHuntersCrossbow(_x, _y);
+		}
+
+		return null;
 	}
 
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component {

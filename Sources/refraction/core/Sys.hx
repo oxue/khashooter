@@ -19,6 +19,7 @@ class NullSystem<T:Component> {
  * ...
  * @author worldedit
  */
+@:generic
 class Sys<T:Component> {
 	public var components:Array<T>;
 

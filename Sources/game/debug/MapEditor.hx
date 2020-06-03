@@ -8,8 +8,7 @@ import kha.Assets;
 import zui.Zui;
 import kha.Framebuffer;
 
-class MapEditor{
-
+class MapEditor {
 	private var show:Bool;
 
 	public function new() {
@@ -47,8 +46,8 @@ class MapEditor{
 		f.g2.drawString(s, x * 2, y * 2);
 	}
 
-	private function drawLine2(f:Framebuffer, x:Float, y:Float, z:Float, w:Float, s:Float=1.0) {
-		f.g2.drawLine(x*2, y*2, z*2, w*2, s);
+	private function drawLine2(f:Framebuffer, x:Float, y:Float, z:Float, w:Float, s:Float = 1.0) {
+		f.g2.drawLine(x * 2, y * 2, z * 2, w * 2, s);
 	}
 
 	private function renderGrid(context:GameContext, f:Framebuffer) {
@@ -66,33 +65,15 @@ class MapEditor{
 		var endIndY:Int = cast Math.floor((camera.y + camera.h) / tilesize) + 1;
 
 		for (i in startIndX...endIndX) {
-			drawString2(
-				f,
-				Std.string(i), 
-				i * tilesize - cameraX, 
-				Math.max(0.0, -cameraY) - 20);
-			
-			drawLine2(
-				f,
-				i * tilesize - cameraX,
-				Math.max(0.0, -cameraY),
-				i * tilesize - cameraX,
-				camera.h);
+			drawString2(f, Std.string(i), i * tilesize - cameraX, Math.max(0.0, -cameraY) - 20);
+
+			drawLine2(f, i * tilesize - cameraX, Math.max(0.0, -cameraY), i * tilesize - cameraX, camera.h);
 		}
 
 		for (i in startIndY...endIndY) {
-			drawString2(
-				f,
-				Std.string(i),
-				Math.max(0, -cameraX) - 10, 
-				i * tilesize - cameraY);
+			drawString2(f, Std.string(i), Math.max(0, -cameraX) - 10, i * tilesize - cameraY);
 
-			drawLine2(
-				f,
-				Math.max(0, -cameraX),
-				i * tilesize - cameraY,
-				camera.w,
-				i * tilesize - cameraY);
+			drawLine2(f, Math.max(0, -cameraX), i * tilesize - cameraY, camera.w, i * tilesize - cameraY);
 		}
 	}
 }
