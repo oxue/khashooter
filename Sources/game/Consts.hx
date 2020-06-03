@@ -21,5 +21,8 @@ class Consts {
 	public static inline var BEACON_SWEEP_INTERVAL = 300;
 
 	// HITGROUPS
-	public static inline var PLAYER_BOLT = "player_bolt";
+	public static inline var PLAYER_BOLT = "PLAYER_BOLT";
+	public static inline var FIRE = "FIRE";
+	public static inline var ZOMBIE = "ZOMBIE";
+	public static inline var NEUTRAL_HP = "NEUTRAL_HP";
 }

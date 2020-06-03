@@ -20,11 +20,20 @@ components:
     hitboxX: -10
     hitboxY: -10
 - type: HitCircle
+  name: GYO
   args:
-    tag: gyo
+    tag: GYO
+    radius: 15
+- type: HitCircle
+  name: NEUTRAL_HP
+  args:
+    tag: NEUTRAL_HP
     radius: 15
 - type: BreadCrumbs
   args:
     acceptanceRadius: 20
     maxAcceleration: 1
 - type: MimiAI
+- type: Health
+  args:
+    maxValue: 300

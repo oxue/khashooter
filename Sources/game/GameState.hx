@@ -21,6 +21,7 @@ import game.GameContext;
 import game.EntFactory;
 import game.Inventory;
 import game.ShooterFactory;
+import game.debug.MapEditor;
 
 /**
  * ...
@@ -31,6 +32,7 @@ class GameState extends refraction.core.State {
 
 	private var gameContext:GameContext;
 	private var entFactory:EntFactory;
+	private var mapEditor:MapEditor;
 
 	private var ui:Zui;
 	private var showMenu:Bool = false;
@@ -86,6 +88,8 @@ class GameState extends refraction.core.State {
 
 			// TODO: reset DC stuff
 
+			mapEditor = new MapEditor();
+
 			Application.addKeyDownListener((code) -> {
 				if (KeyCode.F9 == code) {
 					gameContext.reloadConfigs();
@@ -94,6 +98,9 @@ class GameState extends refraction.core.State {
 				if (KeyCode.F10 == code) {
 					entFactory.reloadEntityBlobs();
 					DebugLogger.info("RESOURCE", "reloading entities");
+				}
+				if(KeyCode.F11 == code) {
+					mapEditor.toggle();
 				}
 			});
 
@@ -109,10 +116,17 @@ class GameState extends refraction.core.State {
 	}
 
 	private function defineBehaviours():Void {
-		gameContext.hitTestSystem.onHit("zombie", "player", function(z:Entity, p:Entity) {
+		gameContext.hitTestSystem.onHit(Consts.ZOMBIE, "player", function(z:Entity, p:Entity) {
 			p.notify("damage", {amount: -1});
 		});
-		gameContext.hitTestSystem.onHit("zombie", Consts.PLAYER_BOLT, function(z:Entity, b:Entity) {
+		gameContext.hitTestSystem.onHit(Consts.NEUTRAL_HP, Consts.FIRE, (n, f) -> {
+			trace("HIT");
+			n.notify("damage", {
+				amount: -2, 
+				type:Consts.FIRE
+			});
+		});
+		gameContext.hitTestSystem.onHit(Consts.ZOMBIE, Consts.PLAYER_BOLT, function(z:Entity, b:Entity) {
 			z.notify("damage", {amount: -10});
 			b.notify("collided");
 			for (i in 0...10) {
@@ -252,14 +266,15 @@ class GameState extends refraction.core.State {
 	}
 
 	private function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
-		// === Custom UI ===
+		// === Game UI ===
 		f.g2.begin(false);
 		renderHitBoxes(f, context);
 		renderGameUI(f, context, ui);
 		f.g2.end();
 
-		// === ZUI ===
+		// === Debug UI ===
 		ui.begin(f.g2);
+		mapEditor.render(context, f, ui);
 		gameContext.debugMenu.render(context, ui);
 		gameContext.console.draw();
 		ui.end();

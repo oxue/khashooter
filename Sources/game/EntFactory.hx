@@ -175,12 +175,18 @@ class EntFactory {
 		e.addComponent(dimensions);
 
 		var damping = gameContext.dampingSystem.procure(e, Damping);
-		DebugLogger.info("DAMPING", gameContext.config);
 		damping.autoParams({factor: gameContext.config.flamethrower_damping});
 		gameContext.environmentSystem.procure(e, FireComponent);
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
 			.autoParams({tilemap: gameContext.tilemapData});
+
+		gameContext.hitTestSystem
+			.procure(e, HitCircle)
+			.autoParams({
+				tag: Consts.FIRE,
+				radius: 10
+			});
 
 		return e;
 	}
