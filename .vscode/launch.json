@@ -1,12 +1,6 @@
 {
     "configurations": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${file}"
-        },
-        {
             "type": "electron",
             "request": "launch",
             "name": "Kha: HTML5 Debug",

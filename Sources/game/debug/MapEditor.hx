@@ -1,8 +1,6 @@
 package game.debug;
 
 import zui.Id;
-import refraction.tile.TilemapData;
-import kha.math.FastMatrix3;
 import kha.Color;
 import kha.Assets;
 import zui.Zui;
@@ -61,8 +59,8 @@ class MapEditor {
 
 		var startIndX:Int = cast Math.max(0, Math.floor(camera.x / tilesize));
 		var startIndY:Int = cast Math.max(0, Math.floor(camera.y / tilesize));
-		var endIndX:Int = cast Math.floor((camera.x + camera.w) / tilesize) + 1;
-		var endIndY:Int = cast Math.floor((camera.y + camera.h) / tilesize) + 1;
+		var endIndX:Int = cast Math.max(Math.floor(camera.r() / tilesize), camera.w);
+		var endIndY:Int = cast Math.max(Math.floor(camera.b() / tilesize), camera.h);
 
 		for (i in startIndX...endIndX) {
 			drawString2(f, Std.string(i), i * tilesize - cameraX, Math.max(0.0, -cameraY) - 20);

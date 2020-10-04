@@ -7,7 +7,7 @@ class DebugLogger {
 	private static var linearLogs:Array<Dynamic> = new Array();
 	public static var traceLogs = true;
 
-	public static var silencedLogs:Map<String, Bool> = ["ROUTINE" => true;];
+	public static var silencedLogs:Map<String, Bool> = ["ROUTINE" => true];
 
 	public static function info(_tag:String, _message:Dynamic) {
 		if (silencedLogs.exists(_tag) && !silencedLogs.get(_tag)) {

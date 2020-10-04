@@ -42,6 +42,14 @@ class Camera {
 		}
 	}
 
+	public inline function r():Float {
+		return x + w;
+	}
+
+	public inline function b():Float {
+		return y + h;
+	}
+
 	public function position():Vector2 {
 		return new Vector2(x, y);
 	}
