@@ -2,15 +2,15 @@ package refraction.tile;
 
 /*import flash.geom.Rectangle;
 	import flash.Vector; */
+import hxblit.Camera;
 import hxblit.TextureAtlas.FloatRect;
+import kha.graphics2.Graphics;
+import kha.math.Vector2;
 import refraction.control.KeyControl;
 import refraction.core.Component;
 import refraction.generic.Dimensions;
 import refraction.generic.Position;
 import refraction.generic.Velocity;
-import hxblit.Camera;
-import kha.math.Vector2;
-import kha.graphics2.Graphics;
 
 /**
  * ...

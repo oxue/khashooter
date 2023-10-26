@@ -1,12 +1,12 @@
 package hxblit;
 
 import kha.Shaders;
+import kha.graphics4.BlendingFactor;
 import kha.graphics4.BlendingOperation;
 import kha.graphics4.CompareMode;
 import kha.graphics4.PipelineState;
 import kha.graphics4.StencilAction;
 import kha.graphics4.VertexData;
-import kha.graphics4.BlendingFactor;
 import kha.graphics4.VertexStructure;
 
 /**
@@ -32,7 +32,9 @@ class ShadowPipelineState extends PipelineState {
 		alphaBlendDestination = BlendingFactor.BlendOne;
 		alphaBlendSource = BlendingFactor.BlendOne;
 
-		stencilMode = CompareMode.Equal;
-		stencilBothPass = StencilAction.Keep;
+		stencilFrontMode = CompareMode.Equal;
+		stencilFrontBothPass = StencilAction.Keep;
+		stencilBackMode = CompareMode.Equal;
+		stencilBackBothPass = StencilAction.Keep;
 	}
 }

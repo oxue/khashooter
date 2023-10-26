@@ -1,12 +1,12 @@
 package refraction.systems;
 
-import refraction.core.Sys;
-import zui.Zui;
-import zui.Id;
-import refraction.core.Application;
-import refraction.generic.Tooltip;
 import kha.math.Vector2;
+import refraction.core.Application;
 import refraction.core.Sys;
+import refraction.core.Sys;
+import refraction.generic.Tooltip;
+import zui.Id;
+import zui.Zui;
 
 /**
  * ...

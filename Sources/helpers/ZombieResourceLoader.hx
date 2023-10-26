@@ -5,7 +5,7 @@ import kha.Assets;
 import refraction.display.ResourceFormat;
 
 class ZombieResourceLoader {
-	public static function load():Void {
+	public static function load() {
 		ResourceFormat.images.set("mimi_normal", Assets.images.mimi_normal);
 		ResourceFormat.images.set("mimi_pout", Assets.images.mimi_pout);
 		if (!ResourceFormat.atlases.exists("all")) {

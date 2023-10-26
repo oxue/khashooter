@@ -1,19 +1,19 @@
 package refraction.core;
 
-import pgr.dconsole.DC;
 import hxblit.Camera;
 import kha.Framebuffer;
-import kha.input.KeyCode;
 import kha.Scheduler;
 import kha.System;
+import kha.input.KeyCode;
 import kha.input.Keyboard;
 import kha.input.Mouse;
 import kha.math.Vector2;
 
 class Application {
-	public static var width:Int;
-	public static var height:Int;
-	public static var zoom:Int;
+
+	static var width:Int;
+	static var height:Int;
+	static var zoom:Int;
 
 	public static var currentState:State;
 
@@ -40,7 +40,7 @@ class Application {
 	private static var mouse2WasDown:Bool;
 
 	public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
-			__callback:Void->Void):Void {
+			__callback:Void->Void) {
 		currentState = new State();
 		keys = new Map<Int, Bool>();
 
@@ -54,58 +54,84 @@ class Application {
 		keyDownListeners = [];
 		keyUpListeners = [];
 
-		System.start({title: _title, width: _width, height: _height}, (window) -> {
-			Mouse
-				.get()
-				.notify(mouseDown, mouseUp, mouseMove, null);
-			Keyboard
-				.get()
-				.notify(keyDown, keyUp);
+		System.start(
+			{title: _title, width: _width, height: _height},
+			(window) -> {
+				Mouse
+					.get()
+					.notify(mouseDown, mouseUp, mouseMove, null);
+				Keyboard
+					.get()
+					.notify(keyDown, keyUp);
 
-			Scheduler.addTimeTask(update, 0, 1 / 60);
-			System.notifyOnFrames(render);
+				Scheduler.addTimeTask(update, 0, 1 / 60);
+				System.notifyOnFrames(render);
 
-			lastTime = Scheduler.time();
-			__callback();
-		});
+				lastTime = Scheduler.time();
+				__callback();
+			}
+		);
 	}
 
-	static public function resetKeyListeners() {
+	/**
+	 * width in pixels of the graphics, not the window
+	 * @return Int
+	 */
+	public static function getScreenWidth():Int {
+		return width;
+	}
+
+	/**
+	 * height in pixels of the graphics, not the window
+	 * @return Int
+	 */
+	public static function getScreenHeight():Int {
+		return height;
+	}
+
+	/**
+	 * zoom of the graphics, zoom x the width and height is the window size
+	 * @return Int
+	 */
+	public static function getScreenZoom():Int {
+		return zoom;
+	}
+
+	public static function resetKeyListeners() {
 		keyDownListeners = keyUpListeners = [];
 	}
 
-	static public function mouseCoords():Vector2 {
+	public static function mouseCoords():Vector2 {
 		return new Vector2(mouseX, mouseY);
 	}
 
-	static private function mouseMove(x:Int, y:Int, dX:Int, dY:Int) {
+	static function mouseMove(x:Int, y:Int, dX:Int, dY:Int) {
 		mouseX = x;
 		mouseY = y;
 	}
 
-	static private function mouseDown(button:Int, x:Int, y:Int) {
+	static function mouseDown(button:Int, x:Int, y:Int) {
 		if (button == 0)
 			mouseIsDown = true;
 		if (button == 1)
 			mouse2IsDown = true;
 	}
 
-	static private function mouseUp(button:Int, x:Int, y:Int) {
+	static function mouseUp(button:Int, x:Int, y:Int) {
 		if (button == 0)
 			mouseIsDown = false;
 		if (button == 1)
 			mouse2IsDown = false;
 	}
 
-	static private function keyDown(key:KeyCode) {
-		// if (char != null)
+	static function keyDown(key:KeyCode) {
 		keys.set(key, true);
 		for (method in keyDownListeners) {
 			method(key);
 		}
 	}
 
-	static private function keyUp(key:KeyCode) {
+	static function keyUp(key:KeyCode) {
 		// if(char != null)
 		keys.set(key, false);
 		for (method in keyUpListeners) {
@@ -119,9 +145,9 @@ class Application {
 		_state.load();
 	}
 
-	private static function update() {
-		var m2 = mouse2IsDown;
-		var m = mouseIsDown;
+	static function update() {
+		var m2:Bool = mouse2IsDown;
+		var m:Bool = mouseIsDown;
 		currentState.update();
 		mouse2JustDown = m2 && !mouse2WasDown;
 		mouseJustDown = m && !mouseWasDown;

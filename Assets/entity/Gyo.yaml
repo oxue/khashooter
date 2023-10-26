@@ -17,8 +17,8 @@ components:
     frameTime: 2
 - type: TileCollision
   args:
-    hitboxX: -10
-    hitboxY: -10
+    hitboxX: -0
+    hitboxY: -0
 - type: HitCircle
   name: GYO
   args:

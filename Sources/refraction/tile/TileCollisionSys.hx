@@ -1,21 +1,16 @@
 package refraction.tile;
 
-import refraction.core.Sys;
-import refraction.generic.Position;
-import refraction.generic.Dimensions;
-import refraction.generic.Velocity;
-import refraction.tile.TilemapData;
-import refraction.tile.TileCollision;
 import hxblit.TextureAtlas.FloatRect;
 import hxblit.TextureAtlas.IntBounds;
-import refraction.core.Utils;
+import refraction.core.Sys;
+import refraction.generic.Dimensions;
 
 class TileCollisionSys extends Sys<TileCollision> {
-	private var tilemapData:TilemapData;
-	private var pool:Array<TileCollision>;
+	var tilemapData:TilemapData;
+	var pool:Array<TileCollision>;
 
 	public function new() {
-		pool = new Array<TileCollision>();
+		pool = [];
 		super();
 	}
 
@@ -26,11 +21,11 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return null;
 	}
 
-	public function setTilemap(_tilemapData:TilemapData):Void {
+	public function setTilemap(_tilemapData:TilemapData) {
 		tilemapData = _tilemapData;
 	}
 
-	override public function update():Void {
+	override public function update() {
 		var i = 0;
 		while (i < components.length) {
 			var tc = components[i];
@@ -43,23 +38,31 @@ class TileCollisionSys extends Sys<TileCollision> {
 		}
 	}
 
-	private function maxi(a:Int, b:Int):Int {
+	function maxi(a:Int, b:Int):Int {
 		return (a < b) ? b : a;
 	}
 
-	private function mini(a:Int, b:Int):Int {
+	function mini(a:Int, b:Int):Int {
 		return (a > b) ? b : a;
 	}
 
-	private function clamp(a:Int, low:Int, high:Int):Int {
+	function clamp(a:Int, low:Int, high:Int):Int {
 		return maxi(mini(a, high), low);
 	}
 
-	private function getCollisionBounds(_bound:FloatRect):IntBounds {
-		var bottom = Math.floor(_bound.bottom() / tilemapData.tilesize) + 1;
-		var top = Math.floor(_bound.top() / tilemapData.tilesize) - 1;
-		var right = Math.floor(_bound.right() / tilemapData.tilesize) + 1;
-		var left = Math.floor(_bound.left() / tilemapData.tilesize) - 1;
+	function getCollisionBounds(_bound:FloatRect):IntBounds {
+		var bottom = Math.floor(
+			_bound.bottom() / tilemapData.tilesize
+		) + 1;
+		var top = Math.floor(
+			_bound.top() / tilemapData.tilesize
+		) - 1;
+		var right = Math.floor(
+			_bound.right() / tilemapData.tilesize
+		) + 1;
+		var left = Math.floor(
+			_bound.left() / tilemapData.tilesize
+		) - 1;
 
 		top = clamp(top, 0, tilemapData.height - 1);
 		left = clamp(left, 0, tilemapData.width - 1);
@@ -69,32 +72,34 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return new IntBounds(left, right, top, bottom);
 	}
 
-	private function sweptRect(tc:TileCollision):FloatRect {
+	function sweptRect(tc:TileCollision):FloatRect {
 		var previousX = tc.position.x - tc.velocity.getVelX();
 		var previousY = tc.position.y - tc.velocity.getVelY();
 
 		var hx = tc.hitboxPosition.x;
 		var hy = tc.hitboxPosition.y;
 
-		var lastRect = new FloatRect(previousX + hx, previousY + hy, tc.dimensions.width,
-			tc.dimensions.height);
-		var nowRect = new FloatRect(tc.position.x + hx, tc.position.y + hy, tc.dimensions.width,
-			tc.dimensions.height);
+		var lastRect = new FloatRect(
+			previousX + hx,
+			previousY + hy,
+			tc.dimensions.width,
+			tc.dimensions.height
+		);
+		var nowRect = new FloatRect(
+			tc.position.x + hx,
+			tc.position.y + hy,
+			tc.dimensions.width,
+			tc.dimensions.height
+		);
 		return lastRect.union(nowRect);
 	}
 
-	private function minTimeData(_datas:Array<CollisionData>):CollisionData {
-		return Lambda.fold(_datas, function(d:CollisionData, f:CollisionData) {
-			return (d.time < f.time ? d : f);
-		}, _datas[0]);
-	}
+	function pushBack(tc:TileCollision, data:CollisionData) {
+		var xFlag:Int = 1 - data.nature;
+		var yFlag:Int = data.nature;
 
-	private function pushBack(tc:TileCollision, data:CollisionData):Void {
-		var xFlag = 1 - data.nature;
-		var yFlag = data.nature;
-
-		var pushbackX = -tc.velocity.getVelX() * (1 - data.time);
-		var pushbackY = -tc.velocity.getVelY() * (1 - data.time);
+		var pushbackX:Float = -tc.velocity.getVelX() * (1 - data.time);
+		var pushbackY:Float = -tc.velocity.getVelY() * (1 - data.time);
 
 		// pushback
 		tc.position.x += pushbackX * xFlag;
@@ -104,15 +109,20 @@ class TileCollisionSys extends Sys<TileCollision> {
 		tc.velocity.setVelY(-pushbackY * xFlag);
 	}
 
-	private function getCollisionsInBound(tc:TileCollision, bounds:IntBounds):Array<CollisionData> {
+	function getCollisionsInBound(tc:TileCollision, bounds:IntBounds):Array<CollisionData> {
 		var datas = new Array<CollisionData>();
 		var i = bounds.t;
 		while (i <= bounds.b) {
 			var j = bounds.l;
 			while (j <= bounds.r) {
 				if (tilemapData.data[i][j].solid) {
-					var cdata = solveRect(tc, j * tilemapData.tilesize, i * tilemapData.tilesize,
-						tilemapData.tilesize, tilemapData.tilesize);
+					var cdata = solveRect(
+						tc,
+						j * tilemapData.tilesize,
+						i * tilemapData.tilesize,
+						tilemapData.tilesize,
+						tilemapData.tilesize
+					);
 					if (cdata.collided) {
 						datas.push(cdata);
 					}
@@ -124,14 +134,28 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return datas;
 	}
 
-	public function collideOneAxis(tc:TileCollision):Void {
-		var datas = getCollisionsInBound(tc, getCollisionBounds(sweptRect(tc)));
+	public function collideOneAxis(tc:TileCollision) {
+		var datas:Array<CollisionData> = getCollisionsInBound(
+			tc,
+			getCollisionBounds(sweptRect(tc))
+		);
 
-		if (datas.length > 0)
-			pushBack(tc, minTimeData(datas));
+		if (datas.length <= 0) {
+			return;
+		}
+
+		// get data by min time:
+		var minTimeData:CollisionData = datas[0];
+		for (data in datas) {
+			if (data.time < minTimeData.time) {
+				minTimeData = data;
+			}
+		}
+
+		pushBack(tc, minTimeData);
 	}
 
-	private function collide(tc:TileCollision):Void {
+	function collide(tc:TileCollision) {
 		collideOneAxis(tc);
 		collideOneAxis(tc);
 	}
@@ -181,7 +205,12 @@ class TileCollisionSys extends Sys<TileCollision> {
 		}
 
 		if (t0 < t1) {
-			return new CollisionData(true, t0, timeX >= timeY ? 0 : 1);
+			var collisionNature:Int = CollisionData.VERTICAL;
+			if (timeX >= timeY) {
+				collisionNature = CollisionData.HORIZONTAL;
+			}
+
+			return new CollisionData(true, t0, collisionNature);
 		}
 
 		return new CollisionData(false);

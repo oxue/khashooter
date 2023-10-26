@@ -1,1 +1,28 @@
-{   "wrapping": {     "methodChain": {       "defaultWrap": "onePerLine",       "defaultLocation": "afterLast",       "rules": []     },     "maxLineLength": 110   } }
+{
+    "wrapping": {
+        "methodChain": {
+            "defaultWrap": "onePerLine",
+            "defaultLocation": "afterLast",
+            "rules": [
+            ]
+        },
+        "callParameter": {
+            "rules": [
+                {
+                    "conditions": [
+                        {
+                            "cond": "lineLength >= n",
+                            "value": 70
+                        }
+                    ],
+                    "type": "onePerLine"
+                }
+            ]
+        },
+        "maxLineLength": 110
+    },
+    "lineEnds": {
+        "leftCurly": "after",
+        "emptyCurly": "noBreak"
+    }
+}

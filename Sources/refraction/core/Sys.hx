@@ -1,15 +1,14 @@
 package refraction.core;
 
-import refraction.utils.ObjectPool;
-import refraction.core.Entity;
 import haxe.Constraints.Constructible;
+import refraction.core.Entity;
 
 class NullSystem<T:Component> {
 	public function new() {}
 
 	@:generic
 	public function procure<G:Constructible<Dynamic> & T>(e:Entity, _type:Class<G>):G {
-		var ret:G = new G();
+		var ret:G = null;
 		e.addComponent(ret);
 		return ret;
 	}
@@ -30,11 +29,20 @@ class Sys<T:Component> {
 	}
 
 	@:generic
-	public function procure<G:Constructible<Dynamic> & T & Component>(e:Entity, _type:Class<G>,
-			_name:String = null):G {
+	public function procure<G:Constructible<Dynamic> & T & Component>
+		(
+			e:Entity, 
+			_type:Class<G>,
+			_name:String = null,
+			_default:G = null
+		):G {
 		var ret:G = cast produce();
 		if (ret == null) {
-			ret = new G();
+			ret = _default;
+		}
+		if (ret == null) {
+			var instance: G = Type.createInstance(_type, []);
+			ret = instance;
 		}
 		e.addComponent(ret, _name);
 		addComponent(ret);

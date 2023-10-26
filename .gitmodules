@@ -1,3 +1,7 @@
 [submodule "Kha"]
 	path = Kha
 	url = https://github.com/KTXSoftware/Kha
+
+[submodule "Libraries/zui"]
+    path = Libraries/zui
+    url = <submodule_url>

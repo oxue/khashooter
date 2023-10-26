@@ -1,16 +1,16 @@
 package;
 
-import refraction.display.ResourceFormat;
+import game.GameState;
 import hxblit.KhaBlit;
 import refraction.core.Application;
-import game.GameState;
+import refraction.display.ResourceFormat;
 
 class Main {
 	public static function main() {
-		Application.init("HXB Port", 1920, 1080, 2, function() {
-			KhaBlit.init(Application.width, Application.height, Application.zoom);
+		Application.init("HXB Port", 1200, 800, 2, function() {
+			KhaBlit.init(Application.getScreenWidth(), Application.getScreenHeight(), Application.getScreenZoom());
 			ResourceFormat.init();
-			Application.setState(new GameState("bloodstrike_zm"));
+			Application.setState(new GameState("rooms"));
 		});
 	}
 }

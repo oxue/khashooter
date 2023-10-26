@@ -1,111 +1,123 @@
 package game;
 
-import kha.input.KeyCode;
+import components.Particle;
+import game.debug.MapEditor;
 import helpers.DebugLogger;
-import hxblit.KhaBlit;
+import helpers.LevelLoader;
+import helpers.ZombieResourceLoader;
 import hxblit.Camera;
+import hxblit.KhaBlit;
 import kha.Assets;
 import kha.Framebuffer;
+import kha.input.KeyCode;
+import kha.input.Mouse;
 import refraction.core.Application;
-import refraction.core.State;
 import refraction.core.Entity;
 import refraction.display.ResourceFormat;
 import refraction.generic.Position;
-import kha.math.Vector2;
-import components.Particle;
-import helpers.ZombieResourceLoader;
-import kha.input.Mouse;
 import zui.*;
-import helpers.LevelLoader;
-import game.GameContext;
-import game.EntFactory;
-import game.Inventory;
-import game.ShooterFactory;
-import game.debug.MapEditor;
 
-/**
- * ...
- * @author
- */
 class GameState extends refraction.core.State {
-	private var isRenderingReady:Bool;
+	var isRenderingReady:Bool;
 
-	private var gameContext:GameContext;
-	private var entFactory:EntFactory;
-	private var mapEditor:MapEditor;
+	var gameContext:GameContext;
+	var entFactory:EntFactory;
+	var mapEditor:MapEditor;
 
-	private var ui:Zui;
-	private var showMenu:Bool = false;
-	private var shouldDrawHitBoxes:Bool = false;
+	var ui:Zui;
+	var showMenu:Bool;
+	var shouldDrawHitBoxes:Bool;
 
-	private var levelLoader:LevelLoader;
+	var levelLoader:LevelLoader;
 
-	private var defaultMap:String;
+	var defaultMap:String;
 
 	public function new(defaultMap:String) {
 		this.defaultMap = defaultMap;
+		this.showMenu = false;
+		this.shouldDrawHitBoxes = false;
 		super();
 	}
 
-	private function loadResources():Void {
+	function loadResources() {
 		ZombieResourceLoader.load();
 	}
 
-	override public function load():Void {
+	function onLoadAssets() {
+		// TODO: Why is this here?
+		Mouse.get()
+			.notify(mouseDown, null, null, null);
+		this.ui = new Zui({
+			font: Assets.fonts.monaco,
+			khaWindowId: 0,
+			scaleFactor: 1
+		});
+
+		var gameCamera = new Camera(
+			Std.int(Application.getScreenWidth() / Application.getScreenZoom()),
+			Std.int(Application.getScreenHeight() / Application.getScreenZoom())
+		);
+
+		// Init Game Context
+		gameContext = GameContext.instance(
+			gameCamera,
+			ui
+		);
+		Application.defaultCamera = gameCamera;
+
+		// Load resources
+		loadResources();
+
+		// Init Ent Factory
+		entFactory = EntFactory.instance(
+			gameContext,
+			new ShooterFactory(gameContext)
+		);
+
+		// load map
+		levelLoader = new LevelLoader(
+			entFactory,
+			gameContext
+		);
+		levelLoader.loadMap(defaultMap);
+
+		// Init collision behaviours
+		defineBehaviours();
+
+		// TODO: reset DC stuff
+
+		mapEditor = new MapEditor();
+
+		isRenderingReady = true;
+	}
+
+	function configureDebugKeys() {
+		Application.addKeyDownListener((code) -> {
+			if (KeyCode.F9 == code) {
+				gameContext.reloadConfigs();
+				DebugLogger.info(
+					"RESOURCE",
+					"reloading configs"
+				);
+			}
+			if (KeyCode.F10 == code) {
+				entFactory.reloadEntityBlobs();
+				DebugLogger.info(
+					"RESOURCE",
+					"reloading entities"
+				);
+			}
+			if (KeyCode.P == code) {
+				mapEditor.toggle();
+			}
+		});
+	}
+
+	override public function load() {
 		super.load();
 		isRenderingReady = false;
 
-		Assets.loadEverything(function() {
-			Mouse
-				.get()
-				.notify(mouseDown, null, null, null);
-			ui = new Zui({font: Assets.fonts.monaco, khaWindowId: 0, scaleFactor: 1});
-
-			var gameCamera = new Camera(Std.int(Application.width / Application.zoom),
-				Std.int(Application.height / Application.zoom));
-
-			// Init Game Context
-			gameContext = GameContext.instance(gameCamera, ui);
-			Application.defaultCamera = gameCamera;
-
-			// Load resources
-			loadResources();
-
-			// Init Ent Factory
-			entFactory = EntFactory.instance(gameContext, new ShooterFactory(gameContext));
-
-			// Init Lighting
-			// var i = 0;
-			// while(i-->0)
-			// gameContext.lightingSystem.addLightSource(new LightSource(100, 100, 0xffffff,1000));
-
-			// load map
-			levelLoader = new LevelLoader(entFactory, gameContext);
-			levelLoader.loadMap(defaultMap);
-
-			// Init collision behaviours
-			defineBehaviours();
-
-			// TODO: reset DC stuff
-
-			mapEditor = new MapEditor();
-
-			Application.addKeyDownListener((code) -> {
-				if (KeyCode.F9 == code) {
-					gameContext.reloadConfigs();
-					DebugLogger.info("RESOURCE", "reloading configs");
-				}
-				if (KeyCode.F10 == code) {
-					entFactory.reloadEntityBlobs();
-					DebugLogger.info("RESOURCE", "reloading entities");
-				}
-				if (KeyCode.F11 == code) {
-					mapEditor.toggle();
-				}
-			});
-
-			isRenderingReady = true;
-		});
+		Assets.loadEverything(this.onLoadAssets);
 	}
 
 	public function newState(map:String) {
@@ -115,49 +127,68 @@ class GameState extends refraction.core.State {
 		Application.setState(new GameState(map));
 	}
 
-	private function defineBehaviours():Void {
-		gameContext.hitTestSystem.onHit(Consts.ZOMBIE, "player", function(z:Entity, p:Entity) {
-			p.notify("damage", {amount: -1});
-		});
-		gameContext.hitTestSystem.onHit(Consts.NEUTRAL_HP, Consts.FIRE, (n, f) -> {
-			trace("HIT");
-			n.notify("damage", {
-				amount: -2,
-				type: Consts.FIRE
-			});
-		});
-		gameContext.hitTestSystem.onHit(Consts.ZOMBIE, Consts.PLAYER_BOLT, function(z:Entity, b:Entity) {
-			z.notify("damage", {amount: -10});
-			b.notify("collided");
-			for (i in 0...10) {
-				entFactory
-					.autoBuild("Blood")
-					.getComponent(Position)
-					.setFromPosition(z.getComponent(Position))
-					.getEntity()
-					.getComponent(Particle)
-					.randomDirection(Math.random() * 10 + 5);
+	function defineBehaviours() {
+		gameContext.hitTestSystem.onHit(
+			Consts.ZOMBIE,
+			"player",
+			function(z:Entity, p:Entity) {
+				p.notify(
+					"damage",
+					{amount: -1}
+				);
+				var playerPos:Position = p.getComponent(Position);
+				for (i in 0...1) {
+					EntFactory
+						.instance()
+						.autoBuild("Blood")
+						.getComponent(Position)
+						.setPosition(playerPos.x, playerPos.y)
+						.getEntity()
+						.getComponent(Particle)
+						.randomDirection(Math.random() * 30 + 5);
+				}
 			}
-		});
+		);
+		gameContext.hitTestSystem.onHit(
+			Consts.NEUTRAL_HP,
+			Consts.FIRE,
+			(n, f) -> {
+				n.notify(
+					"damage",
+					{
+						amount: -2,
+						type: Consts.FIRE
+					}
+				);
+			}
+		);
+		gameContext.hitTestSystem.onHit(
+			Consts.ZOMBIE,
+			Consts.PLAYER_BOLT,
+			function(z:Entity, b:Entity) {
+				z.notify(
+					"damage",
+					{amount: -10}
+				);
+				b.notify("collided");
+				for (i in 0...10) {
+					entFactory
+						.autoBuild("Blood")
+						.getComponent(Position)
+						.setFromPosition(z.getComponent(Position))
+						.getEntity()
+						.getComponent(Particle)
+						.randomDirection(Math.random() * 10 + 5);
+				}
+			}
+		);
 	}
 
-	private function buildDebugPoly():Void {
-		var poly = new refraction.ds2d.Polygon(2, 10, 100, 100);
-		poly.faces = [
-			new refraction.ds2d.Face(new Vector2(100, 100), new Vector2(100, 120)),
-			new refraction.ds2d.Face(new Vector2(100, 125), new Vector2(100, 145))
-		];
-		gameContext.lightingSystem.polygons.push(poly);
-	}
-
-	private function mouseDown(button:Int, x:Int, y:Int) {
+	function mouseDown(button:Int, x:Int, y:Int) {
 		if (button == 0) {
 			gameContext.interactSystem.update();
-			// var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
-
-			gameContext.playerEntity
-				.getComponent(Inventory)
-				.primary();
+			var inventory:Inventory = gameContext.playerEntity.getComponent(Inventory);
+			inventory.primaryAction();
 		}
 	}
 
@@ -165,9 +196,7 @@ class GameState extends refraction.core.State {
 	// MAIN LOOP
 	// =========
 
-	override public function update():Void {
-		super.update();
-
+	override public function update() {
 		if (gameContext != null) {
 			gameContext.controlSystem.update();
 			gameContext.spacingSystem.update();
@@ -189,39 +218,57 @@ class GameState extends refraction.core.State {
 			if (Application.mouseIsDown) {
 				gameContext.playerEntity
 					.getComponent(Inventory)
-					.persist();
+					.persistentAction();
 			}
 		}
 	}
 
-	override public function render(frame:Framebuffer) {
-		if (!isRenderingReady)
-			return;
-
+	function updateCamera() {
 		gameContext.camera.updateShake();
-
 		var playerPos:Position = cast gameContext.playerEntity.getComponent(Position);
 
-		gameContext.camera.x += Std.int((playerPos.x
-			+ gameContext.config.camera_offset.x
-			- gameContext.camera.x) / 8);
-		gameContext.camera.y += Std.int((playerPos.y
-			+ gameContext.config.camera_offset.y
-			- gameContext.camera.y) / 8);
+		gameContext.camera.follow(
+			playerPos.x,
+			playerPos.y,
+			gameContext.config.camera_damping_speed
+		);
 
 		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
 		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
+	}
+
+	override public function render(frame:Framebuffer) {
+		if (!isRenderingReady) {
+			return;
+		}
+
+		this.updateCamera();
 
 		var g = frame.g4;
 
 		g.begin();
 		KhaBlit.setContext(frame.g4);
-		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
-		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
-		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
-			.get("all")
-			.image
+		KhaBlit.clear(
+			0.1,
+			0,
+			0,
+			0,
+			1,
+			1
+		);
+		KhaBlit.setPipeline(
+			KhaBlit.KHBTex2PipelineState,
+			"KHBTex2PipelineState"
+		);
+		KhaBlit.setUniformMatrix4(
+			"mproj",
+			KhaBlit.matrix2
+		);
+		KhaBlit.setUniformTexture(
+			"tex",
+			ResourceFormat.atlases
+				.get("all")
+				.image
 		);
 
 		if (gameContext.currentMap != null) {
@@ -238,11 +285,19 @@ class GameState extends refraction.core.State {
 
 		g.begin();
 		KhaBlit.setContext(frame.g4);
-		KhaBlit.setPipeline(KhaBlit.KHBTex2PipelineState, "KHBTex2PipelineState");
-		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
-			.get("all")
-			.image
+		KhaBlit.setPipeline(
+			KhaBlit.KHBTex2PipelineState,
+			"KHBTex2PipelineState"
+		);
+		KhaBlit.setUniformMatrix4(
+			"mproj",
+			KhaBlit.matrix2
+		);
+		KhaBlit.setUniformTexture(
+			"tex",
+			ResourceFormat.atlases
+				.get("all")
+				.image
 		);
 
 		gameContext.selfLitRenderSystem.update();
@@ -257,7 +312,11 @@ class GameState extends refraction.core.State {
 		}
 
 		// ========== UI BEGIN ==========
-		renderUI(frame, gameContext, ui);
+		renderUI(
+			frame,
+			gameContext,
+			ui
+		);
 
 		frame.g2.begin(false);
 		gameContext.tooltipSystem.draw(frame.g2);
@@ -265,37 +324,56 @@ class GameState extends refraction.core.State {
 		gameContext.statusText.render(frame.g2);
 	}
 
-	private function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
-		// === Game UI ===
+	function renderUI(f:Framebuffer, context:GameContext, ui:Zui) { // === Game UI ===
 		f.g2.begin(false);
-		renderHitBoxes(f, context);
-		renderGameUI(f, context, ui);
+		renderHitBoxes(
+			f,
+			context
+		);
+		renderGameUI(
+			f,
+			context,
+			ui
+		);
 		f.g2.end();
 
 		// === Debug UI ===
 		ui.begin(f.g2);
-		mapEditor.render(context, f, ui);
-		gameContext.debugMenu.render(context, ui);
-		gameContext.console.draw();
+		mapEditor.render(
+			context,
+			f,
+			ui
+		);
+		gameContext.debugMenu.render(
+			context,
+			ui
+		);
+		// gameContext.console.draw();
 		ui.end();
 	}
 
-	private function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
+	function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
 		gameContext.healthBar.render(f);
 		gameContext.dialogueManager.render(f);
 	}
 
-	private function renderHitBoxes(f:Framebuffer, gc:GameContext) {
+	function renderHitBoxes(f:Framebuffer, gc:GameContext) {
 		if (!shouldDrawHitBoxes) {
 			return;
 		}
 		for (tc in gc.collisionSystem.components) {
-			tc.drawHitbox(gc.camera, f.g2);
+			tc.drawHitbox(
+				gc.camera,
+				f.g2
+			);
 		}
 		for (p in gc.hitCheckSystem.components) {
 			p.entity
 				.getComponent(Position)
-				.drawPoint(gc.camera, f.g2);
+				.drawPoint(
+					gc.camera,
+					f.g2
+				);
 		}
 	}
 }

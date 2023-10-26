@@ -2,11 +2,10 @@ package game.debug;
 
 import components.Particle;
 import kha.Color;
-import refraction.ds2d.LightSource;
-import zui.Id;
 import refraction.core.Application;
-import js.html.SharedWorker;
+import refraction.ds2d.LightSource;
 import refraction.generic.Position;
+import zui.Id;
 import zui.Zui;
 
 class DebugMenu {
@@ -19,7 +18,7 @@ class DebugMenu {
 	}
 
 	public function toggleMenu() {
-		showMenu = !showMenu;
+		showMenu = true;
 		if (showMenu) {
 			menuX = Application.mouseX;
 			menuY = Application.mouseY;

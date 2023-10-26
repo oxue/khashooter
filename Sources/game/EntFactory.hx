@@ -1,29 +1,29 @@
 package game;
 
-import helpers.DebugLogger;
-import refraction.core.Utils;
-import refraction.display.LightSourceComponent;
-import kha.math.Vector2;
-import refraction.control.*;
-import refraction.core.Entity;
-import refraction.display.AnimatedRender;
-import refraction.generic.*;
-import refraction.tile.TileRender;
-import refraction.tile.TileCollision;
-import refraction.tile.TilemapData;
-import entbuilders.ItemBuilder;
-import entbuilders.ItemBuilder.Items;
+import components.HitCircle;
 import components.Interactable;
 import components.Projectile;
-import components.HitCircle;
-import refraction.core.Application;
+import entbuilders.ItemBuilder.Items;
+import entbuilders.ItemBuilder;
+import game.Consts;
+import game.GameContext;
 import haxe.ds.StringMap;
+import helpers.DebugLogger;
+import kha.math.Vector2;
+import refraction.control.*;
+import refraction.core.Application;
 import refraction.core.Component;
 import refraction.core.ComponentFactory;
+import refraction.core.Entity;
 import refraction.core.TemplateParser;
+import refraction.core.Utils;
+import refraction.display.AnimatedRender;
+import refraction.display.LightSourceComponent;
 import refraction.display.ResourceFormat;
-import game.GameContext;
-import game.Consts;
+import refraction.generic.*;
+import refraction.tile.TileCollision;
+import refraction.tile.TileRender;
+import refraction.tile.TilemapData;
 
 /**
  * ...
@@ -141,7 +141,7 @@ class EntFactory {
 		gameContext.interactSystem.addComponent(npc);
 
 		gameContext.breadCrumbsSystem
-			.procure(e, BreadCrumbs)
+			.procure(e, BreadCrumbs, null, new BreadCrumbs())
 			.autoParams({
 				acceptanceRadius: Consts.BREADCRUMB_ACCEPTANCE_DISTANCE,
 				maxAcceleration: Consts.BREADCRUMB_ZOMBIE_MAX_ACCEL

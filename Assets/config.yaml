@@ -8,6 +8,4 @@ flamethrower_starting_size: 2
 
 flamethrower_damping: 0.95
 flamethrower_fireball_size: 4
-camera_offset:
-  x: -480
-  y: -270
+camera_damping_speed: 0.0166

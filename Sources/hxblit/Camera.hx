@@ -42,6 +42,11 @@ class Camera {
 		}
 	}
 
+	public function follow(followX: Float, followY: Float, followDamping: Float) {
+		x += (followX - w / 2 - x) * followDamping;
+		y += (followY - h / 2 - y) * followDamping;
+	}
+
 	public inline function r():Float {
 		return x + w;
 	}

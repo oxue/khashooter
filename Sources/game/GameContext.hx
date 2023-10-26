@@ -1,14 +1,16 @@
 package game;
 
-import pgr.dconsole.DC;
+import game.debug.DebugMenu;
+import game.dialogue.DialogueManager;
 import helpers.DebugLogger;
-import refraction.core.TemplateParser;
 import hxblit.Camera;
+import pgr.dconsole.DC;
 import refraction.control.Damping;
 import refraction.core.Application;
 import refraction.core.Component;
 import refraction.core.Entity;
 import refraction.core.Sys;
+import refraction.core.TemplateParser;
 import refraction.ds2d.DS2D;
 import refraction.generic.Velocity;
 import refraction.systems.BreadCrumbsSys;
@@ -16,17 +18,15 @@ import refraction.systems.LightSourceSystem;
 import refraction.systems.RenderSys;
 import refraction.systems.SpacingSys;
 import refraction.systems.TooltipSys;
-import refraction.tile.TileRender;
 import refraction.tile.TileCollisionSys;
+import refraction.tile.TileRender;
 import refraction.tile.TilemapData;
-import systems.InteractSys;
-import systems.HitTestSys;
 import systems.BeaconSys;
-import zui.Zui;
+import systems.HitTestSys;
+import systems.InteractSys;
 import systems.ParticleSys;
 import ui.HealthBar;
-import game.dialogue.DialogueManager;
-import game.debug.DebugMenu;
+import zui.Zui;
 
 /**
  * ...
@@ -120,13 +120,13 @@ class GameContext {
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();
 
-		lightingSystem = new DS2D(Std.int(Application.width / Application.zoom),
-			Std.int(Application.height / Application.zoom));
+		lightingSystem = new DS2D(Std.int(Application.getScreenWidth() / Application.getScreenZoom()),
+			Std.int(Application.getScreenHeight() / Application.getScreenZoom()));
 		tooltipSystem = new TooltipSys(ui);
 
 		dialogueManager = new DialogueManager("../../Assets/dialogue");
 		debugMenu = new DebugMenu();
-		initConsole();
+		// initConsole();
 	}
 
 	private function initConsole() {
