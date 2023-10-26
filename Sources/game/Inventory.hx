@@ -4,6 +4,7 @@ import entbuilders.ItemBuilder.Items;
 import game.WeaponFactory;
 import helpers.DebugLogger;
 import kha.math.Vector2;
+import refraction.core.Application;
 import refraction.core.Component;
 import refraction.core.Utils;
 import refraction.generic.Position;
@@ -73,12 +74,12 @@ class Inventory extends Component {
 			return;
 		}
 
-		EntFactory
-			.instance()
-			.createFireball(
-				muzzlePositon(),
-				muzzleDirection()
-			);
+		// EntFactory
+		// 	.instance()
+		// 	.createFireball(
+		// 		muzzlePositon(),
+		// 		muzzleDirection()
+		// 	);
 	}
 
 	public function primaryAction() {
@@ -86,7 +87,11 @@ class Inventory extends Component {
 			return;
 		}
 
-		// Application.defaultCamera.shake(3, 2);
+		EntFactory
+			.instance()
+			.createProjectile(muzzlePositon(), muzzleDirection());
+		Application.defaultCamera.shake(6, 4);
+		
 		// EntFactory
 		// 	.instance()
 		// 	.createFireball(muzzlePositon(), muzzleDirection());

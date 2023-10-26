@@ -216,6 +216,7 @@ class GameState extends refraction.core.State {
 			gameContext.beaconSystem.update();
 
 			if (Application.mouseIsDown) {
+				trace("persistent action");
 				gameContext.playerEntity
 					.getComponent(Inventory)
 					.persistentAction();

@@ -10,7 +10,7 @@ class Main {
 		Application.init("HXB Port", 1200, 800, 2, function() {
 			KhaBlit.init(Application.getScreenWidth(), Application.getScreenHeight(), Application.getScreenZoom());
 			ResourceFormat.init();
-			Application.setState(new GameState("rooms"));
+			Application.setState(new GameState("modern_home"));
 		});
 	}
 }
