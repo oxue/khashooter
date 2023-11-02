@@ -1,16 +1,18 @@
 package components;
 
+import game.CollisionBehaviours.MSG_COLLIDED;
 import kha.math.Vector2;
-import refraction.tile.TilemapData;
 import refraction.core.Component;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
+import refraction.tile.TilemapData;
 
 /**
  * ...
  * @author
  */
 class Projectile extends Component {
-	private var position:Position;
+
+	var position:PositionCmp;
 
 	public var tilemapData:TilemapData;
 
@@ -19,19 +21,16 @@ class Projectile extends Component {
 		super();
 	}
 
-	override public function load():Void {
-		position = entity.getComponent(Position);
-		this.on("collided", function(data) {
+	override public function load() {
+		position = entity.getComponent(PositionCmp);
+		this.on(MSG_COLLIDED, function(data) {
 			entity.remove();
 		});
 	}
 
-	override public function update():Void {
-		// position.x = position.y = 0;
+	override public function update() {
 		if (tilemapData.hitTestPoint(new Vector2(position.x, position.y))) {
 			entity.remove();
-			// entity.getComponent(Velocity).remove = true;
-			// this.remove = true;
 		}
 	}
 }

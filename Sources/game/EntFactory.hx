@@ -1,12 +1,12 @@
 package game;
 
-import components.HitCircle;
+import components.HitCircleCmp;
 import components.Interactable;
 import components.Projectile;
-import entbuilders.ItemBuilder.Items;
 import entbuilders.ItemBuilder;
-import game.Consts;
-import game.GameContext;
+import game.CollisionBehaviours.HG_CROSSBOW_BOLT;
+import game.CollisionBehaviours.HG_FIRE;
+import game.behaviours.MimiAI;
 import haxe.ds.StringMap;
 import helpers.DebugLogger;
 import kha.math.Vector2;
@@ -17,8 +17,8 @@ import refraction.core.ComponentFactory;
 import refraction.core.Entity;
 import refraction.core.TemplateParser;
 import refraction.core.Utils;
-import refraction.display.AnimatedRender;
-import refraction.display.LightSourceComponent;
+import refraction.display.AnimatedRenderCmp;
+import refraction.display.LightSourceCmp;
 import refraction.display.ResourceFormat;
 import refraction.generic.*;
 import refraction.tile.TileCollision;
@@ -30,25 +30,26 @@ import refraction.tile.TilemapData;
  * @author
  */
 class EntFactory {
-	private static var myInstance:EntFactory = null;
+
+	static var M_INSTANCE:EntFactory = null;
 
 	public static function instance(?_gc:GameContext, ?_factory:ComponentFactory):EntFactory {
-		if (myInstance == null) {
-			myInstance = new EntFactory(_gc, _factory);
+		if (M_INSTANCE == null) {
+			M_INSTANCE = new EntFactory(_gc, _factory);
 		}
-		return myInstance;
+		return M_INSTANCE;
 	}
 
 	public static function destroyInstance() {
-		myInstance = null;
+		M_INSTANCE = null;
 	}
 
 	public var gameContext:GameContext;
 	public var factory:ComponentFactory;
 
-	private var entityPrototypes:Dynamic;
-	private var itemBuilder:ItemBuilder;
-	private var entityTemplates:StringMap<Dynamic>;
+	var entityPrototypes:Dynamic;
+	var itemBuilder:ItemBuilder;
+	var entityTemplates:StringMap<Dynamic>;
 
 	public function new(_gc:GameContext, _factory:ComponentFactory) {
 		gameContext = _gc;
@@ -57,14 +58,11 @@ class EntFactory {
 		entityTemplates = TemplateParser.parse();
 	}
 
-	public function reloadEntityBlobs():Void {
-		TemplateParser.reloadEntityBlobs(
-			"../../Assets/entity",
-			(templateMap) -> {
-				this.entityTemplates = templateMap;
-				DebugLogger.info("IO", "Entity Blobs Reloaded");
-			}
-		);
+	public function reloadEntityBlobs() {
+		TemplateParser.reloadEntityBlobs("../../Assets/entity", (templateMap) -> {
+			this.entityTemplates = templateMap;
+			DebugLogger.info("IO", "Entity Blobs Reloaded");
+		});
 	}
 
 	public function worldMouse():Vector2 {
@@ -88,10 +86,7 @@ class EntFactory {
 
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component {
 		if (_type == "SurfaceSet") {
-			return _e.addComponent(
-				ResourceFormat.surfacesets.get(_settings.resource),
-				_settings.name
-			);
+			return _e.addComponent(ResourceFormat.surfacesets.get(_settings.resource), _settings.name);
 		}
 
 		var ret:Component = factory.get(_type, _e, _settings.name);
@@ -101,19 +96,19 @@ class EntFactory {
 		return ret;
 	}
 
-	public function autoBuild(_entityName:String, _e:Entity = null):Entity {
+	public function autoBuild(_entityName:String, ?_e:Entity):Entity {
 		if (entityTemplates
 			.get(_entityName)
 			.base_entity != null
 		) {
-			_e = autoBuild(
-				entityTemplates
-					.get(_entityName)
-					.base_entity
+			_e = autoBuild(entityTemplates
+				.get(_entityName)
+				.base_entity
 			);
 		}
-		if (_e == null)
+		if (_e == null) {
 			_e = new Entity();
+		}
 
 		var components:Array<Dynamic> = entityTemplates
 			.get(_entityName)
@@ -126,15 +121,13 @@ class EntFactory {
 	}
 
 	public function createNPC(_x:Int = 0, _y:Int = 0, name:String) {
-		var e:Entity = autoBuild(
-			"Actor"
-		)
-			.getComponent(Position)
+		var e:Entity = autoBuild("Actor")
+			.getComponent(PositionCmp)
 			.setPosition(_x, _y)
 			.getEntity();
 		e.addComponent(ResourceFormat.surfacesets.get(name));
 
-		var surfaceRender:AnimatedRender = new AnimatedRender();
+		var surfaceRender:AnimatedRenderCmp = new AnimatedRenderCmp();
 		e.addComponent(surfaceRender);
 
 		surfaceRender.animations.set("idle", [0]);
@@ -173,20 +166,12 @@ class EntFactory {
 	public function createFireball(_position:Vector2, direction:Vector2):Entity {
 		var e = new Entity();
 		var e:Entity = new Entity();
-		var offsetLight = Std.int(
-			gameContext.config.flamethrower_fireball_size / 2
-		);
+		var offsetLight:Int = Std.int(gameContext.config.flamethrower_fireball_size / 2);
 
 		e.addComponent(
-			new Position(
-				_position.x,
-				_position.y,
-				10,
-				10,
-				Utils.direction2Degrees(direction)
-			)
+			new PositionCmp(_position.x, _position.y, Utils.direction2Degrees(direction))
 		);
-		var lightSource = new LightSourceComponent(
+		var lightSource:LightSourceCmp = new LightSourceCmp(
 			gameContext.lightingSystem,
 			0x5500ff,
 			gameContext.config.flamethrower_starting_size,
@@ -196,16 +181,12 @@ class EntFactory {
 		e.addComponent(lightSource);
 		gameContext.lightSourceSystem.addComponent(lightSource);
 
-		var velocity = gameContext.velocitySystem.procure(
-			e,
-			Velocity
-		);
-		direction.normalize();
-		direction = direction.mult(Consts.CROSSBOW_PROJECTILE_SPEED);
+		var velocity:VelocityCmp = gameContext.velocitySystem.procure(e, VelocityCmp);
+		direction = direction.normalized().mult(gameContext.config.flamethrower_start_speed);
 		velocity.setVelX(direction.x);
 		velocity.setVelY(direction.y);
 
-		var dimensions = new Dimensions(
+		var dimensions:DimensionsCmp = new DimensionsCmp(
 			gameContext.config.flamethrower_fireball_size,
 			gameContext.config.flamethrower_fireball_size
 		);
@@ -213,18 +194,16 @@ class EntFactory {
 		e.addComponent(dimensions);
 
 		var damping = gameContext.dampingSystem.procure(e, Damping);
-		damping.autoParams(
-			{factor: gameContext.config.flamethrower_damping}
-		);
-		gameContext.environmentSystem.procure(e, FireComponent);
+		damping.autoParams({factor: gameContext.config.flamethrower_damping});
+		gameContext.environmentSystem.procure(e, FireCmp);
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
 			.autoParams({tilemap: gameContext.tilemapData});
 
 		gameContext.hitTestSystem
-			.procure(e, HitCircle)
+			.procure(e, HitCircleCmp)
 			.autoParams({
-				tag: Consts.FIRE,
+				tag: HG_FIRE,
 				radius: 10
 			});
 
@@ -234,18 +213,10 @@ class EntFactory {
 	public function createProjectile(_position:Vector2, direction:Vector2):Entity {
 		var e:Entity = new Entity();
 		e.addComponent(
-			new Position(
-				_position.x,
-				_position.y,
-				10,
-				10,
-				Utils.direction2Degrees(direction)
-			)
+			new PositionCmp(_position.x, _position.y, Utils.direction2Degrees(direction))
 		);
-		e.addComponent(
-			ResourceFormat.surfacesets.get("projectiles")
-		);
-		var lightSource = new LightSourceComponent(
+		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
+		var lightSource = new LightSourceCmp(
 			gameContext.lightingSystem,
 			gameContext.config.crossbow_bolt_light_color,
 			gameContext.config.crossbow_bolt_light_radius,
@@ -255,10 +226,7 @@ class EntFactory {
 		e.addComponent(lightSource);
 		gameContext.lightSourceSystem.addComponent(lightSource);
 
-		var surfaceRender = gameContext.selfLitRenderSystem.procure(
-			e,
-			AnimatedRender
-		);
+		var surfaceRender = gameContext.selfLitRenderSystem.procure(e, AnimatedRenderCmp);
 		surfaceRender.autoParams({
 			"animations": [{name: "bolt", frames: [0]}],
 			"initialAnimation": "bolt",
@@ -266,10 +234,7 @@ class EntFactory {
 			"frameTime": 8
 		});
 
-		var velocity:Velocity = gameContext.velocitySystem.procure(
-			e,
-			Velocity
-		);
+		var velocity:VelocityCmp = gameContext.velocitySystem.procure(e, VelocityCmp);
 		direction = direction
 			.normalized()
 			.mult(gameContext.config.crossbow_projectile_speed);
@@ -280,9 +245,9 @@ class EntFactory {
 			.procure(e, Projectile)
 			.tilemapData = gameContext.tilemapData;
 		gameContext.hitTestSystem
-			.procure(e, HitCircle)
+			.procure(e, HitCircleCmp)
 			.autoParams({
-				tag: Consts.PLAYER_BOLT,
+				tag: HG_CROSSBOW_BOLT,
 				radius: gameContext.config.crossbow_bolt_size
 			});
 
@@ -293,12 +258,7 @@ class EntFactory {
 			_data:Array<Array<Int>>, _tileset:String = "all_tiles"):Entity {
 		var e:Entity = new Entity();
 
-		var tilemapData:TilemapData = new TilemapData(
-			_width,
-			_height,
-			_tilesize,
-			_colIndex
-		);
+		var tilemapData:TilemapData = new TilemapData(_width, _height, _tilesize, _colIndex);
 		e.addComponent(tilemapData);
 		tilemapData.setDataIntArray(_data);
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));

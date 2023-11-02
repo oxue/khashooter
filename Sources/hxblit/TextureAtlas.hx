@@ -1,11 +1,10 @@
 package hxblit;
 
 import haxe.ds.Vector;
-import kha.Color;
 import kha.Image;
 import kha.graphics2.Graphics;
 import kha.math.Vector2;
-import refraction.display.SurfaceSet;
+import refraction.display.SurfaceSetCmp;
 
 /**
  * ...
@@ -192,6 +191,7 @@ class FloatRect {
 }
 
 class TextureAtlas {
+
 	public var images:Array<SurfaceData>;
 	public var image:Image;
 	public var assets:Map<Int, Surface2>;
@@ -201,11 +201,11 @@ class TextureAtlas {
 		assets = new Map<Int, Surface2>();
 	}
 
-	public function add(_image:Image, _id:Int):Void {
+	public function add(_image:Image, _id:Int) {
 		images.push(new SurfaceData(_image, _id));
 	}
 
-	private inline function sortOnSize(x:SurfaceData, y:SurfaceData):Int {
+	inline function sortOnSize(x:SurfaceData, y:SurfaceData):Int {
 		if (x.data.width * x.data.height < y.data.width * y.data.height)
 			return -1;
 		else
@@ -258,9 +258,9 @@ class TextureAtlas {
 		return ret;
 	}
 
-	public function splitAndIndex(_img:Image, _frame:FloatRect):SurfaceSet {
+	public function splitAndIndex(_img:Image, _frame:FloatRect):SurfaceSetCmp {
 		var startInd = images.length;
-		var ret:SurfaceSet = new SurfaceSet();
+		var ret:SurfaceSetCmp = new SurfaceSetCmp();
 		ret.frame = _frame;
 		var gw:Int = cast _img.width / _frame.w;
 		var gh:Int = cast _img.height / _frame.h;

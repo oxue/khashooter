@@ -8,9 +8,9 @@ import kha.graphics2.Graphics;
 import kha.math.Vector2;
 import refraction.control.KeyControl;
 import refraction.core.Component;
-import refraction.generic.Dimensions;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.generic.DimensionsCmp;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 /**
  * ...
@@ -20,9 +20,9 @@ class TileCollision extends Component {
 	public var targetTilemap:TilemapData;
 	public var hitboxPosition:Vector2;
 
-	public var position:Position;
-	public var dimensions:Dimensions;
-	public var velocity:Velocity;
+	public var position:PositionCmp;
+	public var dimensions:DimensionsCmp;
+	public var velocity:VelocityCmp;
 
 	public function new() {
 		super();
@@ -41,8 +41,8 @@ class TileCollision extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
-		dimensions = entity.getComponent(Dimensions);
-		velocity = entity.getComponent(Velocity);
+		position = entity.getComponent(PositionCmp);
+		dimensions = entity.getComponent(DimensionsCmp);
+		velocity = entity.getComponent(VelocityCmp);
 	}
 }

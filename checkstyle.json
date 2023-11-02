@@ -40,10 +40,6 @@
 			"props": {}
 		},
 		{
-			"type": "AvoidTernaryOperator",
-			"props": {}
-		},
-		{
 			"type": "BlockBreakingConditional",
 			"props": {}
 		},
@@ -486,27 +482,6 @@
 			"props": {
 				"max": 2,
 				"ignoreFormat": "^$"
-			}
-		},
-		{
-			"type": "RightCurly",
-			"props": {
-				"tokens": [
-					"CLASS_DEF",
-					"ENUM_DEF",
-					"ABSTRACT_DEF",
-					"TYPEDEF_DEF",
-					"INTERFACE_DEF",
-					"OBJECT_DECL",
-					"FUNCTION",
-					"FOR",
-					"IF",
-					"WHILE",
-					"SWITCH",
-					"TRY",
-					"CATCH"
-				],
-				"option": "aloneorsingle"
 			}
 		},
 		{

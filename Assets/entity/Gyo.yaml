@@ -27,7 +27,7 @@ components:
 - type: HitCircle
   name: NEUTRAL_HP
   args:
-    tag: NEUTRAL_HP
+    tag: neutral_hp
     radius: 15
 - type: BreadCrumbs
   args:

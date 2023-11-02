@@ -12,7 +12,7 @@ import refraction.core.Entity;
 import refraction.core.Sys;
 import refraction.core.TemplateParser;
 import refraction.ds2d.DS2D;
-import refraction.generic.Velocity;
+import refraction.generic.VelocityCmp;
 import refraction.systems.BreadCrumbsSys;
 import refraction.systems.LightSourceSystem;
 import refraction.systems.RenderSys;
@@ -33,6 +33,7 @@ import zui.Zui;
  * @author
  */
 class GameContext {
+
 	private static var myInstance:GameContext = null;
 
 	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext {
@@ -57,7 +58,7 @@ class GameContext {
 	public var renderSystem:RenderSys;
 	public var selfLitRenderSystem:RenderSys;
 	public var controlSystem:Sys<Component>;
-	public var velocitySystem:Sys<Velocity>;
+	public var velocitySystem:Sys<VelocityCmp>;
 	public var dampingSystem:Sys<Damping>;
 	public var collisionSystem:TileCollisionSys;
 	public var interactSystem:InteractSys;
@@ -99,13 +100,15 @@ class GameContext {
 		ui = _ui;
 
 		statusText = new StatusText();
+		statusText.x = cast camera.w / 2 * Application.getScreenZoom();
+		statusText.y = cast camera.h / 2 * Application.getScreenZoom();
 
 		worldMouseX = worldMouseY = 0;
 
 		renderSystem = new RenderSys(camera);
 		selfLitRenderSystem = new RenderSys(camera);
 		controlSystem = new Sys<Component>();
-		velocitySystem = new Sys<Velocity>();
+		velocitySystem = new Sys<VelocityCmp>();
 		dampingSystem = new Sys<Damping>();
 		collisionSystem = new TileCollisionSys();
 		interactSystem = new InteractSys();
@@ -120,8 +123,14 @@ class GameContext {
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();
 
-		lightingSystem = new DS2D(Std.int(Application.getScreenWidth() / Application.getScreenZoom()),
-			Std.int(Application.getScreenHeight() / Application.getScreenZoom()));
+		lightingSystem = new DS2D(
+			Std.int(
+				Application.getScreenWidth() / Application.getScreenZoom()
+			),
+			Std.int(
+				Application.getScreenHeight() / Application.getScreenZoom()
+			)
+		);
 		tooltipSystem = new TooltipSys(ui);
 
 		dialogueManager = new DialogueManager("../../Assets/dialogue");
@@ -146,7 +155,7 @@ class GameContext {
 		DC.log("    - config:Application");
 	}
 
-	public function reloadConfigs():Void {
+	public function reloadConfigs() {
 		TemplateParser.reloadConfigurations("../../Assets", (c) -> {
 			DebugLogger.info("config", c);
 			config = c;

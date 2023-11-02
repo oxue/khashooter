@@ -60,14 +60,18 @@ class Camera {
 	}
 
 	public function renderPosition():Vector2 {
-		return new Vector2(X(), Y());
+		return new Vector2(roundedX(), roundedY());
 	}
 
-	public function X():Int {
+	public function roundedX():Int {
 		return Math.round(x + shakeX);
 	}
 
-	public function Y():Int {
+	public function roundedY():Int {
 		return Math.round(y + shakeY);
+	}
+
+	public function roundedVec2():Vector2 {
+		return new Vector2(roundedX(), roundedY());
 	}
 }

@@ -1,18 +1,18 @@
 package refraction.core;
 
-import helpers.DebugLogger;
-import haxe.ds.StringMap;
 import haxe.Json;
+import haxe.ds.StringMap;
+import helpers.DebugLogger;
 import kha.Assets;
-import yaml.Yaml;
 import yaml.Parser;
+import yaml.Yaml;
 
 class TemplateParser {
 	public static var FALL_BACK_TO_JSON:Array<String> = [];
 
 	public static function parse():StringMap<Dynamic> {
 		var yamlObj:Dynamic = Yaml.parse(Assets.blobs.entity_entities_yaml.toString());
-		var ret = new StringMap<Dynamic>();
+		var ret:StringMap<Dynamic> = new StringMap<Dynamic>();
 		var i:Int = yamlObj
 			.get("entities")
 			.length;
@@ -33,7 +33,7 @@ class TemplateParser {
 		);
 	}
 
-	public static function reloadConfigurations(_dirPath, _done:Dynamic->Void):Void {
+	public static function reloadConfigurations(_dirPath, _done:Dynamic->Void) {
 		Assets.loadBlobFromPath('${_dirPath}/config.yaml', (blob) -> {
 			var yamlObj:Dynamic = Yaml.parse(blob.toString(), Parser
 				.options()
@@ -44,7 +44,7 @@ class TemplateParser {
 		});
 	}
 
-	public static function reloadEntityBlobs(_dirPath:String, _done:StringMap<Dynamic>->Void):Void {
+	public static function reloadEntityBlobs(_dirPath:String, _done:StringMap<Dynamic>->Void) {
 		Assets.loadBlobFromPath('${_dirPath}/entities.yaml', (blob) -> {
 			var yamlObj:Dynamic = Yaml.parse(blob.toString());
 			var ret = new StringMap<Dynamic>();
@@ -64,7 +64,7 @@ class TemplateParser {
 		});
 	}
 
-	public static function loadEntityTemplate(_dirPath:String, _name:String, _done:Dynamic->Void):Void {
+	public static function loadEntityTemplate(_dirPath:String, _name:String, _done:Dynamic->Void) {
 		Assets.loadBlobFromPath('${_dirPath}/${_name}.yaml', (blob) -> {
 			_done(Yaml.parse(blob.toString(), Parser
 				.options()
@@ -73,7 +73,7 @@ class TemplateParser {
 		});
 	}
 
-	private static function getEntityTemplate(_entityName:String):Dynamic {
+	static function getEntityTemplate(_entityName:String):Dynamic {
 		if (FALL_BACK_TO_JSON.indexOf(_entityName) == -1) {
 			var entityBlobYaml = Reflect
 				.field(Assets.blobs, 'entity_${_entityName}_yaml')

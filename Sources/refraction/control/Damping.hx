@@ -1,15 +1,15 @@
 package refraction.control;
 
 import refraction.core.Component;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 /**
  * ...
  * @author worldedit
  */
 class Damping extends Component {
-	private var velocity:Velocity;
+	private var velocity:VelocityCmp;
 	private var factor:Float;
 
 	public function new(_factor:Float = 0.9) {
@@ -22,7 +22,7 @@ class Damping extends Component {
 	}
 
 	override public function load():Void {
-		velocity = entity.getComponent(Velocity);
+		velocity = entity.getComponent(VelocityCmp);
 	}
 
 	override public function update():Void {

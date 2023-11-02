@@ -1,9 +1,9 @@
 package game;
 
 import entbuilders.ItemBuilder.Items;
-import refraction.display.AnimatedRender;
-import refraction.generic.Position;
 import kha.math.Vector2;
+import refraction.display.AnimatedRenderCmp;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
@@ -20,11 +20,11 @@ class Weapon {
 		name = _name;
 	}
 
-	public function castWeapon(_position:Position):Void {}
+	public function castWeapon(_position:PositionCmp):Void {}
 
-	public function persistCast(_positionc:Position):Void {}
+	public function persistCast(_positionc:PositionCmp):Void {}
 
-	public function setAnimation(_anim:AnimatedRender):Void {}
+	public function setAnimation(_anim:AnimatedRenderCmp):Void {}
 
 	public function getAmmo(_i:Inventory):Void {}
 

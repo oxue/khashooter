@@ -1,10 +1,10 @@
 package components;
 
 import refraction.core.Component;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
 
 class Beacon extends Component {
-	public var position:Position;
+	public var position:PositionCmp;
 	public var tag:String;
 
 	public function new() {
@@ -16,6 +16,6 @@ class Beacon extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
+		position = entity.getComponent(PositionCmp);
 	}
 }

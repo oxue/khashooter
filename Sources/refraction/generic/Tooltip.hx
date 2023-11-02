@@ -1,12 +1,12 @@
 package refraction.generic;
 
-import refraction.core.Component;
-import refraction.core.Application;
-import refraction.generic.Position;
-import refraction.generic.Dimensions;
-import kha.math.Vector2;
 import hxblit.Camera;
 import kha.Color;
+import kha.math.Vector2;
+import refraction.core.Application;
+import refraction.core.Component;
+import refraction.generic.DimensionsCmp;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
@@ -15,8 +15,8 @@ import kha.Color;
 class Tooltip extends Component {
 	public var message:String;
 	public var camera:Camera;
-	public var position:Position;
-	public var mouseBox:Dimensions;
+	public var position:PositionCmp;
+	public var mouseBox:DimensionsCmp;
 	public var color:Color;
 
 	public function new(_message = "Default", _color = Color.White, ?_camera:Camera) {
@@ -35,8 +35,8 @@ class Tooltip extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
-		mouseBox = entity.getComponent(Dimensions);
+		position = entity.getComponent(PositionCmp);
+		mouseBox = entity.getComponent(DimensionsCmp);
 	}
 
 	public function containsPoint(mouseCoords:Vector2):Bool {

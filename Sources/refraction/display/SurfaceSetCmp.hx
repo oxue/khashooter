@@ -2,14 +2,13 @@ package refraction.display;
 
 import hxblit.Surface2;
 import hxblit.TextureAtlas.FloatRect;
-import hxblit.TextureAtlas.IntRect;
 import refraction.core.Component;
 
 /**
  * ...
  * @author qwerber
  */
-class SurfaceSet extends Component {
+class SurfaceSetCmp extends Component {
 	public var surfaces:Array<Surface2>;
 	public var indexes:Array<Int>;
 	public var translateX:Float;
@@ -23,13 +22,13 @@ class SurfaceSet extends Component {
 		registrationX = registrationY = 0;
 	}
 
-	public function addTranslation(x:Float, y:Float):SurfaceSet {
+	public function addTranslation(x:Float, y:Float):SurfaceSetCmp {
 		translateX += x;
 		translateY += y;
 		return this;
 	}
 
-	public function registration(x:Float, y:Float):SurfaceSet {
+	public function registration(x:Float, y:Float):SurfaceSetCmp {
 		registrationX = x;
 		registrationY = y;
 		return this;

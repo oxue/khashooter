@@ -45,6 +45,13 @@ class ZombieResourceLoader {
 			ResourceFormat
 				.formatRotatedSprite("gibs", Assets.images.gibs, 16, 16)
 				.registration(8, 8);
+			ResourceFormat
+				.formatRotatedSprite("crate_base", Assets.images.crate_base, 26, 26)
+				.addTranslation(3, 3)
+				.registration(10, 10);
+			ResourceFormat
+				.formatRotatedSprite("crate_light", Assets.images.crate_light, 4, 4)
+				.registration(2, 2);
 
 			ResourceFormat.endAtlas();
 			DebugLogger.info("PERF", {time: Timer.stamp() - t});

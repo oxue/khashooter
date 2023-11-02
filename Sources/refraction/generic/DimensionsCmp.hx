@@ -1,13 +1,13 @@
 package refraction.generic;
 
-import refraction.core.Component;
 import kha.math.Vector2;
+import refraction.core.Component;
 
 /**
  * ...
  * @author worldedit
  */
-class Dimensions extends Component {
+class DimensionsCmp extends Component {
 	public var width:Int;
 	public var height:Int;
 
@@ -22,7 +22,7 @@ class Dimensions extends Component {
 		@param w     width
 		@param h     height
 	 */
-	override public function autoParams(_args:Dynamic):Void {
+	override public function autoParams(_args:Dynamic) {
 		width = _args.w;
 		height = _args.h;
 	}

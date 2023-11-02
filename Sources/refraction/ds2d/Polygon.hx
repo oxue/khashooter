@@ -11,23 +11,32 @@ class Polygon {
 	public var faces:Array<Face>;
 	public var x:Int;
 	public var y:Int;
-	public var radius:Int;
 
-	public function new(_numVertices:Int, _radius:Int, _x:Int, _y:Int) {
-		vertices = new Array<Vector2>();
-		faces = new Array<Face>();
+	public function new(_x:Int = 0, _y:Int = 0) {
+		vertices = [];
+		faces = [];
 		x = _x;
 		y = _y;
-		radius = _radius;
+	}
+
+	public function addDefaultFaces(_numVertices:Int, _radius:Int) {
 		var i:Int = _numVertices;
 		while (i-- > 0) {
-			vertices.push(new Vector2(Math.cos((3.14159265 * 2 / _numVertices) * i + 3.14 / 4) * _radius + x,
-				Math.sin((3.14159265 * 2 / _numVertices) * i + 3.14 / 4) * _radius + y));
+			var pi:Float = 3.1415;
+			var rads:Float = (pi * 2 / _numVertices) * i + pi / 4;
+			vertices.push(
+				new Vector2(
+					Math.cos(rads) * _radius + x,
+					Math.sin(rads) * _radius + y
+				)
+			);
 		}
 		var i:Int = _numVertices - 1;
 		while (i-- > 0) {
 			faces.push(new Face(vertices[i], vertices[i + 1]));
 		}
-		faces.push(new Face(vertices[_numVertices - 1], vertices[0]));
+		faces.push(
+			new Face(vertices[_numVertices - 1], vertices[0])
+		);
 	}
 }

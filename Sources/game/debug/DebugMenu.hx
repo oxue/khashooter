@@ -3,8 +3,9 @@ package game.debug;
 import components.Particle;
 import kha.Color;
 import refraction.core.Application;
+import refraction.core.Entity;
 import refraction.ds2d.LightSource;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
 import zui.Id;
 import zui.Zui;
 
@@ -25,16 +26,40 @@ class DebugMenu {
 		}
 	}
 
+	var entityCrate:Entity;
+
 	public function render(context:GameContext, ui:Zui) {
 		if (!showMenu) {
 			return;
 		}
-		var playerPos = context.playerEntity.getComponent(Position);
+		var playerPos = context.playerEntity.getComponent(PositionCmp);
+
+		if (entityCrate != null) {
+			// entityCrate.getComponent(Position).rotation += 1;
+		}
 
 		var worldMenuX:Int = cast menuX / 2 + context.camera.x;
 		var worldMenuY:Int = cast menuY / 2 + context.camera.y;
 
 		if (ui.window(Id.handle(), menuX, menuY, 200, 300, false)) {
+			if (ui.button("Spawn Crate")) {
+				entityCrate = EntFactory
+					.instance()
+					.autoBuild("Crate");
+
+				entityCrate
+					.getComponent(PositionCmp)
+					.setPosition(worldMenuX, worldMenuY);
+				context.lightingSystem.addLightSource(
+					new LightSource(
+						worldMenuX,
+						worldMenuY,
+						0x005B6F,
+						15
+					)
+				);
+			}
+
 			if (ui.button("Play Dialogue")) {
 				context.dialogueManager.playDialogue("dialogue1");
 				showMenu = false;
@@ -57,7 +82,7 @@ class DebugMenu {
 				EntFactory
 					.instance()
 					.autoBuild("Zombie")
-					.getComponent(Position)
+					.getComponent(PositionCmp)
 					.setPosition(worldMenuX, worldMenuY);
 			}
 
@@ -79,23 +104,27 @@ class DebugMenu {
 					EntFactory
 						.instance()
 						.autoBuild("Gyo")
-						.getComponent(Position)
-						.setPosition(worldMenuX + Std.int(Math.random() * 5),
-							worldMenuY + Std.int(Math.random() * 5));
+						.getComponent(PositionCmp)
+						.setPosition(
+							worldMenuX + Std.int(Math.random() * 5),
+							worldMenuY + Std.int(Math.random() * 5)
+						);
 				}
 			}
 
 			if (ui.button("Spawn light Source")) {
 				showMenu = false;
-				context.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY, [
-					Color.Cyan,
-					Color.Orange,
-					Color.Pink,
-					Color.White,
-					Color.Green,
-					Color.Yellow,
-					Color.Red
-				][Std.int(Math.random() * 7)].value & 0xFFFFFF));
+				context.lightingSystem.addLightSource(
+					new LightSource(worldMenuX, worldMenuY, [
+						Color.Cyan,
+						Color.Orange,
+						Color.Pink,
+						Color.White,
+						Color.Green,
+						Color.Yellow,
+						Color.Red
+					][Std.int(Math.random() * 7)].value & 0xFFFFFF)
+				);
 			}
 
 			if (ui.button("Blood Particles")) {
@@ -104,7 +133,7 @@ class DebugMenu {
 					EntFactory
 						.instance()
 						.autoBuild("Blood")
-						.getComponent(Position)
+						.getComponent(PositionCmp)
 						.setPosition(worldMenuX, worldMenuY)
 						.getEntity()
 						.getComponent(Particle)
@@ -112,9 +141,19 @@ class DebugMenu {
 				}
 			}
 
-			context.lightingSystem.setAmbientLevel(ui.slider(Id.handle({value: context.lightingSystem.getAmbientLevel()}),
-				"Ambient Level", 0, 1, false,
-				100, true));
+			context.lightingSystem.setAmbientLevel(
+				ui.slider(
+					Id.handle(
+						{value: context.lightingSystem.getAmbientLevel()}
+					),
+					"Ambient Level",
+					0,
+					1,
+					false,
+					100,
+					true
+				)
+			);
 
 			if (ui.button("Clear Lights")) {
 				showMenu = false;
@@ -125,7 +164,10 @@ class DebugMenu {
 				showMenu = false;
 			}
 
-			context.shouldDrawHitBoxes = ui.check(Id.handle(), "draw hitboxes");
+			context.shouldDrawHitBoxes = ui.check(
+				Id.handle(),
+				"draw hitboxes"
+			);
 		}
 	}
 }

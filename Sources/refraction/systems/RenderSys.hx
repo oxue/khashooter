@@ -1,21 +1,22 @@
 package refraction.systems;
 
-import refraction.core.Sys;
-import refraction.display.AnimatedRender;
 import hxblit.Camera;
-import refraction.utils.ObjectPool;
+import refraction.core.Sys;
+import refraction.display.AnimatedRenderCmp;
 
-class RenderSys extends Sys<AnimatedRender> {
-	private var camera:Camera;
-	private var pool:Array<AnimatedRender>;
+class RenderSys extends Sys<AnimatedRenderCmp> {
+
+	var camera:Camera;
+	var pool:Array<AnimatedRenderCmp>;
 
 	public function new(_camera:Camera) {
 		camera = _camera;
-		pool = new Array<AnimatedRender>();
+		pool = [];
 		super();
 	}
 
-	override public function produce():AnimatedRender {
+	// TODO: fix this
+	override public function produce():AnimatedRenderCmp {
 		if (pool.length != 0) {
 			// return pool.pop();
 		}
@@ -31,7 +32,7 @@ class RenderSys extends Sys<AnimatedRender> {
 				continue;
 			}
 			c.draw(camera);
-			++i;
+			i++;
 		}
 	}
 }

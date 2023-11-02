@@ -1,15 +1,15 @@
-package game;
+package game.behaviours;
 
+import helpers.DebugLogger;
 import kha.math.FastVector2;
 import refraction.control.BreadCrumbs;
 import refraction.core.Component;
-import refraction.display.AnimatedRender;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.display.AnimatedRenderCmp;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 import refraction.tile.TilemapData;
 import refraction.tile.TilemapUtils;
 import refraction.utils.Interval;
-import helpers.DebugLogger;
 
 /**
  * ...
@@ -21,21 +21,21 @@ enum ZombieAIState {
 }
 
 class ZombieAI extends Component {
+
 	public var breadcrumbs:BreadCrumbs;
 	public var randTargetInterval:Interval;
-	public var position:Position;
-	public var velocity:Velocity;
+	public var position:PositionCmp;
+	public var velocity:VelocityCmp;
 
-	private var blc:AnimatedRender;
-
-	public var followTarget:Position;
+	public var followTarget:PositionCmp;
 	public var targetMap:TilemapData;
 
-	private var state:ZombieAIState;
-	private var scentInterval:Interval;
-	private var lastScene:Bool;
+	var blc:AnimatedRenderCmp;
+	var state:ZombieAIState;
+	var scentInterval:Interval;
+	var lastScene:Bool;
 
-	public function new(?_followTarget:Position, ?_tilemap:TilemapData) {
+	public function new(?_followTarget:PositionCmp, ?_tilemap:TilemapData) {
 		super();
 
 		followTarget = _followTarget;
@@ -68,9 +68,9 @@ class ZombieAI extends Component {
 
 	override public function load():Void {
 		breadcrumbs = entity.getComponent(BreadCrumbs);
-		position = entity.getComponent(Position);
-		velocity = entity.getComponent(Velocity);
-		blc = entity.getComponent(AnimatedRender);
+		position = entity.getComponent(PositionCmp);
+		velocity = entity.getComponent(VelocityCmp);
+		blc = entity.getComponent(AnimatedRenderCmp);
 		// targetMap = entity.getComponent(TileCollision).targetTilemap;
 	}
 
@@ -83,7 +83,7 @@ class ZombieAI extends Component {
 			followTarget = GameContext
 				.instance()
 				.beaconSystem.getOne("player")
-				.getComponent(Position);
+				.getComponent(PositionCmp);
 			DebugLogger.info("AI", {
 				what: "retargeting zombie target",
 				target: followTarget
@@ -96,14 +96,34 @@ class ZombieAI extends Component {
 		}
 
 		var p:FastVector2 = new FastVector2(position.x - followTarget.x, position.y - followTarget.y);
-		var seen:Bool = !TilemapUtils.raycast(targetMap, position.x + 20, position.y + 20,
-			followTarget.x + 20, followTarget.y + 20)
-			&& !TilemapUtils.raycast(targetMap, position.x + 0, position.y + 0, followTarget.x + 0,
-				followTarget.y + 0)
-			&& !TilemapUtils.raycast(targetMap, position.x + 20, position.y + 0, followTarget.x + 20,
-				followTarget.y + 0)
-			&& !TilemapUtils.raycast(targetMap, position.x + 0, position.y + 20, followTarget.x + 0,
-				followTarget.y + 20);
+		var seen:Bool = !TilemapUtils.raycast(
+			targetMap,
+			position.x + 20,
+			position.y + 20,
+			followTarget.x + 20,
+			followTarget.y + 20
+		)
+			&& !TilemapUtils.raycast(
+				targetMap,
+				position.x + 0,
+				position.y + 0,
+				followTarget.x + 0,
+				followTarget.y + 0
+			)
+			&& !TilemapUtils.raycast(
+				targetMap,
+				position.x + 20,
+				position.y + 0,
+				followTarget.x + 20,
+				followTarget.y + 0
+			)
+			&& !TilemapUtils.raycast(
+				targetMap,
+				position.x + 0,
+				position.y + 20,
+				followTarget.x + 0,
+				followTarget.y + 20
+			);
 
 		if (seen) {
 			while (breadcrumbs.breadcrumbs.length > 1) {

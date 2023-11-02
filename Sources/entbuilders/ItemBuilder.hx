@@ -1,14 +1,14 @@
 package entbuilders;
 
-import refraction.core.Entity;
-import refraction.generic.Position;
-import refraction.generic.Dimensions;
-import refraction.display.AnimatedRender;
-import refraction.generic.Tooltip;
 import components.Interactable;
-import refraction.display.ResourceFormat;
 import game.GameContext;
 import game.Inventory;
+import refraction.core.Entity;
+import refraction.display.AnimatedRenderCmp;
+import refraction.display.ResourceFormat;
+import refraction.generic.DimensionsCmp;
+import refraction.generic.PositionCmp;
+import refraction.generic.Tooltip;
 
 /**
  * ...
@@ -23,7 +23,7 @@ class ItemBuilder {
 	public function createHuntersCrossbow(_x = 0, _y = 0):Entity {
 		var e:Entity = makebaseItem(_x, _y);
 
-		var animatedRender = e.getComponent(AnimatedRender);
+		var animatedRender = e.getComponent(AnimatedRenderCmp);
 		animatedRender.animations.set(CROSSBOW_DEFAULT_ANIMATION, [0]);
 		animatedRender.setCurrentAnimation(CROSSBOW_DEFAULT_ANIMATION);
 		animatedRender.frame = 0;
@@ -47,7 +47,7 @@ class ItemBuilder {
 
 	public function createFlameThrower(_x = 0, _y = 0):Entity {
 		var e = makebaseItem(_x, _y);
-		var animatedRender = e.getComponent(AnimatedRender);
+		var animatedRender = e.getComponent(AnimatedRenderCmp);
 		animatedRender.animations.set(FLAMETHROWER_DEFAULT_ANIMATION, [5]);
 		animatedRender.setCurrentAnimation(FLAMETHROWER_DEFAULT_ANIMATION);
 		animatedRender.frame = 0;
@@ -71,11 +71,11 @@ class ItemBuilder {
 
 	public function makebaseItem(_x = 0, _y = 0):Entity {
 		var e:Entity = new Entity();
-		e.addComponent(new Position(_x, _y));
-		e.addComponent(new Dimensions(32, 32));
+		e.addComponent(new PositionCmp(_x, _y));
+		e.addComponent(new DimensionsCmp(32, 32));
 		e.addComponent(ResourceFormat.getSurfaceSet("items"));
 
-		var animatedRender:AnimatedRender = new AnimatedRender();
+		var animatedRender:AnimatedRenderCmp = new AnimatedRenderCmp();
 		e.addComponent(animatedRender);
 		return e;
 	}

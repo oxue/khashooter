@@ -1,16 +1,16 @@
 package refraction.control;
 
 import hxblit.Camera;
-import refraction.core.Component;
 import refraction.core.Application;
-import refraction.generic.Position;
+import refraction.core.Component;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
  * @author worldedit
  */
 class RotationControl extends Component {
-	private var position:Position;
+	private var position:PositionCmp;
 	private var targetRotation:Float;
 	private var targetCamera:Camera;
 
@@ -24,7 +24,7 @@ class RotationControl extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
+		position = entity.getComponent(PositionCmp);
 	}
 
 	override public function update():Void {

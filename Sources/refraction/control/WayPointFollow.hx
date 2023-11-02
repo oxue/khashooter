@@ -3,10 +3,10 @@ package refraction.control;
 /*import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.Vector; */
-import refraction.core.Component;
 import refraction.core.Application;
+import refraction.core.Component;
 // import refraction.display.EFLA;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
 import refraction.generic.TransformComponent;
 import refraction.generic.VelocityComponent;
 import refraction.tile.TilemapUtils;
@@ -24,10 +24,10 @@ class WayPointFollow extends Component {
 	private var IDLE:Int = 0;
 	private var AGGRO:Int = 1;
 
-	private var followTarget:Position;
-	private var queue:Vector<Position>;
+	private var followTarget:PositionCmp;
+	private var queue:Vector<PositionCmp>;
 	private var velocity:VelocityComponent;
-	private var position:Position;
+	private var position:PositionCmp;
 	private var rotation:TransformComponent;
 	private var maxAccel:Float;
 
@@ -39,7 +39,7 @@ class WayPointFollow extends Component {
 
 	public function new() {
 		super("waypoint_follow_comp");
-		queue = new Vector<Position>();
+		queue = new Vector<PositionCmp>();
 	}
 
 	override public function load():Void {
@@ -54,7 +54,7 @@ class WayPointFollow extends Component {
 		state = AGGRO;
 	}
 
-	public function addWaypoint(_p:Position):Void {
+	public function addWaypoint(_p:PositionCmp):Void {
 		queue.push(_p);
 	}
 
@@ -84,7 +84,7 @@ class WayPointFollow extends Component {
 		timer++;
 		if (timer >= scentTimer) {
 			timer = 0;
-			queue.push(new Position(followTarget.x, followTarget.y));
+			queue.push(new PositionCmp(followTarget.x, followTarget.y));
 		}
 		var k:Int = queue.length;
 		while (k-- > 0) {

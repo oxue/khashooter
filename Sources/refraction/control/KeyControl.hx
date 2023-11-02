@@ -1,18 +1,18 @@
 package refraction.control;
 
 import kha.math.FastVector2;
-import refraction.core.Component;
 import refraction.core.Application;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.core.Component;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 /**
  * ...
  * @author worldedit
  */
 class KeyControl extends Component {
-	private var position:Position;
-	private var velocity:Velocity;
+	private var position:PositionCmp;
+	private var velocity:VelocityCmp;
 
 	public var speed:Float;
 
@@ -26,8 +26,8 @@ class KeyControl extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
-		velocity = entity.getComponent(Velocity);
+		position = entity.getComponent(PositionCmp);
+		velocity = entity.getComponent(VelocityCmp);
 	}
 
 	override public function update():Void {

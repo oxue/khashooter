@@ -2,74 +2,88 @@ package refraction.systems;
 
 // import flash.Vector;
 import kha.math.FastVector2;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
-import refraction.core.Sys;
 import refraction.core.Component;
+import refraction.core.Sys;
+import refraction.core.Utils;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 /**
  * ...
  * @author worldedit
  */
-class Spacing extends Component {
-	public var p:Position;
-	public var v:Velocity;
+class SpacingCmp extends Component {
+
+	public var position:PositionCmp;
+	public var velocity:VelocityCmp;
 	public var radius:Float;
 
 	public function new() {
 		super();
 	}
 
-	override public function autoParams(_args:Dynamic):Void {
+	override public function autoParams(_args:Dynamic) {
 		radius = _args.radius;
 	}
 
-	override public function load():Void {
-		p = entity.getComponent(Position);
-		v = entity.getComponent(Velocity);
+	override public function load() {
+		position = entity.getComponent(PositionCmp);
+		velocity = entity.getComponent(VelocityCmp);
 	}
 }
 
-class SpacingSys extends Sys<Spacing> {
+class SpacingSys extends Sys<SpacingCmp> {
+
+	var spacingFactor:Float;
+
 	public function new() {
 		super();
+
+		spacingFactor = 0.125;
 	}
 
-	override public function update():Void {
+	override public function update() {
 		var i:Int = components.length;
 		while (i-- > 0) {
-			if (components[i].p.remove) {
-				components[i] = components[components.length - 1];
-				components.pop();
+			var spacer:SpacingCmp = components[i];
+			if (spacer.position.remove) {
+				Utils.quickRemoveIndex(components, i);
 				continue;
 			}
-			var b:Position = components[i].p;
-			var j:Int = components.length;
-			var cx:Float = 0;
-			var cy:Float = 0;
-			while (j-- > 0) {
-				var b2:Position = components[j].p;
-				if (b2 == b)
-					continue;
+			pushSpacer(spacer);
+		}
+	}
 
-				var r2 = Math.pow(components[i].radius + components[j].radius, 2);
+	function pushSpacer(spacer:SpacingCmp) {
+		var position:PositionCmp = spacer.position;
+		var aggDisplaceTargetX:Float = 0;
+		var aggDisplaceTargetY:Float = 0;
+		for (spacer2 in components) {
+			var position2:PositionCmp = spacer2.position;
+			if (spacer == spacer2) {
+				continue;
+			}
 
-				if ((b2.x - b.x) * (b2.x - b.x) + (b2.y - b.y) * (b2.y - b.y) < r2) {
-					if (b2.x == b.x && b2.y == b.y) {
-						cx += Math.random() > 0.5 ? 1 : -1;
-						cy += Math.random() > 0.5 ? 1 : -1;
-					} else {
-						var diffVec = new FastVector2(b2.x - b.x, b2.y - b.y);
-						var penetrationDepth = components[i].radius + components[j].radius - diffVec.length;
-						diffVec.normalize();
-						var displace = diffVec.mult(-penetrationDepth);
-						cx = cx + displace.x; // (b2.x - b.x);
-						cy = cy + displace.y; // ;- (b2.y - b.y);
-					}
+			var r2:Float = Math.pow(spacer.radius + spacer2.radius, 2);
+
+			if (position.distanceToSquared(position2) < r2) {
+				if (position.equals(position2)) {
+					aggDisplaceTargetX += Utils.randomOneOrNegOne();
+					aggDisplaceTargetY += Utils.randomOneOrNegOne();
+				} else {
+					var diffVec:FastVector2 = new FastVector2(
+						position2.x - position.x,
+						position2.y - position.y
+					);
+					var penetrationDepth:Float = spacer.radius + spacer2.radius - diffVec.length;
+					diffVec = diffVec.normalized();
+					var displace:FastVector2 = diffVec.mult(-penetrationDepth);
+					aggDisplaceTargetX = aggDisplaceTargetX + displace.x;
+					aggDisplaceTargetY = aggDisplaceTargetY + displace.y;
 				}
 			}
-			components[i].v.addVelX(cx / 8);
-			components[i].v.addVelX(cy / 8);
 		}
+		spacer.velocity.addVelX(aggDisplaceTargetX * spacingFactor);
+		spacer.velocity.addVelX(aggDisplaceTargetY * spacingFactor);
 	}
 }

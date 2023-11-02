@@ -7,7 +7,7 @@ import kha.math.Vector2;
 import refraction.core.Application;
 import refraction.core.Component;
 import refraction.core.Utils;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
@@ -15,14 +15,14 @@ import refraction.generic.Position;
  */
 class Inventory extends Component {
 	private var currentWeapon:Weapon;
-	private var position:Position;
+	private var position:PositionCmp;
 
 	public function new() {
 		super();
 	}
 
 	override public function load() {
-		position = entity.getComponent(Position);
+		position = entity.getComponent(PositionCmp);
 	}
 
 	override public function update() {}

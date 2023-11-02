@@ -1,6 +1,7 @@
 ---
 entities: 
 - Player
+- Crate
 - Actor
 - Zombie
 - Gyo

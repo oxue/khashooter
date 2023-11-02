@@ -4,6 +4,7 @@ import haxe.Constraints.Constructible;
 import refraction.core.Entity;
 
 class NullSystem<T:Component> {
+
 	public function new() {}
 
 	@:generic
@@ -20,6 +21,7 @@ class NullSystem<T:Component> {
  */
 @:generic
 class Sys<T:Component> {
+
 	public var components:Array<T>;
 
 	private var l:Int;
@@ -29,19 +31,11 @@ class Sys<T:Component> {
 	}
 
 	@:generic
-	public function procure<G:Constructible<Dynamic> & T & Component>
-		(
-			e:Entity, 
-			_type:Class<G>,
-			_name:String = null,
-			_default:G = null
-		):G {
+	public function procure<G:Constructible<Dynamic> & T & Component>(e:Entity, _type:Class<G>,
+			?_name:String, ?_default:G):G {
 		var ret:G = cast produce();
 		if (ret == null) {
-			ret = _default;
-		}
-		if (ret == null) {
-			var instance: G = Type.createInstance(_type, []);
+			var instance:G = Type.createInstance(_type, []);
 			ret = instance;
 		}
 		e.addComponent(ret, _name);
@@ -53,7 +47,7 @@ class Sys<T:Component> {
 		components = components.filter(function(c) return !c.remove);
 	}
 
-	public function removeIndex(_i:Int, _pool:Array<T> = null):Void {
+	public function removeIndex(_i:Int, _pool:Array<T> = null) {
 		if (_pool != null) {
 			components[_i].reset();
 			_pool.push(components[_i]);
@@ -66,7 +60,7 @@ class Sys<T:Component> {
 		return null;
 	}
 
-	public inline function addComponent(_c:T):Void {
+	public inline function addComponent(_c:T) {
 		components.push(_c);
 	}
 
@@ -75,7 +69,7 @@ class Sys<T:Component> {
 		comp.update();
 	}
 
-	public function update():Void {
+	public function update() {
 		l = components.length;
 		var i:Int = 0;
 		while (i < l) {

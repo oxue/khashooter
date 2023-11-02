@@ -4,7 +4,6 @@ base_entity: Actor
 components:
 - type: SurfaceSet
   resource: zombie
-
 - type: AnimatedRender
   name: 
   args:
@@ -23,12 +22,12 @@ components:
 - type: HitCircle
   name: zombie_hitcircle
   args:
-    tag: ZOMBIE
+    tag: enemy
     radius: 15
 - type: HitCircle
   name: neutral_hitcircle
   args:
-    tag: NEUTRAL_HP
+    tag: neutral_hp
     radius: 15
 - type: BreadCrumbs
   args:
@@ -37,4 +36,4 @@ components:
 - type: ZombieAI
 - type: Health
   args:
-    maxValue: 1000
+    maxValue: 100

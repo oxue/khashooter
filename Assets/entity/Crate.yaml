@@ -1,0 +1,27 @@
+---
+entity_name: Crate
+components:
+- type: Position
+- type: SurfaceSet
+  resource: crate_base
+- type: SurfaceSet
+  resource: crate_light
+  name: crate_light_surface
+- type: AnimatedRender
+  name: 
+  args:
+    animations:
+    - name: idle
+      frames: [0]
+    initialAnimation: idle
+    surface: 
+    frameTime: 2
+- type: AnimatedRender/SelfLit
+  name: light_render
+  args:
+    animations:
+    - name: blue
+      frames: [0]
+    initialAnimation: blue
+    surface: crate_light_surface
+    frameTime: 8

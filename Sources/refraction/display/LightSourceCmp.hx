@@ -4,16 +4,17 @@ import kha.math.FastVector2;
 import refraction.core.Component;
 import refraction.ds2d.DS2D;
 import refraction.ds2d.LightSource;
-import refraction.generic.Position;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
  * @author
  */
-class LightSourceComponent extends Component {
+class LightSourceCmp extends Component {
+
 	public var light:LightSource;
 	public var offset:FastVector2;
-	public var position:Position;
+	public var position:PositionCmp;
 
 	public function new(lightingSystem:DS2D, _color:Int = 0xff0000, _radius:Int = 100, _offsetX:Int,
 			_offsetY:Int) {
@@ -24,12 +25,12 @@ class LightSourceComponent extends Component {
 		super();
 	}
 
-	override public function load():Void {
-		position = entity.getComponent(Position);
+	override public function load() {
+		position = entity.getComponent(PositionCmp);
 	}
 
 	// TODO : remove funct
-	override public function unload():Void {
+	override public function unload() {
 		light.remove = true;
 	}
 }

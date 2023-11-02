@@ -2,11 +2,8 @@ package hxblit;
 
 import kha.Image;
 
-/**
- * ...
- * @author worldedit qwerber
- */
 class SurfaceData {
+
 	public var data:Image;
 	public var id:Int;
 

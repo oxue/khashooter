@@ -3,7 +3,7 @@ package refraction.tile;
 import hxblit.TextureAtlas.FloatRect;
 import hxblit.TextureAtlas.IntBounds;
 import refraction.core.Sys;
-import refraction.generic.Dimensions;
+import refraction.generic.DimensionsCmp;
 
 class TileCollisionSys extends Sys<TileCollision> {
 	var tilemapData:TilemapData;
@@ -169,7 +169,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 			.vec()
 			.sub(_tc.velocity.vec())
 			.add(_tc.hitboxPosition);
-		var dimensions:Dimensions = _tc.dimensions;
+		var dimensions:DimensionsCmp = _tc.dimensions;
 		var velX = position.x - previous.x;
 		var velY = position.y - previous.y;
 		var dtxc = 0.0;

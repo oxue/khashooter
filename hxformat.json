@@ -3,15 +3,14 @@
         "methodChain": {
             "defaultWrap": "onePerLine",
             "defaultLocation": "afterLast",
-            "rules": [
-            ]
+            "rules": []
         },
         "callParameter": {
             "rules": [
                 {
                     "conditions": [
                         {
-                            "cond": "lineLength >= n",
+                            "cond": "totalItemLength >= n",
                             "value": 70
                         }
                     ],
@@ -21,8 +20,22 @@
         },
         "maxLineLength": 110
     },
+    "emptyLines": {
+        "afterLeftCurly": "keep",
+        "afterPackage": 1,
+        "afterReturn": "remove",
+        "classEmptyLines": {
+            "beginType": 1
+        }
+    },
+    "whitespace": {
+        "arrowFunctionsPolicy": "around",
+        "functionTypeHaxe4Policy": "around",
+        "functionTypeHaxe3Policy": "around"
+    },
     "lineEnds": {
         "leftCurly": "after",
+        "rightCurly": "after",
         "emptyCurly": "noBreak"
     }
 }

@@ -1,11 +1,11 @@
-package game;
+package game.behaviours;
 
 import kha.math.FastVector2;
 import refraction.control.BreadCrumbs;
 import refraction.core.Component;
-import refraction.display.AnimatedRender;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.display.AnimatedRenderCmp;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 import refraction.utils.Interval;
 
 /**
@@ -15,13 +15,13 @@ import refraction.utils.Interval;
 class MimiAI extends Component {
 	public var breadcrumbs:BreadCrumbs;
 	public var randTargetInterval:Interval;
-	public var position:Position;
-	public var velocity:Velocity;
-
-	private var blc:AnimatedRender;
+	public var position:PositionCmp;
+	public var velocity:VelocityCmp;
 
 	public var lastX:Float;
 	public var lastY:Float;
+
+	var blc:AnimatedRenderCmp;
 
 	public function new() {
 		super();
@@ -37,17 +37,17 @@ class MimiAI extends Component {
 		breadcrumbs.breadcrumbs[0].y = position.x + Math.random() * 300 - 150;
 	}
 
-	override public function load():Void {
+	override public function load() {
 		breadcrumbs = entity.getComponent(BreadCrumbs);
-		position = entity.getComponent(Position);
-		velocity = entity.getComponent(Velocity);
-		blc = entity.getComponent(AnimatedRender);
+		position = entity.getComponent(PositionCmp);
+		velocity = entity.getComponent(VelocityCmp);
+		blc = entity.getComponent(AnimatedRenderCmp);
 
 		lastX = position.x;
 		lastY = position.y;
 	}
 
-	override public function update():Void {
+	override public function update() {
 		randTargetInterval.tick();
 		if (Math.round(position.x - lastX) == 0 && Math.round(position.y - lastY) == 0) {
 			blc.curAnimaition = "idle";

@@ -42,6 +42,16 @@ class TilemapData extends Component {
 		return tile != null && tile.solid;
 	}
 
+	/**
+	 * right, bottom, left, top
+	 * @param i 
+	 * @param j 
+	 * @return (Int, Int, Int, Int)
+	 */
+	public function getTileBoundsAt(i:Int, j:Int):Array<Int> {
+		return [j * tilesize + tilesize, i * tilesize + tilesize, j * tilesize, i * tilesize];
+	}
+
 	public function getTileAt(row:Int, col:Int):Tile {
 		if (row < 0 || col < 0 || row >= height || col >= width) {
 			return null;
@@ -50,7 +60,7 @@ class TilemapData extends Component {
 		return data[row][col];
 	}
 
-	public function setDataIntArray(_data:Array<Array<Int>>):Void {
+	public function setDataIntArray(_data:Array<Array<Int>>) {
 		var i:Int = _data.length;
 		while (i-- > 0) {
 			var j:Int = _data[0].length;

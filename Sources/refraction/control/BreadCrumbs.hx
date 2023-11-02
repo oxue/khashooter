@@ -2,8 +2,8 @@ package refraction.control;
 
 import kha.math.FastVector2;
 import refraction.core.Component;
-import refraction.generic.Position;
-import refraction.generic.Velocity;
+import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 /**
  * ...
@@ -14,8 +14,8 @@ class BreadCrumbs extends Component {
 	public var acceptanceRadius:Float;
 	public var maxAcceleration:Float;
 
-	public var position:Position;
-	public var velocity:Velocity;
+	public var position:PositionCmp;
+	public var velocity:VelocityCmp;
 
 	public function new() {
 		breadcrumbs = new Array();
@@ -37,7 +37,7 @@ class BreadCrumbs extends Component {
 	}
 
 	override public function load():Void {
-		position = entity.getComponent(Position);
-		velocity = entity.getComponent(Velocity);
+		position = entity.getComponent(PositionCmp);
+		velocity = entity.getComponent(VelocityCmp);
 	}
 }

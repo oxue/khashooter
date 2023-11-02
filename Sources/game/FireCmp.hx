@@ -1,33 +1,34 @@
 package game;
 
-import refraction.display.LightSourceComponent;
 import refraction.core.Component;
-import refraction.generic.Position;
+import refraction.display.LightSourceCmp;
+import refraction.generic.PositionCmp;
 
 /**
  * ...
  * @author qwerber
  */
-class FireComponent extends Component {
-	public var lightSource:LightSourceComponent;
-	public var position:Position;
+class FireCmp extends Component {
 
-	private var t:Int;
-	private var timer:Int;
+	public var lightSource:LightSourceCmp;
+	public var position:PositionCmp;
+
+	var t:Int;
+	var timer:Int;
 
 	public function new() {
 		super();
 	}
 
-	override public function load():Void {
-		position = entity.getComponent(Position);
-		lightSource = entity.getComponent(LightSourceComponent);
+	override public function load() {
+		position = entity.getComponent(PositionCmp);
+		lightSource = entity.getComponent(LightSourceCmp);
 		timer = GameContext
 			.instance()
 			.config.flamethrower_total_particle_life;
 	}
 
-	override public function update():Void {
+	override public function update() {
 		t++;
 		if (t >= timer || lightSource.light.radius <= 0) {
 			entity.remove();
@@ -36,10 +37,11 @@ class FireComponent extends Component {
 		if (t < GameContext
 			.instance()
 			.config.flamethrower_grow_util
-		)
+		) {
 			lightSource.light.radius += GameContext
 				.instance()
 				.config.flamethrower_grow_rate;
+		}
 
 		lightSource.light.v3Color.x += (1 * 0.3 - lightSource.light.v3Color.x) / 60;
 		lightSource.light.v3Color.y += (0.6 * 0.3 - lightSource.light.v3Color.y) / 60;
