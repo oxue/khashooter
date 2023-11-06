@@ -7,9 +7,9 @@ import refraction.core.Component;
 import refraction.display.AnimatedRenderCmp;
 import refraction.generic.PositionCmp;
 import refraction.generic.VelocityCmp;
-import refraction.tile.Tilemap;
-import refraction.tile.Tilemap;
-import refraction.tile.TilemapUtils;
+import refraction.tilemap.Tilemap;
+import refraction.tilemap.Tilemap;
+import refraction.tilemap.TilemapUtils;
 import refraction.utils.Interval;
 
 /**

@@ -1,4 +1,4 @@
-package refraction.tile;
+package refraction.tilemap;
 
 import refraction.display.SurfaceSetCmp;
 

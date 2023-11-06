@@ -22,8 +22,8 @@ import refraction.display.AnimatedRenderCmp;
 import refraction.display.LightSourceCmp;
 import refraction.display.ResourceFormat;
 import refraction.generic.*;
-import refraction.tile.TileCollision;
-import refraction.tile.Tilemap;
+import refraction.tilemap.TileCollisionCmp;
+import refraction.tilemap.Tilemap;
 
 /**
  * ...
@@ -160,7 +160,7 @@ class EntFactory {
 			});
 
 		gameContext.collisionSystem
-			.procure(e, TileCollision)
+			.procure(e, TileCollisionCmp)
 			.autoParams({tilemap: gameContext.tilemap});
 		gameContext.aiSystem.procure(e, MimiAI);
 		gameContext.tooltipSystem
@@ -211,7 +211,7 @@ class EntFactory {
 		damping.autoParams({factor: gameContext.config.flamethrower_damping});
 		gameContext.environmentSystem.procure(e, FireCmp);
 		gameContext.collisionSystem
-			.procure(e, TileCollision)
+			.procure(e, TileCollisionCmp)
 			.autoParams({tilemap: gameContext.tilemap});
 
 		gameContext.hitTestSystem

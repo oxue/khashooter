@@ -1,4 +1,4 @@
-package refraction.tile;
+package refraction.tilemap;
 
 import kha.math.Vector2;
 import refraction.ds2d.Face;

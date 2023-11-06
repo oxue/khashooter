@@ -1,20 +1,20 @@
-package refraction.tile;
+package refraction.tilemap;
 
 import hxblit.TextureAtlas.FloatRect;
 import hxblit.TextureAtlas.IntBounds;
 import refraction.core.Sys;
 import refraction.generic.DimensionsCmp;
 
-class TileCollisionSys extends Sys<TileCollision> {
+class TileCollisionSys extends Sys<TileCollisionCmp> {
 	var tilemapData:Tilemap;
-	var pool:Array<TileCollision>;
+	var pool:Array<TileCollisionCmp>;
 
 	public function new() {
 		pool = [];
 		super();
 	}
 
-	override public function produce():TileCollision {
+	override public function produce():TileCollisionCmp {
 		if (pool.length != 0) {
 			return pool.pop();
 		}
@@ -72,7 +72,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return new IntBounds(left, right, top, bottom);
 	}
 
-	function sweptRect(tc:TileCollision):FloatRect {
+	function sweptRect(tc:TileCollisionCmp):FloatRect {
 		var previousX = tc.position.x - tc.velocity.getVelX();
 		var previousY = tc.position.y - tc.velocity.getVelY();
 
@@ -94,7 +94,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return lastRect.union(nowRect);
 	}
 
-	function pushBack(tc:TileCollision, data:CollisionData) {
+	function pushBack(tc:TileCollisionCmp, data:CollisionData) {
 		var xFlag:Int = 1 - data.nature;
 		var yFlag:Int = data.nature;
 
@@ -109,7 +109,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 		tc.velocity.setVelY(-pushbackY * xFlag);
 	}
 
-	function getCollisionsInBound(tc:TileCollision, bounds:IntBounds):Array<CollisionData> {
+	function getCollisionsInBound(tc:TileCollisionCmp, bounds:IntBounds):Array<CollisionData> {
 		var datas = new Array<CollisionData>();
 		var i = bounds.t;
 		while (i <= bounds.b) {
@@ -134,7 +134,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return datas;
 	}
 
-	public function collideOneAxis(tc:TileCollision) {
+	public function collideOneAxis(tc:TileCollisionCmp) {
 		var datas:Array<CollisionData> = getCollisionsInBound(
 			tc,
 			getCollisionBounds(sweptRect(tc))
@@ -155,13 +155,13 @@ class TileCollisionSys extends Sys<TileCollision> {
 		pushBack(tc, minTimeData);
 	}
 
-	function collide(tc:TileCollision) {
+	function collide(tc:TileCollisionCmp) {
 		collideOneAxis(tc);
 		collideOneAxis(tc);
 	}
 
 	// WARNING DELICATE FLOATING POINT MATH
-	public function solveRect(_tc:TileCollision, _tx:Int, _ty:Int, _tw:Int, _th:Int):CollisionData {
+	public function solveRect(_tc:TileCollisionCmp, _tx:Int, _ty:Int, _tw:Int, _th:Int):CollisionData {
 		var position = _tc.position
 			.vec()
 			.add(_tc.hitboxPosition);

@@ -8,7 +8,7 @@ import haxe.Json;
 import kha.Assets;
 import refraction.ds2d.LightSource;
 import refraction.generic.PositionCmp;
-import refraction.tile.TilemapUtils;
+import refraction.tilemap.TilemapUtils;
 import ui.HealthBar;
 
 class LevelLoader {

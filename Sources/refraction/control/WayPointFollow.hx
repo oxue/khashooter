@@ -9,7 +9,7 @@ import refraction.core.Component;
 import refraction.generic.PositionCmp;
 import refraction.generic.TransformComponent;
 import refraction.generic.VelocityComponent;
-import refraction.tile.TilemapUtils;
+import refraction.tilemap.TilemapUtils;
 
 /**
  * ...

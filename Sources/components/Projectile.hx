@@ -4,7 +4,7 @@ import game.CollisionBehaviours.MSG_COLLIDED;
 import kha.math.Vector2;
 import refraction.core.Component;
 import refraction.generic.PositionCmp;
-import refraction.tile.Tilemap;
+import refraction.tilemap.Tilemap;
 
 /**
  * ...

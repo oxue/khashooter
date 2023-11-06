@@ -20,7 +20,7 @@ import refraction.generic.DimensionsCmp;
 import refraction.generic.PositionCmp;
 import refraction.generic.VelocityCmp;
 import refraction.systems.SpacingSys.SpacingCmp;
-import refraction.tile.TileCollision;
+import refraction.tilemap.TileCollisionCmp;
 
 class ShooterComponentFactory extends ComponentFactory {
 
@@ -33,7 +33,7 @@ class ShooterComponentFactory extends ComponentFactory {
 		typeToMethodMap.set("AnimatedRender/SelfLit", (e:Entity, name:String) -> gameContext.selfLitRenderSystem.procure(e, AnimatedRenderCmp, name));
 		typeToMethodMap.set("RotationControl", (e:Entity, name:String) -> gameContext.controlSystem.procure(e, RotationControl, name));
 		typeToMethodMap.set("KeyControl", (e:Entity, name:String) -> gameContext.controlSystem.procure(e, KeyControl, name));
-		typeToMethodMap.set("TileCollision", (e:Entity, name:String) -> gameContext.collisionSystem.procure(e, TileCollision, name));
+		typeToMethodMap.set("TileCollision", (e:Entity, name:String) -> gameContext.collisionSystem.procure(e, TileCollisionCmp, name));
 		typeToMethodMap.set("PlayerAnimation", (e:Entity, name:String) -> gameContext.controlSystem.procure(e, PlayerAnimation, name));
 		typeToMethodMap.set("Inventory", (e:Entity, name:String) -> e.addComponent(new InventoryCmp()));
 		typeToMethodMap.set("Position", (e:Entity, name:String) -> e.addComponent(new PositionCmp()));

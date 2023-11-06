@@ -1,4 +1,4 @@
-package refraction.tile;
+package refraction.tilemap;
 
 import haxe.ds.Vector;
 import hxblit.Camera;
@@ -23,7 +23,7 @@ class Tilemap {
 
 	var surface2set:SurfaceSetCmp;
 
-	public function new(tilesheet:SurfaceSetCmp, _width, _height, _tilesize, _colIndex) {
+	public function new(tilesheet:SurfaceSetCmp, _width:Int, _height:Int, _tilesize:Int, _colIndex:Int) {
 		this.surface2set = tilesheet;
 		this.tilesize = _tilesize;
 		this.width = _width;
