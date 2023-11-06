@@ -19,7 +19,7 @@ import refraction.systems.RenderSys;
 import refraction.systems.SpacingSys;
 import refraction.systems.TooltipSys;
 import refraction.tile.TileCollisionSys;
-import refraction.tile.TileRender;
+import refraction.tile.Tilemap;
 import refraction.tile.TilemapData;
 import systems.BeaconSys;
 import systems.HitTestSys;
@@ -34,7 +34,7 @@ import zui.Zui;
  */
 class GameContext {
 
-	private static var myInstance:GameContext = null;
+	static var myInstance:GameContext = null;
 
 	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext {
 		if (myInstance == null) {
@@ -48,7 +48,7 @@ class GameContext {
 	}
 
 	public var camera:Camera;
-	public var currentMap:TileRender;
+	public var tilemapRender:Tilemap;
 	public var tilemapData:TilemapData;
 
 	public var playerEntity:Entity;
@@ -92,11 +92,15 @@ class GameContext {
 
 	public var shouldDrawHitBoxes:Bool;
 
+	public var values:Values;
+	public var reloadGraphics:Bool;
+
 	public function new(_camera:Camera, _ui:Zui) {
 		config = TemplateParser.parseConfig();
+		values = new Values(config);
 
 		camera = _camera;
-		currentMap = null;
+		tilemapRender = null;
 		ui = _ui;
 
 		statusText = new StatusText();
@@ -135,10 +139,18 @@ class GameContext {
 
 		dialogueManager = new DialogueManager("../../Assets/dialogue");
 		debugMenu = new DebugMenu();
+		reloadGraphics = false;
 		// initConsole();
 	}
 
-	private function initConsole() {
+	public function reloadConfigs() {
+		TemplateParser.reloadConfigurations("../../Assets", (c) -> {
+			DebugLogger.info("config", c);
+			config = c;
+		});
+	}
+
+	function initConsole() {
 		console = new Console((s) -> {
 			DebugLogger.info("CONSOLE", s);
 		}, ui);
@@ -153,12 +165,5 @@ class GameContext {
 		DC.log("    - context:GameContext");
 		DC.log("    - app:Application");
 		DC.log("    - config:Application");
-	}
-
-	public function reloadConfigs() {
-		TemplateParser.reloadConfigurations("../../Assets", (c) -> {
-			DebugLogger.info("config", c);
-			config = c;
-		});
 	}
 }

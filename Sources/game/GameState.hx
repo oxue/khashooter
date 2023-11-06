@@ -9,6 +9,7 @@ import hxblit.Camera;
 import hxblit.KhaBlit;
 import kha.Assets;
 import kha.Framebuffer;
+import kha.graphics4.Graphics;
 import kha.input.KeyCode;
 import kha.input.Mouse;
 import refraction.core.Application;
@@ -26,7 +27,6 @@ class GameState extends refraction.core.State {
 
 	var ui:Zui;
 	var showMenu:Bool;
-	var shouldDrawHitBoxes:Bool;
 
 	var levelLoader:LevelLoader;
 
@@ -35,7 +35,6 @@ class GameState extends refraction.core.State {
 	public function new(defaultMap:String) {
 		this.defaultMap = defaultMap;
 		this.showMenu = false;
-		this.shouldDrawHitBoxes = false;
 		super();
 	}
 
@@ -87,6 +86,8 @@ class GameState extends refraction.core.State {
 
 		mapEditor = new MapEditor();
 
+		configureDebugKeys();
+
 		isRenderingReady = true;
 	}
 
@@ -123,9 +124,7 @@ class GameState extends refraction.core.State {
 	function mouseDown(button:Int, x:Int, y:Int) {
 		if (button == 0) {
 			gameContext.interactSystem.update();
-			var inventory:Inventory = gameContext.playerEntity.getComponent(
-				Inventory
-			);
+			var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
 			inventory.primaryAction();
 		}
 	}
@@ -156,7 +155,7 @@ class GameState extends refraction.core.State {
 			if (Application.mouseIsDown) {
 				trace("persistent action");
 				gameContext.playerEntity
-					.getComponent(Inventory)
+					.getComponent(InventoryCmp)
 					.persistentAction();
 			}
 		}
@@ -164,9 +163,7 @@ class GameState extends refraction.core.State {
 
 	function updateCamera() {
 		gameContext.camera.updateShake();
-		var playerPos:PositionCmp = cast gameContext.playerEntity.getComponent(
-			PositionCmp
-		);
+		var playerPos:PositionCmp = cast gameContext.playerEntity.getComponent(PositionCmp);
 
 		gameContext.camera.follow(
 			playerPos.x,
@@ -185,9 +182,9 @@ class GameState extends refraction.core.State {
 
 		this.updateCamera();
 
-		var g = frame.g4;
+		var g4:Graphics = frame.g4;
 
-		g.begin();
+		g4.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
 		KhaBlit.setPipeline(
@@ -195,44 +192,40 @@ class GameState extends refraction.core.State {
 			"KHBTex2PipelineState"
 		);
 		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture(
-			"tex",
-			ResourceFormat.atlases
-				.get("all")
-				.image
+		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+			.get("all")
+			.image
 		);
 
-		if (gameContext.currentMap != null) {
-			gameContext.currentMap.update();
+		if (gameContext.tilemapRender != null) {
+			gameContext.tilemapRender.render();
 		}
 
 		gameContext.renderSystem.update();
 
 		KhaBlit.draw();
 
-		g.end();
+		g4.end();
 
 		gameContext.lightingSystem.renderHXB(gameContext);
 
-		g.begin();
+		g4.begin();
 		KhaBlit.setContext(frame.g4);
 		KhaBlit.setPipeline(
 			KhaBlit.KHBTex2PipelineState,
 			"KHBTex2PipelineState"
 		);
 		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture(
-			"tex",
-			ResourceFormat.atlases
-				.get("all")
-				.image
+		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+			.get("all")
+			.image
 		);
 
 		gameContext.selfLitRenderSystem.update();
 
 		KhaBlit.draw();
 
-		g.end();
+		g4.end();
 
 		// UI
 		if (Application.mouse2JustDown) {
@@ -244,11 +237,35 @@ class GameState extends refraction.core.State {
 
 		frame.g2.begin(false);
 		gameContext.tooltipSystem.draw(frame.g2);
+		// frame.g2.color = White;
+		// frame.g2.drawImage(
+		// 	Assets.images.projectiles,
+		// 	gameContext.config.texPosX,
+		// 	gameContext.config.texPosY
+		// );
 		frame.g2.end();
+
 		gameContext.statusText.render(frame.g2);
+
+		if (gameContext.reloadGraphics) {
+			gameContext.reloadGraphics = false;
+			isRenderingReady = false;
+			Assets.loadEverything(() -> {
+				ZombieResourceLoader.load();
+				isRenderingReady = true;
+			}, desc -> {
+				desc.files[0] = "../../Assets/" + desc.files[0] + "?t=" + Std.string(Date
+					.now()
+					.getTime()
+				);
+				true;
+			});
+		}
 	}
 
-	function renderUI(f:Framebuffer, context:GameContext, ui:Zui) { // === Game UI ===
+	function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
+
+		// === Game UI ===
 		f.g2.begin(false);
 		renderHitBoxes(f, context);
 		renderGameUI(f, context, ui);
@@ -268,7 +285,7 @@ class GameState extends refraction.core.State {
 	}
 
 	function renderHitBoxes(f:Framebuffer, gc:GameContext) {
-		if (!shouldDrawHitBoxes) {
+		if (!gc.shouldDrawHitBoxes) {
 			return;
 		}
 		for (tc in gc.collisionSystem.components) {

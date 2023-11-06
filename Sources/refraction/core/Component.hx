@@ -15,7 +15,7 @@ class Component {
 
 	public var entity:Entity;
 
-	private var events:StringMap<Dynamic->Void>;
+	var events:StringMap<Dynamic->Void>;
 
 	public function new() {
 		events = new StringMap<Dynamic->Void>();
@@ -25,18 +25,18 @@ class Component {
 		return entity;
 	}
 
-	public function reset():Void {
+	public function reset() {
 		remove = false;
 	}
 
-	public function defaulted(_value:Dynamic, _default:Dynamic = null):Dynamic {
+	public function defaulted(_value:Dynamic, ?_default:Dynamic):Dynamic {
 		if (_value != null) {
 			return _value;
 		}
 		return _default;
 	}
 
-	public function notify(_msgType:String, _msgData:Dynamic):Void {
+	public function notify(_msgType:String, _msgData:Dynamic) {
 		if (events.exists(_msgType)) {
 			DebugLogger.info("NOTIFY", {
 				recipientClass: Type.getClassName(Type.getClass(this)),
@@ -49,15 +49,15 @@ class Component {
 		}
 	}
 
-	public function on(_msgType:String, _msgHandler:Dynamic->Void):Void {
+	public function on(_msgType:String, _msgHandler:Dynamic->Void) {
 		events.set(_msgType, _msgHandler);
 	}
 
-	public function autoParams(_args:Dynamic):Void {}
+	public function autoParams(_args:Dynamic) {}
 
-	public function load():Void {}
+	public function load() {}
 
-	public function unload():Void {}
+	public function unload() {}
 
-	public function update():Void {}
+	public function update() {}
 }

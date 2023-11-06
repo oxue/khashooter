@@ -1,10 +1,10 @@
 package systems;
 
-import components.Interactable;
-import refraction.core.Sys;
+import components.InteractableCmp;
 import refraction.core.Application;
+import refraction.core.Sys;
 
-class InteractSys extends Sys<Interactable> {
+class InteractSys extends Sys<InteractableCmp> {
 	override public function update() {
 		sweepRemoved();
 		var hoveredItems = components.filter(function(ic) return ic.containsCursor());

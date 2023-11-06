@@ -201,9 +201,9 @@ class DS2D {
 				.get("all")
 				.image
 		);
-		gameContext.currentMap.threashold = true;
-		gameContext.currentMap.mode = 1;
-		gameContext.currentMap.update();
+		gameContext.tilemapRender.threashold = true;
+		gameContext.tilemapRender.mode = 1;
+		gameContext.tilemapRender.render();
 
 		KhaBlit.draw();
 
@@ -244,7 +244,7 @@ class DS2D {
 
 		backbuffer.end();
 
-		gameContext.currentMap.threashold = false;
+		gameContext.tilemapRender.threashold = false;
 		KhaBlit.KHBTex2PipelineState.blendAlpha();
 	}
 

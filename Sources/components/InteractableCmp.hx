@@ -1,10 +1,10 @@
 package components;
 
 import hxblit.Camera;
+import kha.math.Vector2;
 import refraction.core.Application;
 import refraction.core.Component;
 import refraction.core.Entity;
-import refraction.core.Utils;
 import refraction.generic.DimensionsCmp;
 import refraction.generic.PositionCmp;
 
@@ -12,28 +12,29 @@ import refraction.generic.PositionCmp;
  * ...
  * @author
  */
-class Interactable extends Component {
-	private var position:PositionCmp;
-	private var dimensions:DimensionsCmp;
-	private var camera:Camera;
+class InteractableCmp extends Component {
 
-	public var interactFunc:Entity->Void;
+	public var interactFunc:Entity -> Void;
 
-	public function new(_cam:Camera, _interactFunc:Entity->Void) {
+	var position:PositionCmp;
+	var dimensions:DimensionsCmp;
+	var camera:Camera;
+
+	public function new(_cam:Camera, _interactFunc:Entity -> Void) {
 		camera = _cam;
 		interactFunc = _interactFunc;
 		super();
 	}
 
-	override public function load():Void {
+	override public function load() {
 		position = entity.getComponent(PositionCmp);
 		dimensions = entity.getComponent(DimensionsCmp);
 	}
 
 	public function containsCursor():Bool {
-		var worldMouseCoords = Application
+		var worldMouseCoords:Vector2 = Application
 			.mouseCoords()
-			.mult(0.5)
+			.div(Application.getScreenZoom())
 			.add(camera.position());
 		return dimensions.containsPoint(worldMouseCoords.sub(position.vec()));
 	}

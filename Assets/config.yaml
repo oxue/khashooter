@@ -5,6 +5,9 @@ flamethrower_total_particle_life: 400
 flamethrower_shrink_after: 55
 flamethrower_shrink_rate: 1
 flamethrower_starting_size: 2
+flamethrower_hitcircle_size: 10
+flamethrower_start_speed: 8
+fireball_damage: 0.5
 
 flamethrower_damping: 0.95
 flamethrower_fireball_size: 4
@@ -15,3 +18,10 @@ camera_damping_speed: 0.0166
 crossbow_projectile_speed: 12
 crossbow_bolt_light_color: 0x22225d
 crossbow_bolt_light_radius: 10
+
+gib_splash_magnitude_min: 5
+gib_splash_magnitude_max: 30
+single_hit_gibsplash_amount: 10
+
+texPosX: 0
+texPosY: 0

@@ -1,16 +1,27 @@
 package game.debug;
 
-import zui.Id;
-import kha.Color;
+import hxblit.Camera;
 import kha.Assets;
-import zui.Zui;
+import kha.Color;
 import kha.Framebuffer;
+import kha.math.Vector2;
+import refraction.core.Application;
+import zui.Id;
+import zui.Zui;
 
 class MapEditor {
-	private var show:Bool;
+
+	static final FONTSIZE:Int = 16;
+	static final TILEPALLET_START_X:Int = 20;
+	static final TILEPALLET_START_Y:Int = 20;
+
+	var show:Bool;
+	var tilePaletteHandle:Handle;
 
 	public function new() {
 		show = false;
+
+		tilePaletteHandle = Id.handle();
 	}
 
 	public function toggle() {
@@ -23,7 +34,7 @@ class MapEditor {
 		}
 
 		f.g2.begin(false);
-		f.g2.pushOpacity(0.5);
+		f.g2.pushOpacity(0.3);
 		renderGrid(context, f);
 		f.g2.popOpacity();
 		f.g2.end();
@@ -32,46 +43,102 @@ class MapEditor {
 		ui.end();
 	}
 
+	public function getWindowMousePosition(ui:Zui, windowHandle:Handle):Vector2 {
+		var windowPosition:Vector2 = new Vector2(
+			TILEPALLET_START_X + ui.TAB_W(),
+			TILEPALLET_START_Y + ui.HEADER_DRAG_H()
+		);
+		var windowDragPosition:Vector2 = new Vector2(windowHandle.dragX, windowHandle.dragY);
+		windowPosition = windowPosition.add(windowDragPosition);
+		var mousePosition:Vector2 = new Vector2(Application.mouseX, Application.mouseY);
+
+		var windowMousePosition:Vector2 = mousePosition.sub(windowPosition);
+		return windowMousePosition;
+	}
+
 	public function renderUI(context:GameContext, ui:Zui) {
-		if (ui.window(Id.handle(), 20, 20, 800, 100, true)) {
-			if (ui.image(Assets.images.tilesheet) == State.Down) {
-				trace("ZUI DOWN");
+		if (ui.window(
+			tilePaletteHandle,
+			TILEPALLET_START_X,
+			TILEPALLET_START_Y,
+			800,
+			200,
+			true
+		)) {
+			var tilePalletImgState:State = ui.image(
+				Assets.images.tilesheet,
+				0xffffffff,
+				Assets.images.tilesheet.height * Application.getScreenZoom(),
+			);
+			if (tilePalletImgState == State.Down) {
+				handleTilePaletteSelection(ui, context);
+				
 			}
 		}
 	}
 
-	private function drawString2(f:Framebuffer, s:String, x:Float, y:Float) {
+	function handleTilePaletteSelection(ui:Zui, context:GameContext) {
+		var windowMousePosition:Vector2 = getWindowMousePosition(ui, tilePaletteHandle);
+		// var tileSelected:Int = context.tilemapData.getTileIndexAt(
+		// 	windowMousePosition.x,
+		// 	windowMousePosition.y
+		// );
+	}
+
+	function drawString2(f:Framebuffer, s:String, x:Float, y:Float) {
+		f.g2.fontSize = FONTSIZE;
 		f.g2.drawString(s, x * 2, y * 2);
 	}
 
-	private function drawLine2(f:Framebuffer, x:Float, y:Float, z:Float, w:Float, s:Float = 1.0) {
-		f.g2.drawLine(x * 2, y * 2, z * 2, w * 2, s);
+	function drawLine2(f:Framebuffer, x1:Float, y1:Float, x2:Float, y2:Float, strength:Float = 1.0) {
+		f.g2.drawLine(x1 * 2, y1 * 2, x2 * 2, y2 * 2, strength);
 	}
 
-	private function renderGrid(context:GameContext, f:Framebuffer) {
-		f.g2.font = Assets.fonts.monaco;
-		f.g2.color = Color.White;
-		var tilesize = context.tilemapData.tilesize;
+	function renderGrid(context:GameContext, framebuffer:Framebuffer) {
+		framebuffer.g2.font = Assets.fonts.monaco;
+		framebuffer.g2.color = Color.White;
+		var tilesize:Int = context.tilemapData.tilesize;
 
-		var camera = context.camera;
-		var cameraX = camera.x - 1;
-		var cameraY = camera.y + 1;
+		var camera:Camera = context.camera;
+		var cameraX:Float = camera.x;
+		var cameraY:Float = camera.y;
 
-		var startIndX:Int = cast Math.max(0, Math.floor(camera.x / tilesize));
-		var startIndY:Int = cast Math.max(0, Math.floor(camera.y / tilesize));
-		var endIndX:Int = cast Math.max(Math.floor(camera.r() / tilesize), camera.w);
-		var endIndY:Int = cast Math.max(Math.floor(camera.b() / tilesize), camera.h);
+		var startIndX:Int = cast Math.Math.floor(Math.max(0, camera.x) / tilesize);
+		var startIndY:Int = cast Math.Math.floor(Math.max(0, camera.y) / tilesize);
+		var endIndX:Int = cast Math.floor(camera.r() / tilesize) + 1;
+		var endIndY:Int = cast Math.floor(camera.b() / tilesize) + 1;
 
 		for (i in startIndX...endIndX) {
-			drawString2(f, Std.string(i), i * tilesize - cameraX, Math.max(0.0, -cameraY) - 20);
-
-			drawLine2(f, i * tilesize - cameraX, Math.max(0.0, -cameraY), i * tilesize - cameraX, camera.h);
+			drawString2(
+				framebuffer,
+				Std.string(i),
+				i * tilesize - cameraX,
+				Math.max(0.0, -cameraY - FONTSIZE)
+			);
+			drawLine2(
+				framebuffer,
+				i * tilesize - cameraX,
+				Math.max(0.0, -cameraY),
+				i * tilesize - cameraX,
+				camera.h
+			);
 		}
 
+		// horizontal lines
 		for (i in startIndY...endIndY) {
-			drawString2(f, Std.string(i), Math.max(0, -cameraX) - 10, i * tilesize - cameraY);
-
-			drawLine2(f, Math.max(0, -cameraX), i * tilesize - cameraY, camera.w, i * tilesize - cameraY);
+			drawString2(
+				framebuffer,
+				Std.string(i),
+				Math.max(0, -cameraX - FONTSIZE),
+				i * tilesize - cameraY
+			);
+			drawLine2(
+				framebuffer,
+				Math.max(0, -cameraX),
+				i * tilesize - cameraY,
+				camera.w,
+				i * tilesize - cameraY
+			);
 		}
 	}
 }

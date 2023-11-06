@@ -50,6 +50,11 @@ class VelocityCmp extends Component {
 		velY = _value;
 	}
 
+	public function setBoth(_vx:Float, _vy:Float) {
+		velX = _vx;
+		velY = _vy;
+	}
+
 	public function addVelX(_value:Float) {
 		velX += _value;
 	}

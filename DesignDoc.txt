@@ -3,3 +3,4 @@
 - inventory
 - make sure spacing cmp is removed  
 - better enemy behaviour
+- knockback resistance

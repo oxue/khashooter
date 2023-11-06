@@ -1,6 +1,5 @@
 package game;
 
-import components.Particle;
 import refraction.core.Entity;
 import refraction.core.Utils;
 import refraction.generic.PositionCmp;
@@ -21,59 +20,42 @@ final HG_CROSSBOW_BOLT:String = "crossbow_bolt";
 
 function defineCollisionBehaviours(gameContext:GameContext) {
 	var entFactory:EntFactory = EntFactory.instance();
-	gameContext.hitTestSystem.onHit(
-		HG_ENEMY,
-		HG_PLAYER,
-		function(z:Entity, p:Entity) {
-			p.notify(MSG_DAMAGE, {amount: -1});
-			var playerPos:PositionCmp = p.getComponent(PositionCmp);
-			for (i in 0...1) {
-				entFactory
-					.autoBuild("Blood")
-					.getComponent(PositionCmp)
-					.setPosition(playerPos.x, playerPos.y)
-					.getEntity()
-					.getComponent(Particle)
-					.randomDirection(Math.random() * 30 + 5);
-			}
-		}
-	);
-	gameContext.hitTestSystem.onHit(HG_NEUTRAL_HP, HG_FIRE, (n, f) -> {
-		n.notify(MSG_DAMAGE, {
-			amount: -2,
-			type: HG_FIRE
-		});
+
+	gameContext.hitTestSystem.onHit(HG_ENEMY, HG_PLAYER, function(z:Entity, p:Entity) {
+		p.notify(MSG_DAMAGE, {amount: -1});
+		entFactory.createGibSplash(1, p.getComponent(PositionCmp));
 	});
+
 	gameContext.hitTestSystem.onHit(
-		HG_ENEMY,
-		HG_CROSSBOW_BOLT,
-		function(enemy:Entity, bolt:Entity) {
-
-			// notify
-			enemy.notify(MSG_DAMAGE, {amount: -10});
-			bolt.notify(MSG_COLLIDED);
-
-			final knockbackRotation:Float = bolt
-				.getComponent(PositionCmp)
-				.rotation;
-
-			// particle
-			for (i in 0...10) {
-				entFactory
-					.autoBuild("Blood")
-					.getComponent(PositionCmp)
-					.setFromPosition(enemy.getComponent(PositionCmp))
-					.getEntity()
-					.getComponent(Particle)
-					.randomDirection(
-						Math.random() * 10 + 5,
-						Utils.a2rad(knockbackRotation)
-					);
-			}
-
-			knockback(enemy, knockbackRotation);
+		HG_NEUTRAL_HP,
+		HG_FIRE,
+		function(neutralHpEntity:Entity, f:Entity) {
+			neutralHpEntity.notify(MSG_DAMAGE, {
+				amount: -gameContext.config.fireball_damage,
+				type: HG_FIRE
+			});
 		}
 	);
+
+	gameContext.hitTestSystem.onHit(HG_ENEMY, HG_CROSSBOW_BOLT, function(enemy:Entity, bolt:Entity) {
+
+		// notify
+		enemy.notify(MSG_DAMAGE, {amount: -10});
+		bolt.notify(MSG_COLLIDED);
+
+		final knockbackRotation:Float = bolt
+			.getComponent(PositionCmp)
+			.rotation;
+
+		// particle
+		entFactory.createGibSplash(
+			gameContext.config.single_hit_gibsplash_amount,
+			enemy.getComponent(PositionCmp),
+			Utils.a2rad(knockbackRotation)
+		);
+
+		knockback(enemy, knockbackRotation);
+	});
 }
 
 function knockback(entity:Entity, direction:Float, power:Float = 10) {

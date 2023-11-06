@@ -1,7 +1,8 @@
 package game;
 
 import components.HitCircleCmp;
-import components.Interactable;
+import components.InteractableCmp;
+import components.Particle;
 import components.Projectile;
 import entbuilders.ItemBuilder;
 import game.CollisionBehaviours.HG_CROSSBOW_BOLT;
@@ -22,7 +23,7 @@ import refraction.display.LightSourceCmp;
 import refraction.display.ResourceFormat;
 import refraction.generic.*;
 import refraction.tile.TileCollision;
-import refraction.tile.TileRender;
+import refraction.tile.Tilemap;
 import refraction.tile.TilemapData;
 
 /**
@@ -66,9 +67,10 @@ class EntFactory {
 	}
 
 	public function worldMouse():Vector2 {
+		var invZoom:Float = 1 / Application.getScreenZoom();
 		return new Vector2(
-			cast Application.mouseX / 2 + gameContext.camera.x,
-			cast Application.mouseY / 2 + gameContext.camera.y
+			cast Application.mouseX * invZoom + gameContext.camera.x,
+			cast Application.mouseY * invZoom + gameContext.camera.y
 		);
 	}
 
@@ -81,12 +83,19 @@ class EntFactory {
 			return itemBuilder.createHuntersCrossbow(_x, _y);
 		}
 
+		if (itemType == Items.MachineGun) {
+			return itemBuilder.createMachineGun(_x, _y);
+		}
+
 		return null;
 	}
 
 	public function autoComponent(_type:String, _settings:Dynamic, _e:Entity):Component {
 		if (_type == "SurfaceSet") {
-			return _e.addComponent(ResourceFormat.surfacesets.get(_settings.resource), _settings.name);
+			return _e.addComponent(
+				ResourceFormat.surfacesets.get(_settings.resource),
+				_settings.name
+			);
 		}
 
 		var ret:Component = factory.get(_type, _e, _settings.name);
@@ -137,7 +146,7 @@ class EntFactory {
 
 		gameContext.renderSystem.addComponent(surfaceRender);
 
-		var npc = new Interactable(gameContext.camera, function(e) {
+		var npc = new InteractableCmp(gameContext.camera, function(e) {
 			trace("Asd");
 		});
 		e.addComponent(npc);
@@ -169,7 +178,11 @@ class EntFactory {
 		var offsetLight:Int = Std.int(gameContext.config.flamethrower_fireball_size / 2);
 
 		e.addComponent(
-			new PositionCmp(_position.x, _position.y, Utils.direction2Degrees(direction))
+			new PositionCmp(
+				_position.x,
+				_position.y,
+				Utils.direction2Degrees(direction)
+			)
 		);
 		var lightSource:LightSourceCmp = new LightSourceCmp(
 			gameContext.lightingSystem,
@@ -182,7 +195,9 @@ class EntFactory {
 		gameContext.lightSourceSystem.addComponent(lightSource);
 
 		var velocity:VelocityCmp = gameContext.velocitySystem.procure(e, VelocityCmp);
-		direction = direction.normalized().mult(gameContext.config.flamethrower_start_speed);
+		direction = direction
+			.normalized()
+			.mult(gameContext.config.flamethrower_start_speed);
 		velocity.setVelX(direction.x);
 		velocity.setVelY(direction.y);
 
@@ -204,16 +219,52 @@ class EntFactory {
 			.procure(e, HitCircleCmp)
 			.autoParams({
 				tag: HG_FIRE,
-				radius: 10
+				radius: gameContext.config.flamethrower_hitcircle_size
 			});
 
 		return e;
 	}
 
+	public function createBullet(_position:Vector2, direction:Vector2):Entity {
+		var e:Entity = autoBuild("MGBullet");
+		e
+			.getComponent(PositionCmp)
+			.setPosition(
+				_position.x,
+				_position.y,
+				Utils.direction2Degrees(direction)
+			);
+		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
+		var lightSource = new LightSourceCmp(
+			gameContext.lightingSystem,
+			0x111100,
+			gameContext.config.crossbow_bolt_light_radius,
+			0,
+			0
+		);
+		e.addComponent(lightSource);
+		gameContext.lightSourceSystem.addComponent(lightSource);
+
+		direction = direction
+			.normalized()
+			.mult(gameContext.config.crossbow_projectile_speed);
+		e
+			.getComponent(VelocityCmp)
+			.setBoth(direction.x, direction.y);
+		gameContext.hitCheckSystem
+			.procure(e, Projectile)
+			.tilemapData = gameContext.tilemapData;
+		return e;
+	}
+
 	public function createProjectile(_position:Vector2, direction:Vector2):Entity {
-		var e:Entity = new Entity();
+		var e:Entity = autoBuild("MGBullet");
 		e.addComponent(
-			new PositionCmp(_position.x, _position.y, Utils.direction2Degrees(direction))
+			new PositionCmp(
+				_position.x,
+				_position.y,
+				Utils.direction2Degrees(direction)
+			)
 		);
 		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 		var lightSource = new LightSourceCmp(
@@ -263,14 +314,31 @@ class EntFactory {
 		tilemapData.setDataIntArray(_data);
 		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
 
-		var tileRender:TileRender = new TileRender();
+		var tileRender:Tilemap = new Tilemap();
 		tileRender.targetCamera = gameContext.camera;
 		e.addComponent(tileRender);
 
-		gameContext.currentMap = tileRender;
+		gameContext.tilemapRender = tileRender;
 		gameContext.tilemapData = tilemapData;
 		gameContext.collisionSystem.setTilemap(tilemapData);
 
 		return e;
+	}
+
+	// Smaller Stuff
+	public function createGibSplash(amount:Int, _p:PositionCmp, ?_directionBiasRad:Float,
+			?_directionStdRad:Float) {
+		for (i in 0...amount) {
+			autoBuild("Blood")
+				.getComponent(PositionCmp)
+				.setFromPosition(_p)
+				.getEntity()
+				.getComponent(Particle)
+				.randomDirection(
+					gameContext.values.getRandomGibSplashMaginutude(),
+					_directionBiasRad,
+					_directionStdRad
+				);
+		}
 	}
 }

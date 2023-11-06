@@ -9,6 +9,7 @@ import refraction.core.Component;
  * @author qwerber
  */
 class SurfaceSetCmp extends Component {
+
 	public var surfaces:Array<Surface2>;
 	public var indexes:Array<Int>;
 	public var translateX:Float;

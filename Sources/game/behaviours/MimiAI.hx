@@ -50,10 +50,10 @@ class MimiAI extends Component {
 	override public function update() {
 		randTargetInterval.tick();
 		if (Math.round(position.x - lastX) == 0 && Math.round(position.y - lastY) == 0) {
-			blc.curAnimaition = "idle";
+			blc.curAnimation = "idle";
 			blc.frame = 0;
 		} else {
-			blc.curAnimaition = "running";
+			blc.curAnimation = "running";
 		}
 		lastX = position.x;
 		lastY = position.y;

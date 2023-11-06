@@ -1,8 +1,8 @@
 package entbuilders;
 
-import components.Interactable;
+import components.InteractableCmp;
 import game.GameContext;
-import game.Inventory;
+import game.InventoryCmp;
 import refraction.core.Entity;
 import refraction.display.AnimatedRenderCmp;
 import refraction.display.ResourceFormat;
@@ -33,9 +33,9 @@ class ItemBuilder {
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 
-		var ic = new Interactable(gameContext.camera, function(e:Entity) {
+		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
 			gameContext.playerEntity
-				.getComponent(Inventory)
+				.getComponent(InventoryCmp)
 				.pickup(Items.HuntersCrossbow);
 			e.remove();
 		});
@@ -57,10 +57,34 @@ class ItemBuilder {
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 
-		var ic = new Interactable(gameContext.camera, function(e:Entity) {
+		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
 			gameContext.playerEntity
-				.getComponent(Inventory)
+				.getComponent(InventoryCmp)
 				.pickup(Items.Flamethrower);
+			e.remove();
+		});
+		gameContext.interactSystem.addComponent(ic);
+		e.addComponent(ic);
+
+		return e;
+	}
+
+	public function createMachineGun(_x = 0, _y = 0):Entity {
+		var e = makebaseItem(_x, _y);
+		var animatedRender = e.getComponent(AnimatedRenderCmp);
+		animatedRender.animations.set("default", [3]);
+		animatedRender.setCurrentAnimation("default");
+		animatedRender.frame = 0;
+		gameContext.renderSystem.addComponent(animatedRender);
+
+		var tt:Tooltip = new Tooltip("Machine Gun", kha.Color.Red);
+		e.addComponent(tt);
+		gameContext.tooltipSystem.addComponent(tt);
+
+		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
+			gameContext.playerEntity
+				.getComponent(InventoryCmp)
+				.pickup(Items.MachineGun);
 			e.remove();
 		});
 		gameContext.interactSystem.addComponent(ic);
@@ -86,6 +110,8 @@ class ItemBuilder {
 }
 
 enum Items {
+	Empty;
 	HuntersCrossbow;
 	Flamethrower;
+	MachineGun;
 }

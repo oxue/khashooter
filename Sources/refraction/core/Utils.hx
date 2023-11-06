@@ -8,9 +8,9 @@ import refraction.generic.PositionCmp;
  * @author worldedit
  */
 class Utils {
-	public static var TWIP:Float = 0.05;
-	public static var RAD2A:Float = 180 / 3.1415926;
-	public static var A2RAD:Float = 1 / RAD2A;
+	public static final TWIP:Float = 0.05;
+	public static final RAD2A:Float = 180 / 3.1415926;
+	public static final A2RAD:Float = 1 / RAD2A;
 
 	public static inline function posDis2(_pos1:PositionCmp, _pos2:PositionCmp):Float {
 		var dx:Float = _pos1.x - _pos2.x;
@@ -20,7 +20,7 @@ class Utils {
 		return dis;
 	}
 
-	public static inline function floatEq(f1:Float, f2:Float, precision:Float = 1e-12) {
+	public static inline function floatEq(f1:Float, f2:Float, precision:Float = 1e-12):Bool {
 		return Math.abs(f1 - f2) <= precision;
 	}
 
@@ -49,5 +49,9 @@ class Utils {
 
 	public static inline function sq(_x:Float):Float {
 		return _x * _x;
+	}
+
+	public static inline function clampInt(_x:Int, _min:Int, _max:Int):Int {
+		return _x < _min ? _min : (_x > _max ? _max : _x);
 	}
 }

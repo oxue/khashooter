@@ -36,10 +36,14 @@ class TilemapData extends Component {
 	}
 
 	public function hitTestPoint(p:Vector2):Bool {
-		var tCol = Math.floor(p.x / tilesize);
-		var tRow = Math.floor(p.y / tilesize);
-		var tile = getTileAt(tRow, tCol);
+		var tCol:Int = Math.floor(p.x / tilesize);
+		var tRow:Int = Math.floor(p.y / tilesize);
+		var tile:Tile = getTileAt(tRow, tCol);
 		return tile != null && tile.solid;
+	}
+
+	public function toTileCoord(x:Float): Int {
+		return Math.floor(x / tilesize);
 	}
 
 	/**

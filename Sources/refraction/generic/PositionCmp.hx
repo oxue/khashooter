@@ -22,9 +22,12 @@ class PositionCmp extends Component {
 		super();
 	}
 
-	public function setPosition(_x:Float = 0, _y:Float = 0):PositionCmp {
+	public function setPosition(_x:Float = 0, _y:Float = 0, ?_rotation):PositionCmp {
 		x = _x;
 		y = _y;
+		if (_rotation != null) {
+			rotation = _rotation;
+		}
 		return this;
 	}
 

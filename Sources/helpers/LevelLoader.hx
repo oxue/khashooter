@@ -26,7 +26,7 @@ class LevelLoader {
 		spawnPlayer(levelData);
 		spawnLights(levelData);
 
-		// hardcode
+		// TODO: remove hardcode
 		entityFactory.createItem(
 			levelData.start.x,
 			levelData.start.y,
@@ -38,6 +38,13 @@ class LevelLoader {
 			levelData.start.y,
 			Items.Flamethrower
 		);
+
+		entityFactory.createItem(
+			levelData.start.x + 60,
+			levelData.start.y,
+			Items.MachineGun
+		);
+
 		entityFactory.createNPC(levelData.start.x, levelData.start.y, "mimi");
 	}
 

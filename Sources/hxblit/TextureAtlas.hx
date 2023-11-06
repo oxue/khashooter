@@ -214,7 +214,7 @@ class TextureAtlas {
 
 	public static function bake(_data:Image, _rot:Int = 32):Image {
 		var diagnol:Int = Math.ceil(Math.sqrt(_data.width * _data.width + _data.height * _data.height));
-		var cache:Image = Image.createRenderTarget(diagnol * _rot, diagnol);
+		var cache:Image = Image.createRenderTarget(diagnol * _rot, diagnol, null, NoDepthAndStencil, 4);
 		cache.g2.begin(true, Color.fromFloats(0, 0, 0, 0));
 		var i:Int = -1;
 		var translateX:Float = (diagnol - _data.width) * 0.5;
@@ -237,8 +237,8 @@ class TextureAtlas {
 		var gWidth:Int = cast _data.width / _frame.w;
 		var gHeight:Int = cast _data.height / _frame.h;
 		var diagnol:Int = Math.ceil(Math.sqrt(_frame.w * _frame.w + _frame.h * _frame.h));
-		var ret:Image = Image.createRenderTarget(diagnol * _rot, gWidth * gHeight * diagnol);
-		var brush:Image = Image.createRenderTarget(_frame.w, _frame.h);
+		var ret:Image = Image.createRenderTarget(diagnol * _rot, gWidth * gHeight * diagnol, null, NoDepthAndStencil, 4);
+		var brush:Image = Image.createRenderTarget(_frame.w, _frame.h, null, NoDepthAndStencil, 4);
 		var i:Int = -1;
 		while (i++ < gHeight - 1) {
 			var j:Int = -1;
@@ -270,7 +270,7 @@ class TextureAtlas {
 		while (i++ < gh - 1) {
 			var j:Int = -1;
 			while (j++ < gw - 1) {
-				var b:Image = Image.createRenderTarget(cast _frame.w, cast _frame.h);
+				var b:Image = Image.createRenderTarget(cast _frame.w, cast _frame.h, null, NoDepthAndStencil, 4);
 				_frame.x = j * _frame.w;
 				_frame.y = i * _frame.h;
 				b.g2.begin(true, Color.fromFloats(0, 0, 0, 0));

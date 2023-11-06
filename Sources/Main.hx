@@ -11,7 +11,7 @@ class Main {
 		Application.init("Pew Pew", 1200, 800, 2, function() {
 			KhaBlit.init(Application.getScreenWidth(), Application.getScreenHeight(), Application.getScreenZoom());
 			ResourceFormat.init();
-			Application.setState(new GameState("bloodstrike_zm"));
+			Application.setState(new GameState("rooms"));
 		});
 	}
 }

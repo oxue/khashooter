@@ -84,6 +84,6 @@ class SpacingSys extends Sys<SpacingCmp> {
 			}
 		}
 		spacer.velocity.addVelX(aggDisplaceTargetX * spacingFactor);
-		spacer.velocity.addVelX(aggDisplaceTargetY * spacingFactor);
+		spacer.velocity.addVelY(aggDisplaceTargetY * spacingFactor);
 	}
 }

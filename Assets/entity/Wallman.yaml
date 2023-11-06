@@ -1,0 +1,17 @@
+---
+entity_name: Wallman
+base_entity: Actor
+components:
+- type: SurfaceSet
+  resource: wall_man
+- type: AnimatedRender
+  name:
+  args:
+    animations:
+    - name: shoot
+      frames: [1, 2, 3, 0, 0, 0, 0, 0, 0]
+    - name: idle
+      frames: [0]
+    initialAnimation: shoot
+    surface:
+    frameTime: 10

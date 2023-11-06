@@ -67,6 +67,14 @@ class Camera {
 		return Math.round(x + shakeX);
 	}
 
+	public function roundedR():Int {
+		return Math.round(r() + shakeX);
+	}
+
+	public function roundedB():Int {
+		return Math.round(b() + shakeY);
+	}
+
 	public function roundedY():Int {
 		return Math.round(y + shakeY);
 	}

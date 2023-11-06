@@ -25,9 +25,6 @@ class ResourceFormat {
 	}
 
 	public static function beginAtlas(_name:String) {
-		if (curAtlas != null) {
-			return;
-		}
 		var newAtlas = new TextureAtlas();
 		atlases.set(_name, newAtlas);
 		curAtlas = newAtlas;

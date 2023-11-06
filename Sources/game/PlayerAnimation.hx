@@ -14,7 +14,7 @@ class PlayerAnimation extends Component {
 
 	var velocity:VelocityCmp;
 	var blc:AnimatedRenderCmp;
-	var inventory:Inventory;
+	var inventory:InventoryCmp;
 
 	public function new() {
 		super();
@@ -24,7 +24,7 @@ class PlayerAnimation extends Component {
 		velocity = entity.getComponent(VelocityCmp);
 		blc = entity.getComponent(AnimatedRenderCmp);
 		weapons = entity.getComponent(AnimatedRenderCmp, "weapon_render_comp");
-		inventory = entity.getComponent(Inventory);
+		inventory = entity.getComponent(InventoryCmp);
 	}
 
 	function notMoving():Bool {
@@ -38,12 +38,12 @@ class PlayerAnimation extends Component {
 		var walkingAnimation:String = inventory.wieldingWeapon() ? "running with weapon" : "running";
 
 		if (notMoving()) {
-			if (blc.curAnimaition != idleAnimation) {
-				blc.curAnimaition = idleAnimation;
+			if (blc.curAnimation != idleAnimation) {
+				blc.curAnimation = idleAnimation;
 				blc.frame = 0;
 			}
-		} else if (blc.curAnimaition != walkingAnimation) {
-			blc.curAnimaition = walkingAnimation;
+		} else if (blc.curAnimation != walkingAnimation) {
+			blc.curAnimation = walkingAnimation;
 			blc.frame = Std.int(Math.random() * 4);
 		}
 	}

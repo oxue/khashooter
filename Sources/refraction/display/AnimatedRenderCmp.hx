@@ -19,7 +19,7 @@ class AnimatedRenderCmp extends Component {
 	public var animations:StringMap<Array<Int>>;
 
 	public var numRot:Int;
-	public var curAnimaition:String;
+	public var curAnimation:String;
 
 	var time:Int;
 
@@ -38,12 +38,12 @@ class AnimatedRenderCmp extends Component {
 		coordX = coordY = 0;
 		animations = new StringMap<Array<Int>>();
 		frameTime = 4;
-		curAnimaition = "";
+		curAnimation = "";
 		frame = 0;
 	}
 
 	public inline function setCurrentAnimation(_animation) {
-		this.curAnimaition = _animation;
+		this.curAnimation = _animation;
 	}
 
 	override public function autoParams(_args:Dynamic) {
@@ -52,9 +52,10 @@ class AnimatedRenderCmp extends Component {
 			var item = _args.animations[i];
 			animations.set(item.name, item.frames);
 		}
-		curAnimaition = _args.initialAnimation;
+		curAnimation = _args.initialAnimation;
 		frameTime = _args.frameTime;
 		surface = _args.surface;
+		frame = 0;
 		surface2Set = entity.getComponent(SurfaceSetCmp, surface);
 	}
 
@@ -65,16 +66,11 @@ class AnimatedRenderCmp extends Component {
 
 	public function draw(camera:Camera) {
 		time++;
+		var animation:Array<Int> = animations.get(curAnimation);
+		coordY = animation[frame];
 		if (time == frameTime) {
 			time = 0;
-			frame++;
-			if (frame == animations
-				.get(curAnimaition)
-				.length
-			) {
-				frame = 0;
-			}
-			coordY = animations.get(curAnimaition)[frame];
+			frame = (frame + 1) % animation.length;
 		}
 		if (position.rotation < 0) {
 			position.rotation += 360;
@@ -84,19 +80,14 @@ class AnimatedRenderCmp extends Component {
 		var offsetX = 0.0;
 		var offsetY = 0.0;
 
-		coordX = Math.round(
-			position.rotation / 360 * numRot
-		) % numRot;
+		coordX = Math.round(position.rotation / 360 * numRot) % numRot;
 
 		if (surface2Set.registrationX != 0 || surface2Set.registrationY != 0) {
 			var halfs = new Vector2(
 				surface2Set.surfaces[0].width / 2,
 				surface2Set.surfaces[0].height / 2
 			);
-			var translation = new Vector2(
-				surface2Set.translateX,
-				surface2Set.translateY
-			);
+			var translation = new Vector2(surface2Set.translateX, surface2Set.translateY);
 			var center = halfs.sub(translation);
 			var reg = center.sub(
 				new Vector2(
@@ -117,12 +108,8 @@ class AnimatedRenderCmp extends Component {
 
 		KhaBlit.blit(
 			surface2Set.surfaces[cast coordX + coordY * numRot],
-			cast(Math.round(
-				position.x - surface2Set.translateX
-			) - camera.roundedX() + offsetX),
-			cast(Math.round(
-				position.y - surface2Set.translateY
-			) - camera.roundedY() + offsetY)
+			cast(Math.round(position.x - surface2Set.translateX) - camera.roundedX() + offsetX),
+			cast(Math.round(position.y - surface2Set.translateY) - camera.roundedY() + offsetY)
 		);
 	}
 }

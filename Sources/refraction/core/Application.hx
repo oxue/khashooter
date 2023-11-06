@@ -30,17 +30,18 @@ class Application {
 	public static var defaultCamera:Camera;
 
 	public static var keys:Map<Int, Bool>;
+	public static var frameClock:Int;
 
-	private static var lastTime:Float;
+	static var lastTime:Float;
 
-	private static var keyDownListeners:Array<KeyCode->Void>;
-	private static var keyUpListeners:Array<KeyCode->Void>;
+	static var keyDownListeners:Array<KeyCode -> Void>;
+	static var keyUpListeners:Array<KeyCode -> Void>;
 
-	private static var mouseWasDown:Bool;
-	private static var mouse2WasDown:Bool;
+	static var mouseWasDown:Bool;
+	static var mouse2WasDown:Bool;
 
 	public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
-			__callback:Void->Void) {
+			__callback:Void -> Void) {
 		currentState = new State();
 		keys = new Map<Int, Bool>();
 
@@ -50,6 +51,8 @@ class Application {
 
 		mouseX = mouseY = 0;
 		mouseIsDown = mouseWasDown = mouse2IsDown = mouse2WasDown = false;
+
+		frameClock = 0;
 
 		keyDownListeners = [];
 		keyUpListeners = [];
@@ -157,17 +160,19 @@ class Application {
 
 		mouse2WasDown = m2;
 		mouseWasDown = m;
+
+		frameClock++;
 	}
 
 	public static function render(frame:Array<Framebuffer>) {
 		currentState.render(frame[0]);
 	}
 
-	public static function addKeyUpListener(method:KeyCode->Void) {
+	public static function addKeyUpListener(method:KeyCode -> Void) {
 		keyUpListeners.push(method);
 	}
 
-	public static function addKeyDownListener(method:KeyCode->Void) {
+	public static function addKeyDownListener(method:KeyCode -> Void) {
 		keyDownListeners.push(method);
 	}
 }

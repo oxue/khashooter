@@ -11,7 +11,7 @@
                     "conditions": [
                         {
                             "cond": "totalItemLength >= n",
-                            "value": 70
+                            "value": 50
                         }
                     ],
                     "type": "onePerLine"
