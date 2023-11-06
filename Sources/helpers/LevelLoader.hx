@@ -63,7 +63,7 @@ class LevelLoader {
 				)
 			);
 		}
-		for (p in TilemapUtils.computeGeometry(gameContext.tilemapData)) {
+		for (p in TilemapUtils.computeGeometry(gameContext.tilemap)) {
 			gameContext.lightingSystem.polygons.push(p);
 		}
 	}

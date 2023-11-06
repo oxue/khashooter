@@ -17,7 +17,7 @@ import refraction.generic.VelocityCmp;
  * @author worldedit
  */
 class TileCollision extends Component {
-	public var targetTilemap:TilemapData;
+	public var targetTilemap:Tilemap;
 	public var hitboxPosition:Vector2;
 
 	public var position:PositionCmp;
@@ -28,19 +28,19 @@ class TileCollision extends Component {
 		super();
 	}
 
-	override public function autoParams(_args:Dynamic):Void {
+	override public function autoParams(_args:Dynamic) {
 		targetTilemap = _args.tilemap;
 		hitboxPosition = new Vector2(_args.hitboxX, _args.hitboxY);
 	}
 
-	public function drawHitbox(camera:Camera, g2:Graphics):Void {
+	public function drawHitbox(camera:Camera, g2:Graphics) {
 		g2.color = kha.Color.Green;
 		g2.drawRect((position.x - camera.x + 1 + hitboxPosition.x) * 2,
 			(position.y - camera.y - 1 + hitboxPosition.y) * 2, (dimensions.width) * 2,
 			(dimensions.height) * 2, 1.0);
 	}
 
-	override public function load():Void {
+	override public function load() {
 		position = entity.getComponent(PositionCmp);
 		dimensions = entity.getComponent(DimensionsCmp);
 		velocity = entity.getComponent(VelocityCmp);

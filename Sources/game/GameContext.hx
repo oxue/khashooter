@@ -20,7 +20,6 @@ import refraction.systems.SpacingSys;
 import refraction.systems.TooltipSys;
 import refraction.tile.TileCollisionSys;
 import refraction.tile.Tilemap;
-import refraction.tile.TilemapData;
 import systems.BeaconSys;
 import systems.HitTestSys;
 import systems.InteractSys;
@@ -48,8 +47,7 @@ class GameContext {
 	}
 
 	public var camera:Camera;
-	public var tilemapRender:Tilemap;
-	public var tilemapData:TilemapData;
+	public var tilemap:Tilemap;
 
 	public var playerEntity:Entity;
 
@@ -100,7 +98,7 @@ class GameContext {
 		values = new Values(config);
 
 		camera = _camera;
-		tilemapRender = null;
+		tilemap = null;
 		ui = _ui;
 
 		statusText = new StatusText();

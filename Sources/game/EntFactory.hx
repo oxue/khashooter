@@ -24,7 +24,6 @@ import refraction.display.ResourceFormat;
 import refraction.generic.*;
 import refraction.tile.TileCollision;
 import refraction.tile.Tilemap;
-import refraction.tile.TilemapData;
 
 /**
  * ...
@@ -162,7 +161,7 @@ class EntFactory {
 
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
-			.autoParams({tilemap: gameContext.tilemapData});
+			.autoParams({tilemap: gameContext.tilemap});
 		gameContext.aiSystem.procure(e, MimiAI);
 		gameContext.tooltipSystem
 			.procure(e, Tooltip)
@@ -213,7 +212,7 @@ class EntFactory {
 		gameContext.environmentSystem.procure(e, FireCmp);
 		gameContext.collisionSystem
 			.procure(e, TileCollision)
-			.autoParams({tilemap: gameContext.tilemapData});
+			.autoParams({tilemap: gameContext.tilemap});
 
 		gameContext.hitTestSystem
 			.procure(e, HitCircleCmp)
@@ -253,7 +252,7 @@ class EntFactory {
 			.setBoth(direction.x, direction.y);
 		gameContext.hitCheckSystem
 			.procure(e, Projectile)
-			.tilemapData = gameContext.tilemapData;
+			.tilemapData = gameContext.tilemap;
 		return e;
 	}
 
@@ -294,7 +293,7 @@ class EntFactory {
 
 		gameContext.hitCheckSystem
 			.procure(e, Projectile)
-			.tilemapData = gameContext.tilemapData;
+			.tilemapData = gameContext.tilemap;
 		gameContext.hitTestSystem
 			.procure(e, HitCircleCmp)
 			.autoParams({
@@ -307,22 +306,20 @@ class EntFactory {
 
 	public function createTilemap(_width:Int, _height:Int, _tilesize:Int, _colIndex:Int,
 			_data:Array<Array<Int>>, _tileset:String = "all_tiles"):Entity {
-		var e:Entity = new Entity();
 
-		var tilemapData:TilemapData = new TilemapData(_width, _height, _tilesize, _colIndex);
-		e.addComponent(tilemapData);
-		tilemapData.setDataIntArray(_data);
-		e.addComponent(ResourceFormat.surfacesets.get(_tileset));
+		var tilemap:Tilemap = new Tilemap(
+			ResourceFormat.surfacesets.get(_tileset),
+			_width,
+			_height,
+			_tilesize,
+			_colIndex
+		);
+		tilemap.setDataIntArray(_data);
 
-		var tileRender:Tilemap = new Tilemap();
-		tileRender.targetCamera = gameContext.camera;
-		e.addComponent(tileRender);
+		gameContext.tilemap = tilemap;
+		gameContext.collisionSystem.setTilemap(tilemap);
 
-		gameContext.tilemapRender = tileRender;
-		gameContext.tilemapData = tilemapData;
-		gameContext.collisionSystem.setTilemap(tilemapData);
-
-		return e;
+		return null;
 	}
 
 	// Smaller Stuff

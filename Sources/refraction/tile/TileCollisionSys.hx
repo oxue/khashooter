@@ -6,7 +6,7 @@ import refraction.core.Sys;
 import refraction.generic.DimensionsCmp;
 
 class TileCollisionSys extends Sys<TileCollision> {
-	var tilemapData:TilemapData;
+	var tilemapData:Tilemap;
 	var pool:Array<TileCollision>;
 
 	public function new() {
@@ -21,7 +21,7 @@ class TileCollisionSys extends Sys<TileCollision> {
 		return null;
 	}
 
-	public function setTilemap(_tilemapData:TilemapData) {
+	public function setTilemap(_tilemapData:Tilemap) {
 		tilemapData = _tilemapData;
 	}
 

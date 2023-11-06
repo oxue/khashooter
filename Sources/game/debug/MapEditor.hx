@@ -97,7 +97,7 @@ class MapEditor {
 	function renderGrid(context:GameContext, framebuffer:Framebuffer) {
 		framebuffer.g2.font = Assets.fonts.monaco;
 		framebuffer.g2.color = Color.White;
-		var tilesize:Int = context.tilemapData.tilesize;
+		var tilesize:Int = context.tilemap.getTilesize();
 
 		var camera:Camera = context.camera;
 		var cameraX:Float = camera.x;

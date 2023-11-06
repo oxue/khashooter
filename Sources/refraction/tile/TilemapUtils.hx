@@ -9,7 +9,7 @@ import refraction.ds2d.Polygon;
  * @author worldedit
  */
 class TilemapUtils {
-	public static function raycast(targetTilemap:TilemapData, x1:Float, y1:Float, x2:Float, y2:Float):Bool {
+	public static function raycast(targetTilemap:Tilemap, x1:Float, y1:Float, x2:Float, y2:Float):Bool {
 		var i:Int = Math.floor(x1 / targetTilemap.tilesize);
 		var j:Int = Math.floor(y1 / targetTilemap.tilesize);
 
@@ -73,7 +73,7 @@ class TilemapUtils {
 		return false;
 	}
 
-	static function generatePolygonForTileInd(_tilemapData:TilemapData, i:Int, j:Int):Polygon {
+	static function generatePolygonForTileInd(_tilemapData:Tilemap, i:Int, j:Int):Polygon {
 		var p:Polygon = new Polygon();
 
 		final left:Int = j * _tilemapData.tilesize;
@@ -116,7 +116,7 @@ class TilemapUtils {
 		return p;
 	}
 
-	public static function computeGeometry(_tilemapData:TilemapData):Array<Polygon> {
+	public static function computeGeometry(_tilemapData:Tilemap):Array<Polygon> {
 		var ret:Array<Polygon> = [];
 		for (i in 1..._tilemapData.height - 1) {
 			for (j in 1..._tilemapData.width - 1) {

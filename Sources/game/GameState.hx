@@ -197,8 +197,8 @@ class GameState extends refraction.core.State {
 			.image
 		);
 
-		if (gameContext.tilemapRender != null) {
-			gameContext.tilemapRender.render();
+		if (gameContext.tilemap != null) {
+			gameContext.tilemap.render(gameContext.camera);
 		}
 
 		gameContext.renderSystem.update();
