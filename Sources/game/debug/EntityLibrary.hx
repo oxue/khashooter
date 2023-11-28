@@ -6,50 +6,51 @@ import zui.Zui;
 import zui.Zui.Handle;
 import helpers.LevelLoader;
 
-class EntityLibrary {
+class EntityLibrary extends EditorWindow {
 
-	var windowHandle:Handle;
-	var selectedHandle:Handle;
-	var levelLoader:LevelLoader;
+    var selectedHandle:Handle;
+    var levelLoader:LevelLoader;
+    var selectedEntity:Dynamic;
+    var toolbox:Toolbox;
 
-	static final START_X:Int = 0;
-	static final START_Y:Int = 0;
-	static final WIDTH:Int = 200;
-	static final HEIGHT:Int = 200;
+    static final START_X:Int = 0;
+    static final START_Y:Int = 0;
+    static final WIDTH:Int = 200;
+    static final HEIGHT:Int = 200;
 
-	public function new(editor:MapEditor, levelLoader:LevelLoader, gameContext:GameContext) {
-		this.levelLoader = levelLoader;
-		windowHandle = Id.handle();
-		selectedHandle = Id.handle();
-		selectedHandle.text = 'None';
-	}
+    public function new(editor:MapEditor, toolbox:Toolbox, levelLoader:LevelLoader, gameContext:GameContext) {
+        this.levelLoader = levelLoader;
+        this.toolbox = toolbox;
+        this.selectedEntity = null;
 
-	public function render(ui:Zui, context:GameContext) {
-		var windowActive:Bool = ui.window(
-			windowHandle,
-			START_X,
-			START_Y,
-			WIDTH,
-			HEIGHT,
-			true
-		);
-		if (windowActive) {
-			if (ui.panel(Id.handle({selected: true}), "Entity Library")) {
-				ui.text(selectedHandle.text);
+        super("entity_library", START_X, START_Y, WIDTH, HEIGHT);
 
-				renderTemplateButtons(ui, context);
-			}
-		}
-	}
+        selectedHandle = Id.handle();
+        selectedHandle.text = 'None';
+    }
 
-	function renderTemplateButtons(ui:Zui, context:GameContext) {
-		var entityTemplates:StringMap<Dynamic> = EntFactory
-			.instance()
-			.getEntityTemplates();
-		for (key => value in entityTemplates) {
-			if (ui.button(key, Align.Left)) {
-				selectedHandle.text = key;
-			}
-		}
-	}
+    public function render(ui:Zui, context:GameContext) {
+        if (windowActive(ui)) {
+            if (ui.panel(Id.handle({selected: true}), "Entity Library")) {
+                ui.text(selectedHandle.text);
+                renderTemplateButtons(ui, context);
+            }
+        }
+    }
+
+    public function entityPlacerActive():Bool {
+        return selectedEntity != null;
+    }
+
+    function renderTemplateButtons(ui:Zui, context:GameContext) {
+        var entityTemplates:StringMap<Dynamic> = EntFactory
+            .instance()
+            .getEntityTemplates();
+        for (key => value in entityTemplates) {
+            if (ui.button(value.entity_name, Align.Left)) {
+                selectedEntity = value;
+                selectedHandle.text = selectedEntity.entity_name;
+            }
+        }
+    }
 }

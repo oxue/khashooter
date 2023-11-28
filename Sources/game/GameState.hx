@@ -1,5 +1,6 @@
 package game;
 
+import haxe.Timer;
 import refraction.tilemap.Tile;
 import refraction.core.Entity;
 import kha.math.Vector2i;
@@ -30,386 +31,400 @@ import zui.*;
 
 class GameState extends refraction.core.State {
 
-	var isRenderingReady:Bool;
+    var isRenderingReady:Bool;
 
-	var gameContext:GameContext;
-	var entFactory:EntFactory;
-	var mapEditor:MapEditor;
+    var gameContext:GameContext;
+    var entFactory:EntFactory;
+    var mapEditor:MapEditor;
 
-	var ui:Zui;
-	var showMenu:Bool;
+    var ui:Zui;
+    var showMenu:Bool;
 
-	var levelLoader:LevelLoader;
+    var levelLoader:LevelLoader;
 
-	var defaultMap:String;
-	var aiInterval:Interval;
+    var defaultMap:String;
+    var intervals:Array<Interval>;
 
-	public function new() {
-		this.defaultMap = "level2";
-		this.showMenu = false;
-		super();
-	}
+    public function new() {
+        this.defaultMap = "level2";
+        this.showMenu = false;
+        super();
+    }
 
-	function loadResources() {
-		ZombieResourceLoader.load();
-	}
+    function formatResources() {
+        ZombieResourceLoader.load();
+    }
 
-	function onLoadAssets() {
-		// This is needed to make clicking work
-		Mouse
-			.get()
-			.notify(mouseDown, null, null, null);
+    function onLoadAssets() {
+        // This is needed to make clicking work
+        Mouse
+            .get()
+            .notify(mouseDown, null, null, null);
 
-		this.ui = new Zui({
-			font: Assets.fonts.fonts_monaco,
-			khaWindowId: 0,
-			scaleFactor: 1
-		});
+        this.ui = new Zui({
+            font: Assets.fonts.fonts_monaco,
+            khaWindowId: 0,
+            scaleFactor: 1
+        });
 
-		var zoom:Int = Application.getScreenZoom();
-		var gameCamera:Camera = new Camera(
-			Std.int(Application.getScreenWidth() / zoom),
-			Std.int(Application.getScreenHeight() / zoom)
-		);
+        var zoom:Int = Application.getScreenZoom();
+        var gameCamera:Camera = new Camera(
+            Std.int(Application.getScreenWidth() / zoom),
+            Std.int(Application.getScreenHeight() / zoom)
+        );
 
-		// Init Game Context
-		gameContext = GameContext.instance(gameCamera, ui);
-		Application.defaultCamera = gameCamera;
+        // Init Game Context
+        gameContext = GameContext.instance(gameCamera, ui);
+        Application.defaultCamera = gameCamera;
 
-		// Load resources
-		loadResources();
+        // Load resources
+        formatResources();
 
-		// Init Ent Factory
-		entFactory = EntFactory.instance(
-			gameContext,
-			new ShooterComponentFactory(gameContext)
-		);
+        // Init Ent Factory
+        entFactory = EntFactory.instance(
+            gameContext,
+            new ShooterComponentFactory(gameContext)
+        );
 
-		// load map
-		levelLoader = new LevelLoader(defaultMap, entFactory, gameContext);
-		levelLoader.loadMap();
+        // load map
+        levelLoader = new LevelLoader(defaultMap, entFactory, gameContext);
+        levelLoader.loadMap();
 
-		// Init collision behaviours
-		defineCollisionBehaviours(gameContext);
+        // Init collision behaviours
+        defineCollisionBehaviours(gameContext);
 
-		// TODO: reset DC stuff
+        // TODO: reset DC stuff
 
-		mapEditor = new MapEditor(gameContext, levelLoader, ui);
-		gameContext.dijkstraMap = new DijkstraField(
-			gameContext.tilemap.width,
-			gameContext.tilemap.height,
-			gameContext.tilemap.tilesize,
-			(i, j) -> {
-				var tile:Tile = gameContext.tilemap.getTileAt(i, j);
-				if (tile == null) {
-					return false;
-				}
-				tile.solid;
-			}
-		);
-		gameContext.dijkstraMap.setTarget(0, 0);
+        mapEditor = new MapEditor(gameContext, levelLoader, ui);
+        gameContext.dijkstraMap = new DijkstraField(
+            gameContext.tilemap.width,
+            gameContext.tilemap.height,
+            gameContext.tilemap.tilesize,
+            (i, j) -> {
+                var tile:Tile = gameContext.tilemap.getTileAt(i, j);
+                if (tile == null) {
+                    return false;
+                }
+                tile.solid;
+            }
+        );
 
-		aiInterval = new Interval(() -> {
-			var e:Entity = gameContext.beaconSystem.getOne("player");
-			var p:PositionCmp = e.getComponent(PositionCmp);
-			var t:Vector2i = gameContext.dijkstraMap.getTileIndexesContaining(p.x, p.y);
-			gameContext.dijkstraMap.setTarget(t.y, t.x);
-			gameContext.dijkstraMap.smoothen(1);
-		}, 60 * 1);
+        intervals = initIntervals();
 
-		configureDebugKeys();
+        configureDebugKeys();
 
-		isRenderingReady = true;
-	}
+        isRenderingReady = true;
+    }
 
-	function configureDebugKeys() {
-		Application.addKeyDownListener((code) -> {
-			if (KeyCode.F9 == code) {
-				gameContext.reloadConfigs();
-				DebugLogger.info("RESOURCE", "reloading configs");
-			}
-			if (KeyCode.F10 == code) {
-				entFactory.reloadEntityBlobs();
-				DebugLogger.info("RESOURCE", "reloading entities");
-			}
-			if (KeyCode.P == code) {
-				mapEditor.toggle();
-				gameContext.debugMenu.off();
-			}
-		});
-	}
+    function initIntervals():Array<Interval> {
+        var ret:Array<Interval> = [];
 
-	override public function load() {
-		super.load();
-		isRenderingReady = false;
+        intervals.push(new Interval(() -> {
+            var e:Entity = gameContext.beaconSystem.getOne("player");
+            var p:PositionCmp = e.getComponent(PositionCmp);
+            var t:Vector2i = gameContext.dijkstraMap.getTileIndexesContaining(p.x, p.y);
+            gameContext.dijkstraMap.setTarget(t.y, t.x);
+            gameContext.dijkstraMap.smoothen(1);
+        }, 60 * 1));
 
-		Assets.loadEverything(this.onLoadAssets);
-	}
+        return ret;
+    }
 
-	// public function newState(map:String) {
-	// 	EntFactory.destroyInstance();
-	// 	GameContext.destroyInstance();
-	// 	Application.resetKeyListeners();
-	// 	Application.setState(new GameState(map));
-	// }
+    function configureDebugKeys() {
+        Application.addKeyDownListener((code) -> {
+            if (KeyCode.F9 == code) {
+                gameContext.reloadConfigs();
+                DebugLogger.info("RESOURCE", "reloading configs");
+            }
+            if (KeyCode.F10 == code) {
+                entFactory.reloadEntityBlobs();
+                DebugLogger.info("RESOURCE", "reloading entities");
+            }
+            if (KeyCode.P == code) {
+                mapEditor.toggle();
+                gameContext.debugMenu.off();
+            }
+        });
+    }
 
-	function mouseDown(button:Int, x:Int, y:Int) {
-		if (button == 0) {
-			gameContext.interactSystem.update();
-			var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
-			inventory.primaryAction();
-		}
-	}
+    override public function load() {
+        super.load();
+        isRenderingReady = false;
 
-	// =========
-	// MAIN LOOP
-	// =========
+        var t:Float = Timer.stamp();
+        Assets.loadEverything(this.onLoadAssets);
+        DebugLogger.info(
+            "PERF",
+            "loading assets took " + (Timer.stamp() - t) + " seconds"
+        );
+    }
 
-	override public function update() {
-		if (Application.keys.get(KeyCode.Equals)) {
-			gameContext.lightingSystem.globalRadius += 1;
-		}
-		if (Application.keys.get(KeyCode.HyphenMinus)) {
-			gameContext.lightingSystem.globalRadius -= 1;
-		}
+    // public function newState(map:String) {
+    // 	EntFactory.destroyInstance();
+    // 	GameContext.destroyInstance();
+    // 	Application.resetKeyListeners();
+    // 	Application.setState(new GameState(map));
+    // }
 
-		if (gameContext != null) {
-			gameContext.controlSystem.update();
-			gameContext.spacingSystem.update();
-			gameContext.dampingSystem.update();
-			gameContext.velocitySystem.update();
-			gameContext.collisionSystem.update();
-			gameContext.environmentSystem.update();
-			gameContext.lightSourceSystem.update();
-			gameContext.particleSystem.update();
+    function mouseDown(button:Int, x:Int, y:Int) {
+        if (button == 0) {
+            gameContext.interactSystem.update();
+            var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
+            inventory.primaryAction();
+        }
+    }
 
-			gameContext.breadCrumbsSystem.update();
+    // =========
+    // MAIN LOOP
+    // =========
 
-			gameContext.hitCheckSystem.update();
-			gameContext.aiSystem.update();
+    override public function update() {
+        if (Application.keys.get(KeyCode.Equals)) {
+            gameContext.lightingSystem.globalRadius += 1;
+        }
+        if (Application.keys.get(KeyCode.HyphenMinus)) {
+            gameContext.lightingSystem.globalRadius -= 1;
+        }
 
-			gameContext.hitTestSystem.update();
-			gameContext.beaconSystem.update();
+        if (gameContext != null) {
+            gameContext.controlSystem.update();
+            gameContext.spacingSystem.update();
+            gameContext.dampingSystem.update();
+            gameContext.velocitySystem.update();
+            gameContext.collisionSystem.update();
+            gameContext.environmentSystem.update();
+            gameContext.lightSourceSystem.update();
+            gameContext.particleSystem.update();
 
-			aiInterval.tick();
+            gameContext.breadCrumbsSystem.update();
 
-			if (Application.mouseIsDown) {
-				gameContext.playerEntity
-					.getComponent(InventoryCmp)
-					.persistentAction();
-			}
-		}
-	}
+            gameContext.hitCheckSystem.update();
+            gameContext.aiSystem.update();
 
-	function updateCamera() {
-		gameContext.camera.updateShake();
-		var playerPos:PositionCmp = cast gameContext.playerEntity.getComponent(PositionCmp);
+            gameContext.hitTestSystem.update();
+            gameContext.beaconSystem.update();
 
-		gameContext.camera.follow(
-			playerPos.x,
-			playerPos.y,
-			gameContext.config.camera_damping_speed
-		);
+            for (interval in intervals) {
+                interval.tick();
+            }
 
-		gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
-		gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
-	}
+            if (Application.mouseIsDown) {
+                gameContext.playerEntity
+                    .getComponent(InventoryCmp)
+                    .persistentAction();
+            }
+        }
+    }
 
-	override public function render(frame:Framebuffer) {
-		if (!isRenderingReady) {
-			return;
-		}
+    function updateCamera() {
+        gameContext.camera.updateShake();
+        var playerPos:PositionCmp = cast gameContext.playerEntity.getComponent(PositionCmp);
 
-		this.updateCamera();
+        gameContext.camera.follow(
+            playerPos.x,
+            playerPos.y,
+            gameContext.config.camera_damping_speed
+        );
 
-		var g4:Graphics = frame.g4;
+        gameContext.worldMouseX = cast Application.mouseX / 2 + gameContext.camera.x;
+        gameContext.worldMouseY = cast Application.mouseY / 2 + gameContext.camera.y;
+    }
 
-		g4.begin();
-		KhaBlit.setContext(frame.g4);
-		KhaBlit.clear(0.1, 0.1, 0.1, 0, 1, 1);
-		KhaBlit.setPipeline(
-			KhaBlit.KHBTex2PipelineState,
-			"KHBTex2PipelineState"
-		);
-		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
-			.get("all")
-			.image
-		);
+    override public function render(frame:Framebuffer) {
+        if (!isRenderingReady) {
+            return;
+        }
 
-		if (gameContext.tilemap != null) {
-			gameContext.tilemap.render(gameContext.camera);
-		}
+        this.updateCamera();
 
-		gameContext.renderSystem.update();
+        var g4:Graphics = frame.g4;
 
-		KhaBlit.draw();
+        g4.begin();
+        KhaBlit.setContext(frame.g4);
+        KhaBlit.clear(0.1, 0.1, 0.1, 0, 1, 1);
+        KhaBlit.setPipeline(
+            KhaBlit.KHBTex2PipelineState,
+            "KHBTex2PipelineState"
+        );
+        KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
+        KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+            .get("all")
+            .image
+        );
 
-		g4.end();
+        if (gameContext.tilemap != null) {
+            gameContext.tilemap.render(gameContext.camera);
+        }
 
-		gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
+        gameContext.renderSystem.update();
 
-		g4.begin();
-		KhaBlit.setContext(frame.g4);
-		KhaBlit.setPipeline(
-			KhaBlit.KHBTex2PipelineState,
-			"KHBTex2PipelineState"
-		);
-		KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-		KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
-			.get("all")
-			.image
-		);
+        KhaBlit.draw();
 
-		gameContext.selfLitRenderSystem.update();
+        g4.end();
 
-		KhaBlit.draw();
+        gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
 
-		g4.end();
+        g4.begin();
+        KhaBlit.setContext(frame.g4);
+        KhaBlit.setPipeline(
+            KhaBlit.KHBTex2PipelineState,
+            "KHBTex2PipelineState"
+        );
+        KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
+        KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+            .get("all")
+            .image
+        );
 
-		// UI
-		if (Application.mouse2JustDown) {
-			mapEditor.off();
-			gameContext.debugMenu.toggleMenu();
-		}
+        gameContext.selfLitRenderSystem.update();
 
-		// ========== UI BEGIN ==========
-		renderUI(frame, gameContext, ui);
+        KhaBlit.draw();
 
-		if (gameContext.reloadGraphics) {
-			gameContext.reloadGraphics = false;
-			isRenderingReady = false;
-			reloadAssets();
-		}
-	}
+        g4.end();
 
-	function reloadAssets() {
-		Assets.loadEverything(() -> {
-			ZombieResourceLoader.load();
-			isRenderingReady = true;
-		}, desc -> {
-			final dateNow:Float = Date
-				.now()
-				.getTime();
-			final reloadTime:String = Std.string(dateNow);
-			var s:String = desc.files[0];
-			s.split("?");
-			if ("../../Assets" != s.substr(0, 12)) {
-				desc.files[0] = "../../Assets/" + desc.files[0];
-			}
-			desc.files[0] = desc.files[0].split('?')[0] + "?t=" + reloadTime;
-			true;
-		});
-	}
+        // UI
+        if (Application.mouse2JustDown) {
+            mapEditor.off();
+            gameContext.debugMenu.toggleMenu();
+        }
 
-	function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
-		renderGameUI(f, context, ui);
-		renderDebugUI(f, context, ui);
-	}
+        // ========== UI BEGIN ==========
+        renderUI(frame, gameContext, ui);
 
-	function renderMiscDebug(f:Framebuffer, context:GameContext) {
-		f.g2.begin(false);
-		f.g2.pushTranslation(-context.camera.x, -context.camera.y);
-		f.g2.pushScale(
-			Application.getScreenZoom(),
-			Application.getScreenZoom()
-		);
-		for (d in context.debugDrawablesMisc) {
-			d.drawDebug(context.camera, f.g2);
-		}
-		f.g2.popTransformation();
-		f.g2.popTransformation();
-		f.g2.end();
-	}
+        if (gameContext.reloadGraphics) {
+            gameContext.reloadGraphics = false;
+            isRenderingReady = false;
+            reloadAssets();
+        }
+    }
 
-	function renderDebugUI(f:Framebuffer, context:GameContext, ui:Zui) {
-		if (context.shouldDrawHitBoxes) {
-			renderHitBoxes(f, context);
-			renderMiscDebug(f, context);
-			renderDijkstraMap(f, context);
-		}
+    function reloadAssets() {
+        Assets.loadEverything(() -> {
+            ZombieResourceLoader.load();
+            isRenderingReady = true;
+        }, desc -> {
+            final dateNow:Float = Date
+                .now()
+                .getTime();
+            final reloadTime:String = Std.string(dateNow);
+            var s:String = desc.files[0];
+            s.split("?");
+            if ("../../Assets" != s.substr(0, 12)) {
+                desc.files[0] = "../../Assets/" + desc.files[0];
+            }
+            desc.files[0] = desc.files[0].split('?')[0] + "?t=" + reloadTime;
+            true;
+        });
+    }
 
-		renderZuiElements(f, context, ui);
-	}
+    function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
+        renderGameUI(f, context, ui);
+        renderDebugUI(f, context, ui);
+    }
 
-	function renderZuiElements(f:Framebuffer, gc:GameContext, ui:Zui) {
-		ui.begin(f.g2);
-		mapEditor.render(gc, f, ui);
-		gameContext.debugMenu.render(gc, ui);
-		// gameContext.console.draw();
-		ui.end();
-	}
+    function renderMiscDebug(f:Framebuffer, context:GameContext) {
+        f.g2.begin(false);
+        f.g2.pushTranslation(-context.camera.x, -context.camera.y);
+        f.g2.pushScale(
+            Application.getScreenZoom(),
+            Application.getScreenZoom()
+        );
+        for (d in context.debugDrawablesMisc) {
+            d.drawDebug(context.camera, f.g2);
+        }
+        f.g2.popTransformation();
+        f.g2.popTransformation();
+        f.g2.end();
+    }
 
-	function drawVecArrow(v:Vector2, x:Float, y:Float, gc:GameContext, f:Framebuffer) {
-		f.g2.pushTranslation(-gc.camera.x, -gc.camera.y);
-		f.g2.pushScale(
-			Application.getScreenZoom(),
-			Application.getScreenZoom()
-		);
-		f.g2.color = 0xffebf2eb;
-		f.g2.drawLine(x, y, x + v.x * 4, y + v.y * 4, 0.5);
-		f.g2.color = 0xff00ff00;
-		f.g2.drawLine(
-			x + v.x * 4,
-			y + v.y * 4,
-			x + v.x * 2 - v.y * 1,
-			y + v.y * 2 + v.x * 1,
-			0.5
-		);
-		f.g2.drawLine(
-			x + v.x * 4,
-			y + v.y * 4,
-			x + v.x * 2 + v.y * 1,
-			y + v.y * 2 - v.x * 1,
-			0.5
-		);
-		f.g2.popTransformation();
-		f.g2.popTransformation();
-	}
+    function renderDebugUI(f:Framebuffer, context:GameContext, ui:Zui) {
+        if (context.shouldDrawHitBoxes) {
+            renderHitBoxes(f, context);
+            renderMiscDebug(f, context);
+            renderDijkstraMap(f, context);
+        }
 
-	function renderDijkstraMap(f:Framebuffer, gc:GameContext) {
-		f.g2.begin(false);
-		var dijkstraMap:Vector<Vector<Vector2>> = gc.dijkstraMap.data;
-		for (i in 0...dijkstraMap.length) {
-			for (j in 0...dijkstraMap[i].length) {
-				var v:Vector2 = dijkstraMap[i][j];
-				if (v != null) {
-					f.g2.color = 0xff00FF00;
-					final halfTilsize:Float = gc.tilemap.tilesize / 2;
-					drawVecArrow(
-						v,
-						j * gc.tilemap.tilesize + halfTilsize,
-						i * gc.tilemap.tilesize + halfTilsize,
-						gc,
-						f
-					);
-				}
-			}
-		}
-		f.g2.end();
-	}
+        renderZuiElements(f, context, ui);
+    }
 
-	function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
-		f.g2.begin(false);
-		gameContext.healthBar.render(f);
-		gameContext.dialogueManager.render(f);
-		gameContext.statusText.render(f.g2);
-		gameContext.tooltipSystem.draw(f.g2);
-		f.g2.end();
-	}
+    function renderZuiElements(f:Framebuffer, gc:GameContext, ui:Zui) {
+        ui.begin(f.g2);
+        mapEditor.render(gc, f, ui);
+        gameContext.debugMenu.render(gc, ui);
+        // gameContext.console.draw();
+        ui.end();
+    }
 
-	function renderHitBoxes(f:Framebuffer, gc:GameContext) {
-		if (!gc.shouldDrawHitBoxes) {
-			return;
-		}
-		for (tc in gc.collisionSystem.components) {
-			tc.drawHitbox(gc.camera, f.g2);
-		}
-		for (p in gc.hitCheckSystem.components) {
-			p.entity
-				.getComponent(PositionCmp)
-				.drawPoint(gc.camera, f.g2);
-		}
-		gc.lightingSystem.debugDraw(gc.camera, f.g2, [gameContext.tilemapShadowPolys]);
-	}
+    function drawVecArrow(v:Vector2, x:Float, y:Float, gc:GameContext, f:Framebuffer) {
+        f.g2.pushTranslation(-gc.camera.x, -gc.camera.y);
+        f.g2.pushScale(
+            Application.getScreenZoom(),
+            Application.getScreenZoom()
+        );
+        f.g2.color = 0xffebf2eb;
+        f.g2.drawLine(x, y, x + v.x * 4, y + v.y * 4, 0.5);
+        f.g2.color = 0xff00ff00;
+        f.g2.drawLine(
+            x + v.x * 4,
+            y + v.y * 4,
+            x + v.x * 2 - v.y * 1,
+            y + v.y * 2 + v.x * 1,
+            0.5
+        );
+        f.g2.drawLine(
+            x + v.x * 4,
+            y + v.y * 4,
+            x + v.x * 2 + v.y * 1,
+            y + v.y * 2 - v.x * 1,
+            0.5
+        );
+        f.g2.popTransformation();
+        f.g2.popTransformation();
+    }
+
+    function renderDijkstraMap(f:Framebuffer, gc:GameContext) {
+        f.g2.begin(false);
+        var dijkstraMap:Vector<Vector<Vector2>> = gc.dijkstraMap.data;
+        for (i in 0...dijkstraMap.length) {
+            for (j in 0...dijkstraMap[i].length) {
+                var v:Vector2 = dijkstraMap[i][j];
+                if (v != null) {
+                    f.g2.color = 0xff00FF00;
+                    final halfTilsize:Float = gc.tilemap.tilesize / 2;
+                    drawVecArrow(
+                        v,
+                        j * gc.tilemap.tilesize + halfTilsize,
+                        i * gc.tilemap.tilesize + halfTilsize,
+                        gc,
+                        f
+                    );
+                }
+            }
+        }
+        f.g2.end();
+    }
+
+    function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
+        f.g2.begin(false);
+        gameContext.healthBar.render(f);
+        gameContext.dialogueManager.render(f);
+        gameContext.statusText.render(f.g2);
+        gameContext.tooltipSystem.draw(f.g2);
+        f.g2.end();
+    }
+
+    function renderHitBoxes(f:Framebuffer, gc:GameContext) {
+        if (!gc.shouldDrawHitBoxes) {
+            return;
+        }
+        for (tc in gc.collisionSystem.components) {
+            tc.drawHitbox(gc.camera, f.g2);
+        }
+        for (p in gc.hitCheckSystem.components) {
+            p.entity
+                .getComponent(PositionCmp)
+                .drawPoint(gc.camera, f.g2);
+        }
+        gc.lightingSystem.debugDraw(gc.camera, f.g2, [gameContext.tilemapShadowPolys]);
+    }
 }

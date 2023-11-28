@@ -1,86 +1,103 @@
 sprites:
+
 - name: tilesheet
   surface_name: all_tiles
   type: tilesheet
   size_px: 16
+
 - name: mine_tiles
   surface_name: mine_tiles
   type: tilesheet
   size_px: 16
+
 - name: modern
   surface_name: modern
   type: tilesheet
   size_px: 16
+
 - name: projectiles
   surface_name: projectiles
   type: rotated_sprite
   dimensions: [20, 20]
   registration: [10, 10]
+
 - name: man
   surface_name: man
   type: rotated_sprite
   dimensions: [26, 26]
   translation: [3, 3]
+
 - name: mimi
   surface_name: mimi
   type: rotated_sprite
   dimensions: [26, 26]
   translation: [3, 3]
   registration: [10, 10]
+
 - name: zombie
   surface_name: zombie
   type: rotated_sprite
   dimensions: [32, 32]
   translation: [3, 3]
   registration: [10, 10]
+
 - name: shiro
   surface_name: shiro
   type: rotated_sprite
   dimensions: [26, 26]
   translation: [3, 3]
   registration: [10, 10]
+
 - name: items
   surface_name: items
   type: rotated_sprite
   dimensions: [32, 32]
+
 - name: gyo
   surface_name: gyo
   type: rotated_sprite
   dimensions: [29, 24]
   translation: [3, 4]
+
 - name: crossbow
   surface_name: weapons
   type: rotated_sprite
   dimensions: [26, 26]
   translation: [3, 3]
   registration: [-3, 5]
+
 - name: gibs
   surface_name: gibs
   type: rotated_sprite
   dimensions: [16, 16]
   registration: [8, 8]
+
 - name: crate_base
   surface_name: crate_base
   type: rotated_sprite
   dimensions: [26, 26]
   translation: [3, 3]
   registration: [10, 10]
+
 - name: crate_light
   surface_name: crate_light
   type: rotated_sprite
   dimensions: [4, 4]
   registration: [2, 2]
+
 - name: wall_man
   surface_name: wall_man
   type: rotated_sprite
   dimensions: [32, 32]
   translation: [4, 4]
   registration: [12, 12]
+
 - name: lesser_demon
   surface_name: lesser_demon
   type: rotated_sprite
   dimensions: [64, 64]
   registration: [32, 32]
+
 - name: lesser_demon_eyes
   surface_name: lesser_demon_eyes
   type: rotated_sprite
