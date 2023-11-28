@@ -21,12 +21,10 @@ class StatusText {
 
 	public function render(g2:Graphics) {
 		if (text != "") {
-			g2.begin(false);
-			g2.font = Assets.fonts.OpenSans;
+			g2.font = Assets.fonts.fonts_OpenSans;
 			g2.fontSize = 32;
 			g2.color = Color.White;
 			g2.drawString(text, x, y);
-			g2.end();
 		}
 	}
 }

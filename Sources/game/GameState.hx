@@ -1,5 +1,15 @@
 package game;
 
+import refraction.tilemap.Tile;
+import refraction.core.Entity;
+import kha.math.Vector2i;
+import refraction.utils.Interval;
+import haxe.ds.Vector;
+import refraction.tilemap.DijkstraField;
+import kha.graphics4.Graphics2;
+import refraction.tilemap.TilemapUtils;
+import kha.math.Vector2;
+import refraction.control.KeyControl;
 import game.CollisionBehaviours.defineCollisionBehaviours;
 import game.debug.MapEditor;
 import helpers.DebugLogger;
@@ -12,6 +22,7 @@ import kha.Framebuffer;
 import kha.graphics4.Graphics;
 import kha.input.KeyCode;
 import kha.input.Mouse;
+import kha.input.MouseImpl;
 import refraction.core.Application;
 import refraction.display.ResourceFormat;
 import refraction.generic.PositionCmp;
@@ -31,9 +42,10 @@ class GameState extends refraction.core.State {
 	var levelLoader:LevelLoader;
 
 	var defaultMap:String;
+	var aiInterval:Interval;
 
-	public function new(defaultMap:String) {
-		this.defaultMap = defaultMap;
+	public function new() {
+		this.defaultMap = "level2";
 		this.showMenu = false;
 		super();
 	}
@@ -43,23 +55,21 @@ class GameState extends refraction.core.State {
 	}
 
 	function onLoadAssets() {
-		// TODO: Why is this here?
+		// This is needed to make clicking work
 		Mouse
 			.get()
 			.notify(mouseDown, null, null, null);
+
 		this.ui = new Zui({
-			font: Assets.fonts.monaco,
+			font: Assets.fonts.fonts_monaco,
 			khaWindowId: 0,
 			scaleFactor: 1
 		});
 
-		var gameCamera = new Camera(
-			Std.int(
-				Application.getScreenWidth() / Application.getScreenZoom()
-			),
-			Std.int(
-				Application.getScreenHeight() / Application.getScreenZoom()
-			)
+		var zoom:Int = Application.getScreenZoom();
+		var gameCamera:Camera = new Camera(
+			Std.int(Application.getScreenWidth() / zoom),
+			Std.int(Application.getScreenHeight() / zoom)
 		);
 
 		// Init Game Context
@@ -76,15 +86,36 @@ class GameState extends refraction.core.State {
 		);
 
 		// load map
-		levelLoader = new LevelLoader(entFactory, gameContext);
-		levelLoader.loadMap(defaultMap);
+		levelLoader = new LevelLoader(defaultMap, entFactory, gameContext);
+		levelLoader.loadMap();
 
 		// Init collision behaviours
 		defineCollisionBehaviours(gameContext);
 
 		// TODO: reset DC stuff
 
-		mapEditor = new MapEditor();
+		mapEditor = new MapEditor(gameContext, levelLoader, ui);
+		gameContext.dijkstraMap = new DijkstraField(
+			gameContext.tilemap.width,
+			gameContext.tilemap.height,
+			gameContext.tilemap.tilesize,
+			(i, j) -> {
+				var tile:Tile = gameContext.tilemap.getTileAt(i, j);
+				if (tile == null) {
+					return false;
+				}
+				tile.solid;
+			}
+		);
+		gameContext.dijkstraMap.setTarget(0, 0);
+
+		aiInterval = new Interval(() -> {
+			var e:Entity = gameContext.beaconSystem.getOne("player");
+			var p:PositionCmp = e.getComponent(PositionCmp);
+			var t:Vector2i = gameContext.dijkstraMap.getTileIndexesContaining(p.x, p.y);
+			gameContext.dijkstraMap.setTarget(t.y, t.x);
+			gameContext.dijkstraMap.smoothen(1);
+		}, 60 * 1);
 
 		configureDebugKeys();
 
@@ -103,6 +134,7 @@ class GameState extends refraction.core.State {
 			}
 			if (KeyCode.P == code) {
 				mapEditor.toggle();
+				gameContext.debugMenu.off();
 			}
 		});
 	}
@@ -114,12 +146,12 @@ class GameState extends refraction.core.State {
 		Assets.loadEverything(this.onLoadAssets);
 	}
 
-	public function newState(map:String) {
-		EntFactory.destroyInstance();
-		GameContext.destroyInstance();
-		Application.resetKeyListeners();
-		Application.setState(new GameState(map));
-	}
+	// public function newState(map:String) {
+	// 	EntFactory.destroyInstance();
+	// 	GameContext.destroyInstance();
+	// 	Application.resetKeyListeners();
+	// 	Application.setState(new GameState(map));
+	// }
 
 	function mouseDown(button:Int, x:Int, y:Int) {
 		if (button == 0) {
@@ -134,6 +166,13 @@ class GameState extends refraction.core.State {
 	// =========
 
 	override public function update() {
+		if (Application.keys.get(KeyCode.Equals)) {
+			gameContext.lightingSystem.globalRadius += 1;
+		}
+		if (Application.keys.get(KeyCode.HyphenMinus)) {
+			gameContext.lightingSystem.globalRadius -= 1;
+		}
+
 		if (gameContext != null) {
 			gameContext.controlSystem.update();
 			gameContext.spacingSystem.update();
@@ -152,8 +191,9 @@ class GameState extends refraction.core.State {
 			gameContext.hitTestSystem.update();
 			gameContext.beaconSystem.update();
 
+			aiInterval.tick();
+
 			if (Application.mouseIsDown) {
-				trace("persistent action");
 				gameContext.playerEntity
 					.getComponent(InventoryCmp)
 					.persistentAction();
@@ -186,7 +226,7 @@ class GameState extends refraction.core.State {
 
 		g4.begin();
 		KhaBlit.setContext(frame.g4);
-		KhaBlit.clear(0.1, 0, 0, 0, 1, 1);
+		KhaBlit.clear(0.1, 0.1, 0.1, 0, 1, 1);
 		KhaBlit.setPipeline(
 			KhaBlit.KHBTex2PipelineState,
 			"KHBTex2PipelineState"
@@ -207,7 +247,7 @@ class GameState extends refraction.core.State {
 
 		g4.end();
 
-		gameContext.lightingSystem.renderHXB(gameContext);
+		gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
 
 		g4.begin();
 		KhaBlit.setContext(frame.g4);
@@ -229,59 +269,133 @@ class GameState extends refraction.core.State {
 
 		// UI
 		if (Application.mouse2JustDown) {
+			mapEditor.off();
 			gameContext.debugMenu.toggleMenu();
 		}
 
 		// ========== UI BEGIN ==========
 		renderUI(frame, gameContext, ui);
 
-		frame.g2.begin(false);
-		gameContext.tooltipSystem.draw(frame.g2);
-		// frame.g2.color = White;
-		// frame.g2.drawImage(
-		// 	Assets.images.projectiles,
-		// 	gameContext.config.texPosX,
-		// 	gameContext.config.texPosY
-		// );
-		frame.g2.end();
-
-		gameContext.statusText.render(frame.g2);
-
 		if (gameContext.reloadGraphics) {
 			gameContext.reloadGraphics = false;
 			isRenderingReady = false;
-			Assets.loadEverything(() -> {
-				ZombieResourceLoader.load();
-				isRenderingReady = true;
-			}, desc -> {
-				desc.files[0] = "../../Assets/" + desc.files[0] + "?t=" + Std.string(Date
-					.now()
-					.getTime()
-				);
-				true;
-			});
+			reloadAssets();
 		}
 	}
 
+	function reloadAssets() {
+		Assets.loadEverything(() -> {
+			ZombieResourceLoader.load();
+			isRenderingReady = true;
+		}, desc -> {
+			final dateNow:Float = Date
+				.now()
+				.getTime();
+			final reloadTime:String = Std.string(dateNow);
+			var s:String = desc.files[0];
+			s.split("?");
+			if ("../../Assets" != s.substr(0, 12)) {
+				desc.files[0] = "../../Assets/" + desc.files[0];
+			}
+			desc.files[0] = desc.files[0].split('?')[0] + "?t=" + reloadTime;
+			true;
+		});
+	}
+
 	function renderUI(f:Framebuffer, context:GameContext, ui:Zui) {
-
-		// === Game UI ===
-		f.g2.begin(false);
-		renderHitBoxes(f, context);
 		renderGameUI(f, context, ui);
-		f.g2.end();
+		renderDebugUI(f, context, ui);
+	}
 
-		// === Debug UI ===
+	function renderMiscDebug(f:Framebuffer, context:GameContext) {
+		f.g2.begin(false);
+		f.g2.pushTranslation(-context.camera.x, -context.camera.y);
+		f.g2.pushScale(
+			Application.getScreenZoom(),
+			Application.getScreenZoom()
+		);
+		for (d in context.debugDrawablesMisc) {
+			d.drawDebug(context.camera, f.g2);
+		}
+		f.g2.popTransformation();
+		f.g2.popTransformation();
+		f.g2.end();
+	}
+
+	function renderDebugUI(f:Framebuffer, context:GameContext, ui:Zui) {
+		if (context.shouldDrawHitBoxes) {
+			renderHitBoxes(f, context);
+			renderMiscDebug(f, context);
+			renderDijkstraMap(f, context);
+		}
+
+		renderZuiElements(f, context, ui);
+	}
+
+	function renderZuiElements(f:Framebuffer, gc:GameContext, ui:Zui) {
 		ui.begin(f.g2);
-		mapEditor.render(context, f, ui);
-		gameContext.debugMenu.render(context, ui);
+		mapEditor.render(gc, f, ui);
+		gameContext.debugMenu.render(gc, ui);
 		// gameContext.console.draw();
 		ui.end();
 	}
 
+	function drawVecArrow(v:Vector2, x:Float, y:Float, gc:GameContext, f:Framebuffer) {
+		f.g2.pushTranslation(-gc.camera.x, -gc.camera.y);
+		f.g2.pushScale(
+			Application.getScreenZoom(),
+			Application.getScreenZoom()
+		);
+		f.g2.color = 0xffebf2eb;
+		f.g2.drawLine(x, y, x + v.x * 4, y + v.y * 4, 0.5);
+		f.g2.color = 0xff00ff00;
+		f.g2.drawLine(
+			x + v.x * 4,
+			y + v.y * 4,
+			x + v.x * 2 - v.y * 1,
+			y + v.y * 2 + v.x * 1,
+			0.5
+		);
+		f.g2.drawLine(
+			x + v.x * 4,
+			y + v.y * 4,
+			x + v.x * 2 + v.y * 1,
+			y + v.y * 2 - v.x * 1,
+			0.5
+		);
+		f.g2.popTransformation();
+		f.g2.popTransformation();
+	}
+
+	function renderDijkstraMap(f:Framebuffer, gc:GameContext) {
+		f.g2.begin(false);
+		var dijkstraMap:Vector<Vector<Vector2>> = gc.dijkstraMap.data;
+		for (i in 0...dijkstraMap.length) {
+			for (j in 0...dijkstraMap[i].length) {
+				var v:Vector2 = dijkstraMap[i][j];
+				if (v != null) {
+					f.g2.color = 0xff00FF00;
+					final halfTilsize:Float = gc.tilemap.tilesize / 2;
+					drawVecArrow(
+						v,
+						j * gc.tilemap.tilesize + halfTilsize,
+						i * gc.tilemap.tilesize + halfTilsize,
+						gc,
+						f
+					);
+				}
+			}
+		}
+		f.g2.end();
+	}
+
 	function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
+		f.g2.begin(false);
 		gameContext.healthBar.render(f);
 		gameContext.dialogueManager.render(f);
+		gameContext.statusText.render(f.g2);
+		gameContext.tooltipSystem.draw(f.g2);
+		f.g2.end();
 	}
 
 	function renderHitBoxes(f:Framebuffer, gc:GameContext) {
@@ -296,5 +410,6 @@ class GameState extends refraction.core.State {
 				.getComponent(PositionCmp)
 				.drawPoint(gc.camera, f.g2);
 		}
+		gc.lightingSystem.debugDraw(gc.camera, f.g2, [gameContext.tilemapShadowPolys]);
 	}
 }

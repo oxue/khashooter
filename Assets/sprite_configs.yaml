@@ -3,6 +3,10 @@ sprites:
   surface_name: all_tiles
   type: tilesheet
   size_px: 16
+- name: mine_tiles
+  surface_name: mine_tiles
+  type: tilesheet
+  size_px: 16
 - name: modern
   surface_name: modern
   type: tilesheet
@@ -72,3 +76,13 @@ sprites:
   dimensions: [32, 32]
   translation: [4, 4]
   registration: [12, 12]
+- name: lesser_demon
+  surface_name: lesser_demon
+  type: rotated_sprite
+  dimensions: [64, 64]
+  registration: [32, 32]
+- name: lesser_demon_eyes
+  surface_name: lesser_demon_eyes
+  type: rotated_sprite
+  dimensions: [2, 10]
+  registration: [-6, 5]

@@ -28,7 +28,7 @@ class Weapon {
 		return position
 			.vec()
 			.add(
-				Utils.rotateVec2(muzzleOffset, Utils.a2rad(position.rotation))
+				Utils.rotateVec2(muzzleOffset, Utils.a2rad(position.rotationDegrees))
 			);
 	}
 
@@ -42,6 +42,7 @@ class Weapon {
 				.vec()
 				.add(new Vector2(0, 0))
 			),
+			// 0
 			Math.random() * 0.1 - 0.05
 		);
 	}

@@ -17,6 +17,7 @@ final HG_PICKUPABLE:String = "pickupable";
 // SHOTS
 final HG_FIRE:String = "fire";
 final HG_CROSSBOW_BOLT:String = "crossbow_bolt";
+final HG_DEMON_FIREBALL:String = "demon_fireball";
 
 function defineCollisionBehaviours(gameContext:GameContext) {
 	var entFactory:EntFactory = EntFactory.instance();
@@ -45,7 +46,7 @@ function defineCollisionBehaviours(gameContext:GameContext) {
 
 		final knockbackRotation:Float = bolt
 			.getComponent(PositionCmp)
-			.rotation;
+			.rotationDegrees;
 
 		// particle
 		entFactory.createGibSplash(
@@ -55,6 +56,20 @@ function defineCollisionBehaviours(gameContext:GameContext) {
 		);
 
 		knockback(enemy, knockbackRotation);
+	});
+
+	gameContext.hitTestSystem.onHit(HG_DEMON_FIREBALL, HG_PLAYER, function(fireball:Entity, player:Entity) {
+		player.notify(MSG_DAMAGE, {amount: -gameContext.config.demon_fireball_damage});
+		fireball.notify(MSG_COLLIDED);
+		final knockbackRotation:Float = fireball
+			.getComponent(PositionCmp)
+			.rotationDegrees;
+		knockback(player, knockbackRotation);
+		entFactory.createGibSplash(
+			gameContext.config.single_hit_gibsplash_amount,
+			player.getComponent(PositionCmp),
+			Utils.a2rad(knockbackRotation)
+		);
 	});
 }
 

@@ -11,9 +11,10 @@ in float l_radius;
 out vec4 fragColor;
 
 void main(){
-	vec3 pixelPos = vec3(pos2.x, pos2.y, 0);
+	vec2 posSpace = pos2.xy;
+	vec3 pixelPos = vec3(posSpace.x, posSpace.y, 0);
 	vec3 lightDirection = lightPosition - pixelPos;
-	vec4 n = texture(normalmap, vec2(pos2.x/400, pos2.y/300));
+	vec4 n = texture(normalmap, vec2(posSpace.x/400, posSpace.y/300));
 	vec3 normal = vec3(n.x,n.y,n.z) * 2 - vec3(1,1,1);
 	normal = normal/length(normal);
 	

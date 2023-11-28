@@ -7,8 +7,7 @@ import refraction.core.Component;
 import refraction.display.AnimatedRenderCmp;
 import refraction.generic.PositionCmp;
 import refraction.generic.VelocityCmp;
-import refraction.tilemap.Tilemap;
-import refraction.tilemap.Tilemap;
+import refraction.tilemap.TileMap;
 import refraction.tilemap.TilemapUtils;
 import refraction.utils.Interval;
 
@@ -29,14 +28,14 @@ class ZombieAI extends Component {
 	public var velocity:VelocityCmp;
 
 	public var followTarget:PositionCmp;
-	public var targetMap:Tilemap;
+	public var targetMap:TileMap;
 
 	var blc:AnimatedRenderCmp;
 	var state:ZombieAIState;
 	var scentInterval:Interval;
 	var lastScene:Bool;
 
-	public function new(?_followTarget:PositionCmp, ?_tilemap:Tilemap) {
+	public function new(?_followTarget:PositionCmp, ?_tilemap:TileMap) {
 		super();
 
 		followTarget = _followTarget;

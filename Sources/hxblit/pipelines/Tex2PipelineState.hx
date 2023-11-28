@@ -1,8 +1,7 @@
-package hxblit;
+package hxblit.pipelines;
 
 import kha.Shaders;
 import kha.graphics4.BlendingFactor;
-import kha.graphics4.BlendingOperation;
 import kha.graphics4.CompareMode;
 import kha.graphics4.PipelineState;
 import kha.graphics4.VertexData;
@@ -13,6 +12,7 @@ import kha.graphics4.VertexStructure;
  * @author
  */
 class Tex2PipelineState extends PipelineState {
+
 	public function new() {
 		super();
 

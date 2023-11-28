@@ -1,6 +1,7 @@
 package hxblit;
 
 import kha.math.Vector2;
+import refraction.core.Application;
 
 /**
  * ...
@@ -81,5 +82,20 @@ class Camera {
 
 	public function roundedVec2():Vector2 {
 		return new Vector2(roundedX(), roundedY());
+	}
+
+	public function toScreenPos(vec:Vector2):Vector2 {
+		final zoom:Int = Application.getScreenZoom();
+		return new Vector2(
+			(vec.x - x) * zoom,
+			(vec.y - y) * zoom
+		);
+	}
+
+	public function worldMousePos():Vector2 {
+		return {
+			x: Application.mouseX / Application.getScreenZoom() + x,
+			y: Application.mouseY / Application.getScreenZoom() + y
+		}
 	}
 }

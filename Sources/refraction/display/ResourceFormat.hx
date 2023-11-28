@@ -38,7 +38,7 @@ class ResourceFormat {
 	}
 
 	public static function formatRotatedSprite(_name:String, _img:Image, _w:Int, _h:Int):SurfaceSetCmp {
-		var baked:Image = TextureAtlas.bakeForAnimation(_img, new IntRect(0, 0, _w, _h), 32);
+		var baked:Image = TextureAtlas.bakeForAnimation(_img, new IntRect(0, 0, _w, _h), 64);
 		var diagnol:Int = Math.ceil(Math.sqrt(_w * _w + _h * _h));
 		var ret:SurfaceSetCmp = formatTileSheet(_name, baked, diagnol);
 		ret.translateX = (diagnol - _w) / 2;
@@ -47,7 +47,7 @@ class ResourceFormat {
 	}
 
 	public static function endAtlas() {
-		curAtlas.binpack();
+		curAtlas.binpack(64);
 		for (surfaceset in surfacesets) {
 			var j:Int = surfaceset.indexes.length;
 			while (j-- > 0) {

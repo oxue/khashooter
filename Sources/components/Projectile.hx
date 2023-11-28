@@ -4,7 +4,7 @@ import game.CollisionBehaviours.MSG_COLLIDED;
 import kha.math.Vector2;
 import refraction.core.Component;
 import refraction.generic.PositionCmp;
-import refraction.tilemap.Tilemap;
+import refraction.tilemap.TileMap;
 
 /**
  * ...
@@ -14,9 +14,9 @@ class Projectile extends Component {
 
 	var position:PositionCmp;
 
-	public var tilemapData:Tilemap;
+	public var tilemapData:TileMap;
 
-	public function new(_tilemapData:Tilemap) {
+	public function new(_tilemapData:TileMap) {
 		tilemapData = _tilemapData;
 		super();
 	}

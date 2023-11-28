@@ -1,55 +1,37 @@
 package refraction.tilemap;
 
-import haxe.ds.Vector;
 import hxblit.Camera;
 import hxblit.KhaBlit;
 import kha.math.Vector2;
 import refraction.core.Utils;
-import refraction.display.SurfaceSetCmp;
 
 /**
  * ...
  * @author qwerber
  */
-class Tilemap {
+class TileMap extends GenericTileMap<Tile>{
 
 	public var threashold:Bool;
 	public var mode:Int;
-	public var data:Vector<Vector<Tile>>;
-	public var width:Int;
-	public var height:Int;
-	public var tilesize:Int;
 	public var colIndex:Int;
+	public var tilesheet:Tilesheet;
 
-	var surface2set:SurfaceSetCmp;
+	public function new(tilesheet:Tilesheet, _width:Int, _height:Int, _tilesize:Int, _colIndex:Int) {
+		super(_width, _height, _tilesize);
 
-	public function new(tilesheet:SurfaceSetCmp, _width:Int, _height:Int, _tilesize:Int, _colIndex:Int) {
-		this.surface2set = tilesheet;
-		this.tilesize = _tilesize;
-		this.width = _width;
-		this.height = _height;
+		this.tilesheet = tilesheet;
 		this.colIndex = _colIndex;
-
-		this.data = new Vector<Vector<Tile>>(_height);
-		var i:Int = _height;
-		while (i-- > 0) {
-			data[i] = new Vector<Tile>(_width);
-		}
 	}
 
 	public function getTilesize():Int {
 		return tilesize;
 	}
 
-	public function toTileCoord(x:Float):Int {
-		return Math.floor(x / tilesize);
-	}
-
 	public function render(camera:Camera) {
-		var left:Int = toTileCoord(camera.roundedX());
-		var right:Int = toTileCoord(camera.roundedR()) + 1;
-		var up:Int = toTileCoord(camera.roundedY());
-		var down:Int = toTileCoord(camera.roundedB()) + 1;
+		var left:Int = getIndexAtFloat(camera.roundedX());
+		var right:Int = getIndexAtFloat(camera.roundedR()) + 1;
+		var up:Int = getIndexAtFloat(camera.roundedY());
+		var down:Int = getIndexAtFloat(camera.roundedB()) + 1;
 
 		left = Utils.clampInt(left, 0, width);
 		right = Utils.clampInt(right, 0, width);
@@ -66,6 +48,9 @@ class Tilemap {
 	}
 
 	function renderTile(i:Int, j:Int, camera:Camera) {
+		if (data[i][j] == null) {
+			return;
+		}
 		var index:Int = data[i][j].imageIndex;
 		if (threashold) {
 			if (mode == 0 && index > colIndex) {
@@ -77,7 +62,7 @@ class Tilemap {
 		}
 
 		KhaBlit.blit(
-			surface2set.surfaces[index],
+			tilesheet.surfaceset.surfaces[index],
 			cast j * tilesize - camera.roundedX(),
 			cast i * tilesize - camera.roundedY()
 		);
@@ -100,12 +85,13 @@ class Tilemap {
 		return [j * tilesize + tilesize, i * tilesize + tilesize, j * tilesize, i * tilesize];
 	}
 
-	public function getTileAt(row:Int, col:Int):Tile {
-		if (row < 0 || col < 0 || row >= height || col >= width) {
-			return null;
-		}
-
-		return data[row][col];
+	public function getTileArray():Array<Array<Int>> {
+		var mData:Array<Array<Tile>> = cast data;
+		return mData.map(function(row:Array<Tile>) {
+			return row.map(function(tile:Tile):Int {
+				return tile.imageIndex;
+			});
+		});
 	}
 
 	public function setDataIntArray(_data:Array<Array<Int>>) {

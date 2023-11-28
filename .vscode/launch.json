@@ -1,6 +1,26 @@
 {
     "configurations": [
         {
+            "name": "phys: HTML5",
+            "request": "launch",
+            "type": "chrome",
+            "cwd": "${workspaceFolder}/build/debug-html5",
+            "runtimeExecutable": "${command:kha.findKhaElectron}",
+            "runtimeArgs": [
+                "--no-sandbox",
+                "--force-device-scale-factor=1",
+                "."
+            ],
+            "outFiles": [
+                "${workspaceFolder}/build/debug-html5/*.js"
+            ],
+            "preLaunchTask": "Kha: Build for Debug HTML5",
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "Kha: HTML5",
             "request": "launch",
             "type": "chrome",

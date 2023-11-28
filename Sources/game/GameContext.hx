@@ -1,5 +1,8 @@
 package game;
 
+import game.debug.IDebugDrawable;
+import refraction.tilemap.DijkstraField;
+import kha.math.Vector2;
 import game.debug.DebugMenu;
 import game.dialogue.DialogueManager;
 import helpers.DebugLogger;
@@ -12,6 +15,7 @@ import refraction.core.Entity;
 import refraction.core.Sys;
 import refraction.core.TemplateParser;
 import refraction.ds2d.DS2D;
+import refraction.ds2d.Polygon;
 import refraction.generic.VelocityCmp;
 import refraction.systems.BreadCrumbsSys;
 import refraction.systems.LightSourceSystem;
@@ -19,7 +23,8 @@ import refraction.systems.RenderSys;
 import refraction.systems.SpacingSys;
 import refraction.systems.TooltipSys;
 import refraction.tilemap.TileCollisionSys;
-import refraction.tilemap.Tilemap;
+import refraction.tilemap.TileMap;
+import refraction.tilemap.TilemapUtils;
 import systems.BeaconSys;
 import systems.HitTestSys;
 import systems.InteractSys;
@@ -47,7 +52,10 @@ class GameContext {
 	}
 
 	public var camera:Camera;
-	public var tilemap:Tilemap;
+	public var tilemap:TileMap;
+	public var dijkstraMap:DijkstraField;
+
+	public var tilemapShadowPolys:Array<Polygon>;
 
 	public var playerEntity:Entity;
 
@@ -66,6 +74,8 @@ class GameContext {
 	public var beaconSystem:BeaconSys;
 	public var particleSystem:ParticleSys;
 	public var environmentSystem:Sys<Component>;
+	
+	public var debugDrawablesMisc:Array<IDebugDrawable>;
 
 	public var spacingSystem:SpacingSys;
 	public var tooltipSystem:TooltipSys;
@@ -101,6 +111,8 @@ class GameContext {
 		tilemap = null;
 		ui = _ui;
 
+		tilemapShadowPolys = [];
+
 		statusText = new StatusText();
 		statusText.x = cast camera.w / 2 * Application.getScreenZoom();
 		statusText.y = cast camera.h / 2 * Application.getScreenZoom();
@@ -125,6 +137,8 @@ class GameContext {
 		hitCheckSystem = new Sys<Component>();
 		hitTestSystem = new HitTestSys();
 
+		debugDrawablesMisc = [];
+
 		lightingSystem = new DS2D(
 			Std.int(
 				Application.getScreenWidth() / Application.getScreenZoom()
@@ -146,6 +160,10 @@ class GameContext {
 			DebugLogger.info("config", c);
 			config = c;
 		});
+	}
+
+	public function recomputeShadowPolys() {
+		tilemapShadowPolys = TilemapUtils.computeGeometry(tilemap);
 	}
 
 	function initConsole() {

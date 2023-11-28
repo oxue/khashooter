@@ -1,5 +1,6 @@
 package game;
 
+import game.behaviours.LesserDemonBehaviour;
 import components.Beacon;
 import components.Health;
 import components.HitCircleCmp;
@@ -47,6 +48,7 @@ class ShooterComponentFactory extends ComponentFactory {
 		typeToMethodMap.set("Beacon", (e:Entity, name:String) -> gameContext.beaconSystem.procure(e, Beacon, name));
 		typeToMethodMap.set("ZombieAI", (e:Entity, name:String) -> gameContext.aiSystem.procure(e, ZombieAI, name));
 		typeToMethodMap.set("MimiAI", (e:Entity, name:String) -> gameContext.aiSystem.procure(e, MimiAI, name));
+		typeToMethodMap.set("LesserDemonBehaviour", (e:Entity, name:String) -> gameContext.aiSystem.procure(e, LesserDemonBehaviour, name));
 		typeToMethodMap.set("Particle", (e:Entity, name:String) -> gameContext.particleSystem.procure(e, Particle, name));
 	}
 
@@ -54,7 +56,7 @@ class ShooterComponentFactory extends ComponentFactory {
 		if (typeToMethodMap.exists(_type)) {
 			return cast typeToMethodMap.get(_type)(_e, _name);
 		}
-		DebugLogger.info("WARN", "Does not exist in Shooter Factory");
+		throw "Component type does not exist: " + _type;
 		return null;
 	}
 }

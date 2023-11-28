@@ -1,5 +1,6 @@
 package game.debug;
 
+import game.behaviours.LesserDemonBehaviour;
 import components.Particle;
 import haxe.ds.StringMap;
 import kha.Color;
@@ -16,12 +17,13 @@ class DebugMenu {
 	var menuX:Int;
 	var menuY:Int;
 
-	var buttons:StringMap<(GameContext,Zui) -> Void>;
+	var buttons:StringMap<(GameContext, Zui) -> Void>;
 
 	public function new() {
 		showMenu = false;
-		buttons = new StringMap<(GameContext,Zui) -> Void>();
+		buttons = new StringMap<(GameContext, Zui) -> Void>();
 		buttons.set("Reload Graphics", reloadGraphics);
+		buttons.set("Spawn Lesser Demon", spawnLesserDemon);
 		buttons.set("Spawn Wall Man", spawnWallMan);
 		buttons.set("Spawn Crate", spawnCrate);
 		buttons.set("Play Dialogue", playDialogue);
@@ -35,15 +37,36 @@ class DebugMenu {
 		buttons.set("Blood Particles", bloodParticles);
 	}
 
+	public function off() {
+		showMenu = false;
+	}
+
 	function reloadGraphics(gameContext:GameContext, ui:Zui) {
 		if (ui.button("Reload Graphics")) {
 			gameContext.reloadGraphics = true;
 		}
 	}
 
+	function spawnLesserDemon(gameContext:GameContext, ui:Zui) {
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
+		if (ui.button("Spawn Lesser Demon")) {
+			var entityLesserDemon:Entity = EntFactory
+				.instance()
+				.autoBuild("LesserDemon");
+			entityLesserDemon
+				.getComponent(PositionCmp)
+				.setPosition(worldMenuX, worldMenuY)
+				.rotationDegrees = Math.random() * 360 - 180;
+			gameContext.debugDrawablesMisc.push(entityLesserDemon.getComponent(LesserDemonBehaviour));
+		}
+	}
+
 	function spawnWallMan(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Spawn Wall Man")) {
 			var entityWallMan:Entity = EntFactory
 				.instance()
@@ -51,13 +74,14 @@ class DebugMenu {
 			entityWallMan
 				.getComponent(PositionCmp)
 				.setPosition(worldMenuX, worldMenuY)
-				.rotation = Math.random() * 360 - 180;
+				.rotationDegrees = Math.random() * 360 - 180;
 		}
 	}
 
 	function spawnCrate(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Spawn Crate")) {
 			entityCrate = EntFactory
 				.instance()
@@ -67,7 +91,7 @@ class DebugMenu {
 				.getComponent(PositionCmp)
 				.setPosition(worldMenuX, worldMenuY);
 			gameContext.lightingSystem.addLightSource(
-				new LightSource(worldMenuX, worldMenuY, 0x005B6F, 15)
+				new LightSource(worldMenuX, worldMenuY, 0x00D0FF, 150)
 			);
 		}
 	}
@@ -87,8 +111,8 @@ class DebugMenu {
 	}
 
 	function teleportHere(gameContext:GameContext, ui:Zui) {
-		// var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		// var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		// var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		// var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		// if (ui.button("Teleport Here")) {
 		// 	showMenu = false;
 		// 	playerPos.x = worldMenuX;
@@ -98,8 +122,9 @@ class DebugMenu {
 	}
 
 	function spawnHellMinion(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Spawn Hell Minion")) {
 			showMenu = false;
 			EntFactory
@@ -127,8 +152,9 @@ class DebugMenu {
 	}
 
 	function spawnSeveralGyo(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Spawn Several Gyo")) {
 			showMenu = false;
 			for (i in 0...5) {
@@ -145,25 +171,27 @@ class DebugMenu {
 	}
 
 	function spawnlightSource(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Spawn light Source")) {
 			showMenu = false;
 			gameContext.lightingSystem.addLightSource(new LightSource(worldMenuX, worldMenuY, [
-				Color.Cyan,
-				Color.Orange,
-				Color.Pink,
+				// Color.Cyan,
+				// Color.Orange,
+				// Color.Pink,
 				Color.White,
-				Color.Green,
-				Color.Yellow,
-				Color.Red
-			][Std.int(Math.random() * 7)].value & 0xFFFFFF));
+				// Color.Green,
+				// Color.Yellow,
+				// Color.Red
+			][0].value & 0x555555, 200));
 		}
 	}
 
 	function bloodParticles(gameContext:GameContext, ui:Zui) {
-		var worldMenuX:Int = cast menuX / 2 + gameContext.camera.x;
-		var worldMenuY:Int = cast menuY / 2 + gameContext.camera.y;
+		var zoom:Int = Application.getScreenZoom();
+		var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
+		var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
 		if (ui.button("Blood Particles")) {
 			showMenu = false;
 			for (i in 0...10) {
@@ -195,7 +223,11 @@ class DebugMenu {
 		}
 		var playerPos = context.playerEntity.getComponent(PositionCmp);
 
-		if (ui.window(Id.handle(), menuX, menuY, 400, 600, false)) {
+		if (ui.window(Id.handle(), menuX, menuY, 200, 600, false)) {
+			if (ui.button("[X] Hide Menu")) {
+				showMenu = false;
+			}
+
 			for (kv in buttons.keyValueIterator()) {
 				kv.value(context, ui);
 			}
@@ -215,10 +247,6 @@ class DebugMenu {
 			if (ui.button("Clear Lights")) {
 				showMenu = false;
 				context.lightingSystem.lights = [];
-			}
-
-			if (ui.button("Hide Menu")) {
-				showMenu = false;
 			}
 
 			context.shouldDrawHitBoxes = ui.check(Id.handle(), "draw hitboxes");

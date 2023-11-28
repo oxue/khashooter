@@ -15,7 +15,7 @@ class BeaconSys extends Sys<Beacon> {
 		sweepTicker = new Interval(
 			function() {
 				sweepRemoved();
-				DebugLogger.info("ROUTINE", "beacon system dead object sweep");
+				// DebugLogger.info("ROUTINE", "beacon system dead object sweep");
 			},
 			Consts.BEACON_SWEEP_INTERVAL
 		);

@@ -10,14 +10,16 @@ import refraction.generic.VelocityCmp;
 
 class TileCollisionCmp extends Component {
 
-	public var targetTilemap:Tilemap;
+	public var targetTilemap:TileMap;
 	public var hitboxPosition:Vector2;
 
 	public var position:PositionCmp;
 	public var dimensions:DimensionsCmp;
 	public var velocity:VelocityCmp;
+	public var enabled:Bool;
 
 	public function new() {
+		enabled = true;
 		super();
 	}
 

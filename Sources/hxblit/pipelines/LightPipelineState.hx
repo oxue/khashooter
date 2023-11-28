@@ -1,19 +1,20 @@
-package hxblit;
+package hxblit.pipelines;
 
 import kha.Shaders;
+import kha.graphics4.BlendingFactor;
 import kha.graphics4.BlendingOperation;
 import kha.graphics4.CompareMode;
 import kha.graphics4.PipelineState;
 import kha.graphics4.StencilAction;
 import kha.graphics4.VertexData;
 import kha.graphics4.VertexStructure;
-import kha.graphics4.BlendingFactor;
 
 /**
  * ...
  * @author
  */
 class LightPipelineState extends PipelineState {
+
 	public function new() {
 		super();
 

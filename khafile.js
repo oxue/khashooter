@@ -4,6 +4,7 @@ project.addSources('./Sources');
 project.addShaders('./Shaders');
 //project.addSources('../shooter2016/src');
 
+project.addLibrary("nape-haxe4");
 project.addLibrary('zui');
 project.addLibrary("yaml");
 project.addLibrary("dconsole");

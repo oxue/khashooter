@@ -1,6 +1,7 @@
-- enemy knockback
 - random item pickup
+When we touch a crate, it should give us a random item.
+
 - inventory
-- make sure spacing cmp is removed  
+- make sure spacing cmp is removed from play 
 - better enemy behaviour
 - knockback resistance

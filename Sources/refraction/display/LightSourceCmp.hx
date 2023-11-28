@@ -16,7 +16,7 @@ class LightSourceCmp extends Component {
 	public var offset:FastVector2;
 	public var position:PositionCmp;
 
-	public function new(lightingSystem:DS2D, _color:Int = 0xff0000, _radius:Int = 100, _offsetX:Int,
+	public function new(lightingSystem:DS2D, _color:Int = 0xffff0000, _radius:Int = 100, _offsetX:Int,
 			_offsetY:Int) {
 		light = new LightSource(0, 0, _color, _radius);
 		lightingSystem.addLightSource(light);
@@ -27,6 +27,8 @@ class LightSourceCmp extends Component {
 
 	override public function load() {
 		position = entity.getComponent(PositionCmp);
+		light.position.x = position.x;
+		light.position.y = position.y;
 	}
 
 	// TODO : remove funct

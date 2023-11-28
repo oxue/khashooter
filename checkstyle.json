@@ -478,13 +478,6 @@
 			}
 		},
 		{
-			"type": "ReturnCount",
-			"props": {
-				"max": 2,
-				"ignoreFormat": "^$"
-			}
-		},
-		{
 			"type": "SeparatorWhitespace",
 			"props": {
 				"dotPolicy": "none",

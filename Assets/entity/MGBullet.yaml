@@ -1,5 +1,5 @@
 ---
-entity_name: Wallman
+entity_name: MGBullet
 components:
 - type: Position
 - type: SurfaceSet

@@ -19,6 +19,9 @@ class Entity {
 
 	public function addComponent(_comp:Component, ?_name:String):Component {
 		var compName:String = (_name == null) ? Type.getClassName(Type.getClass(_comp)) : _name;
+		if (components.exists(compName)) {
+			throw "Component with name " + compName + " already exists on entity";
+		}
 		components.set(compName, _comp);
 		_comp.entity = this;
 		_comp.load();

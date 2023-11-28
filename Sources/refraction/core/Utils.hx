@@ -1,5 +1,6 @@
 package refraction.core;
 
+import zui.Zui.Handle;
 import kha.math.Vector2;
 import refraction.generic.PositionCmp;
 
@@ -53,5 +54,9 @@ class Utils {
 
 	public static inline function clampInt(_x:Int, _min:Int, _max:Int):Int {
 		return _x < _min ? _min : (_x > _max ? _max : _x);
+	}
+
+	public static function windowContains(handle:Handle, x:Float, y:Float):Bool {
+		return x >= handle.dragX && x <= handle.lastMaxX && y >= handle.dragY && y <= handle.lastMaxY;
 	}
 }

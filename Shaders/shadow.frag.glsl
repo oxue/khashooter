@@ -20,7 +20,7 @@ void main(){
         float lightDistance = length(lightDirection);
         float f = lightDistance / 100;
         float attenuation = 1 / (f * f);
-        val =  (pcoords.x / pcoords.y);
+        val =  (pcoords.x / sqrt(pcoords.y));
     }
     fragmentColor = vec4(0,0,0,val);
 }

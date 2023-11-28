@@ -73,7 +73,7 @@ class DialogueManager {
 		f.g2.fillRect(448, 280, 600, 168);
 		f.g2.color = Color.Black;
 		trace(phrase.phrase);
-		f.g2.font = Assets.fonts.monaco;
+		f.g2.font = Assets.fonts.fonts_monaco;
 		f.g2.drawString(phrase.phrase, 468, 300);
 	}
 

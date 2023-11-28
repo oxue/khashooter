@@ -33,7 +33,7 @@ class AnimatedRenderCmp extends Component {
 	public function new(?_surface:String) {
 		super();
 		surface = _surface;
-		numRot = 32;
+		numRot = 64;
 
 		coordX = coordY = 0;
 		animations = new StringMap<Array<Int>>();
@@ -72,15 +72,15 @@ class AnimatedRenderCmp extends Component {
 			time = 0;
 			frame = (frame + 1) % animation.length;
 		}
-		if (position.rotation < 0) {
-			position.rotation += 360;
-		} else if (position.rotation >= 360) {
-			position.rotation -= 360;
+		if (position.rotationDegrees < 0) {
+			position.rotationDegrees += 360;
+		} else if (position.rotationDegrees >= 360) {
+			position.rotationDegrees -= 360;
 		}
 		var offsetX = 0.0;
 		var offsetY = 0.0;
 
-		coordX = Math.round(position.rotation / 360 * numRot) % numRot;
+		coordX = Math.round(position.rotationDegrees / 360 * numRot) % numRot;
 
 		if (surface2Set.registrationX != 0 || surface2Set.registrationY != 0) {
 			var halfs = new Vector2(

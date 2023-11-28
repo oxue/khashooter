@@ -5,6 +5,9 @@ import entbuilders.ItemBuilder.Items;
 import game.EntFactory;
 import game.GameContext;
 import haxe.Json;
+import haxe.io.Mime;
+import js.Browser;
+import js.html.URL;
 import kha.Assets;
 import refraction.ds2d.LightSource;
 import refraction.generic.PositionCmp;
@@ -14,16 +17,48 @@ import ui.HealthBar;
 class LevelLoader {
 	var entityFactory:EntFactory;
 	var gameContext:GameContext;
+	var name:String;
 
-	public function new(_ef:EntFactory, _gc:GameContext) {
+	public function new(name:String, _ef:EntFactory, _gc:GameContext) {
+		this.name = name;
 		entityFactory = _ef;
 		gameContext = _gc;
 	}
 
-	public function loadMap(_name:String) {
-		var levelData:Dynamic = getLevelData(_name);
+	public static function saveFile(name:String, mime:Mime, data:String) {
+		final blob = new js.html.Blob([data], {
+			type: mime
+		});
+		final url = URL.createObjectURL(blob);
+		final a = Browser.document.createElement("a");
+		untyped a.download = name;
+		untyped a.href = url;
+		a.onclick = function(e) {
+			e.cancelBubble = true;
+			e.stopPropagation();
+		}
+		Browser.document.body.appendChild(a);
+		a.click();
+		Browser.document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	public function export() {
+		var levelData:Dynamic = getLevelData(name);
+		levelData.data = gameContext.tilemap.getTileArray();
+		var filename:String = '${name}.json';
+		saveFile(
+			filename,
+			"application/json",
+			Json.stringify(levelData)
+		);
+	}
+
+	public function loadMap() {
+		var levelData:Dynamic = getLevelData(name);
 		spawnTilemap(entityFactory, levelData);
 		spawnPlayer(levelData);
+		gameContext.tilemapShadowPolys = TilemapUtils.computeGeometry(gameContext.tilemap);
 		spawnLights(levelData);
 
 		// TODO: remove hardcode
@@ -63,9 +98,7 @@ class LevelLoader {
 				)
 			);
 		}
-		for (p in TilemapUtils.computeGeometry(gameContext.tilemap)) {
-			gameContext.lightingSystem.polygons.push(p);
-		}
+		
 	}
 
 	public function spawnPlayer(levelData:Dynamic) {
@@ -88,16 +121,22 @@ class LevelLoader {
 
 	function spawnTilemap(entFactory:EntFactory, levelData:Dynamic) {
 		var tilesetName:String = levelData.tileset_name;
+		var colIndex:Int = levelData.col_index;
+
 		if (tilesetName == null) {
 			tilesetName = "all_tiles";
+		}
+		if (colIndex == null) {
+			colIndex = 1;
 		}
 		entFactory.createTilemap(
 			levelData.data[0].length,
 			levelData.data.length,
 			levelData.tilesize,
-			1,
+			colIndex,
 			levelData.data,
-			tilesetName
+			tilesetName,
+			levelData.original_tilesheet_name
 		);
 	}
 

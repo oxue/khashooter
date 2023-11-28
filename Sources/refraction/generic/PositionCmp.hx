@@ -13,12 +13,12 @@ class PositionCmp extends Component {
 	public var x:Float;
 	public var y:Float;
 
-	public var rotation:Float;
+	public var rotationDegrees:Float;
 
 	public function new(_x:Float = 0, _y:Float = 0, _rotation:Float = 0) {
 		x = _x;
 		y = _y;
-		rotation = _rotation;
+		rotationDegrees = _rotation;
 		super();
 	}
 
@@ -26,7 +26,7 @@ class PositionCmp extends Component {
 		x = _x;
 		y = _y;
 		if (_rotation != null) {
-			rotation = _rotation;
+			rotationDegrees = _rotation;
 		}
 		return this;
 	}

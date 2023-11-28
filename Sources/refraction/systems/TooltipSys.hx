@@ -35,10 +35,10 @@ class TooltipSys extends Sys<Tooltip> {
 
 	private function drawTooltip(tooltip:Tooltip, g2:kha.graphics2.Graphics):Void {
 		g2.color = kha.Color.Black;
-		var textWidth = kha.Assets.fonts.OpenSans.width(textSize, tooltip.message);
+		var textWidth = kha.Assets.fonts.fonts_OpenSans.width(textSize, tooltip.message);
 		g2.fillRect(Application.mouseX, Application.mouseY, textWidth + margin * 2,
-			kha.Assets.fonts.OpenSans.height(textSize) + margin * 2 * 0.8);
-		g2.font = kha.Assets.fonts.OpenSans;
+			kha.Assets.fonts.fonts_OpenSans.height(textSize) + margin * 2 * 0.8);
+		g2.font = kha.Assets.fonts.fonts_OpenSans;
 		g2.fontSize = textSize;
 		g2.color = tooltip.color;
 		g2.drawString(tooltip.message, Application.mouseX + margin, Application.mouseY + margin * 0.8);

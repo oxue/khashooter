@@ -13,7 +13,7 @@ class LightSourceSystem extends Sys<LightSourceCmp> {
 	}
 
 	override public function updateComponent(comp:LightSourceCmp) {
-		comp.light.position.x = comp.position.x + comp.offset.x;
-		comp.light.position.y = comp.position.y + comp.offset.y;
+		comp.light.position.x = comp.position.x;
+		comp.light.position.y = comp.position.y;
 	}
 }

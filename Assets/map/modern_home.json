@@ -31,6 +31,5 @@
 	"width": 28,
 	"start":{"x":120,"y":100},
 	"height": 24,
-	"tilesize": 16,
-	"tileset_name": "modern"
+	"tilesize": 16
 }

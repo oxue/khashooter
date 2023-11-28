@@ -1,6 +1,6 @@
 package refraction.display;
 
-import hxblit.Surface2;
+import hxblit.Surface2D;
 import hxblit.TextureAtlas.FloatRect;
 import refraction.core.Component;
 
@@ -10,7 +10,7 @@ import refraction.core.Component;
  */
 class SurfaceSetCmp extends Component {
 
-	public var surfaces:Array<Surface2>;
+	public var surfaces:Array<Surface2D>;
 	public var indexes:Array<Int>;
 	public var translateX:Float;
 	public var translateY:Float;

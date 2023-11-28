@@ -1,6 +1,7 @@
 package hxblit;
 
 import hxblit.TextureAtlas.FloatRect;
+import hxblit.pipelines.Tex2PipelineState;
 import kha.Color;
 import kha.FastFloat;
 import kha.Image;
@@ -309,7 +310,7 @@ class KhaBlit {
 		indexQuad();
 	}
 
-	public static function blit(_s2:Surface2, _x:Float, _y:Float) {
+	public static function blit(_s2:Surface2D, _x:Float, _y:Float) {
 		stageV4(_x, _y, _s2.vx1, _s2.vy1);
 		stageV4(_x + _s2.width, _y, _s2.vx2, _s2.vy2);
 		stageV4(_x, _y + _s2.height, _s2.vx3, _s2.vy3);
@@ -317,8 +318,8 @@ class KhaBlit {
 		indexQuad();
 	}
 
-	public static function getSurface(_w:Int, _h:Int):Surface2 {
-		var s:Surface2 = new Surface2();
+	public static function getSurface(_w:Int, _h:Int):Surface2D {
+		var s:Surface2D = new Surface2D();
 		s.height = _h;
 		s.width = _w;
 		s.vx1 = 0;

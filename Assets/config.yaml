@@ -1,4 +1,18 @@
 ---
+system:
+  width: 1300
+  height: 800
+  zoom: 2
+  noclip: true
+
+projectiles_info:
+  DemonFireball:
+    speed: 4
+
+lesser_demon_fireball_cooldown_secs: 0.15
+
+demon_fireball_damage: 10
+
 flamethrower_grow_util: 20
 flamethrower_grow_rate: 0.3
 flamethrower_total_particle_life: 400
@@ -19,9 +33,9 @@ crossbow_projectile_speed: 12
 crossbow_bolt_light_color: 0x22225d
 crossbow_bolt_light_radius: 10
 
-gib_splash_magnitude_min: 5
-gib_splash_magnitude_max: 30
-single_hit_gibsplash_amount: 10
+gib_splash_magnitude_min: 10
+gib_splash_magnitude_max: 20
+single_hit_gibsplash_amount: 5
 
 texPosX: 0
 texPosY: 0

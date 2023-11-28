@@ -26,14 +26,14 @@ class BreadCrumbsSys extends Sys<BreadCrumbs> {
 
 			var s = Math.atan2(direction.y, direction.x);
 			var targetRotation = s * 57.3;
-			var diff = targetRotation - comp.position.rotation;
+			var diff = targetRotation - comp.position.rotationDegrees;
 			if (diff < 0)
 				diff += 360;
 			if (diff >= 360)
 				diff -= 360;
 			if (diff > 180)
 				diff -= 360;
-			comp.position.rotation += diff / 5;
+			comp.position.rotationDegrees += diff / 5;
 
 			var diff = new FastVector2(crumb.x - comp.position.x, crumb.y - comp.position.y);
 			if (diff.length < comp.acceptanceRadius) {

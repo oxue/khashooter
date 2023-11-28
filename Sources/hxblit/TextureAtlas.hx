@@ -41,7 +41,7 @@ class ANode {
 		child = new Vector(2);
 	}
 
-	public function draw(g:Graphics, assets:Map<Int, Surface2>, size:Int = -1) {
+	public function draw(g:Graphics, assets:Map<Int, Surface2D>, size:Int = -1) {
 		if (size == -1) {
 			size = rc.w();
 		}
@@ -61,7 +61,7 @@ class ANode {
 			v[6] = ((rc.l + image.data.width) / size);
 			v[7] = ((rc.t + image.data.height) / size);
 
-			var s2:Surface2 = new Surface2();
+			var s2:Surface2D = new Surface2D();
 
 			s2.vx1 = v[0];
 			s2.vy1 = v[1];
@@ -194,11 +194,11 @@ class TextureAtlas {
 
 	public var images:Array<SurfaceData>;
 	public var image:Image;
-	public var assets:Map<Int, Surface2>;
+	public var assets:Map<Int, Surface2D>;
 
 	public function new() {
 		images = new Array<SurfaceData>();
-		assets = new Map<Int, Surface2>();
+		assets = new Map<Int, Surface2D>();
 	}
 
 	public function add(_image:Image, _id:Int) {
@@ -212,7 +212,7 @@ class TextureAtlas {
 			return 1;
 	}
 
-	public static function bake(_data:Image, _rot:Int = 32):Image {
+	public static function bake(_data:Image, _rot:Int):Image {
 		var diagnol:Int = Math.ceil(Math.sqrt(_data.width * _data.width + _data.height * _data.height));
 		var cache:Image = Image.createRenderTarget(diagnol * _rot, diagnol, null, NoDepthAndStencil, 4);
 		cache.g2.begin(true, Color.fromFloats(0, 0, 0, 0));
@@ -233,7 +233,7 @@ class TextureAtlas {
 		return cache;
 	}
 
-	public static function bakeForAnimation(_data:Image, _frame:IntRect, _rot:Int = 32):Image {
+	public static function bakeForAnimation(_data:Image, _frame:IntRect, _rot:Int):Image {
 		var gWidth:Int = cast _data.width / _frame.w;
 		var gHeight:Int = cast _data.height / _frame.h;
 		var diagnol:Int = Math.ceil(Math.sqrt(_frame.w * _frame.w + _frame.h * _frame.h));
@@ -266,7 +266,7 @@ class TextureAtlas {
 		var gh:Int = cast _img.height / _frame.h;
 		var i:Int = -1;
 		ret.indexes = new Array<Int>();
-		ret.surfaces = new Array<Surface2>();
+		ret.surfaces = new Array<Surface2D>();
 		while (i++ < gh - 1) {
 			var j:Int = -1;
 			while (j++ < gw - 1) {
@@ -284,10 +284,10 @@ class TextureAtlas {
 		return ret;
 	}
 
-	public function binpack() {
+	public function binpack(num_rot:Int) {
 		images.sort(sortOnSize);
 
-		var size:Int = 32;
+		var size:Int = num_rot;
 		var root:ANode = null;
 		var packed:Bool = false;
 		while (!packed) {

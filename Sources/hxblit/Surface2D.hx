@@ -4,7 +4,8 @@ package hxblit;
  * ...
  * @author worldedit qwerber
  */
-class Surface2 {
+class Surface2D {
+
 	public var vx1:Float;
 	public var vy1:Float;
 

@@ -1,4 +1,4 @@
-package hxblit;
+package hxblit.pipelines;
 
 import kha.Shaders;
 import kha.graphics4.BlendingFactor;

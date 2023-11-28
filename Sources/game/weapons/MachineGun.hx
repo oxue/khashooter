@@ -1,5 +1,7 @@
 package game.weapons;
 
+import kha.Assets;
+import kha.audio1.Audio;
 import entbuilders.ItemBuilder.Items;
 import refraction.core.Application;
 import refraction.generic.PositionCmp;
@@ -20,7 +22,8 @@ class MachineGun extends Weapon {
 		if (Application.frameClock - lastShotClock < cooldown) {
 			return;
 		}
-		lastShotClock = Application.frameClock;
+		Audio.play(Assets.sounds.sound_gun);
+ 		lastShotClock = Application.frameClock;
 		EntFactory
 			.instance()
 			.createBullet(calcMuzzlePosition(_position), muzzleDirection(_position));

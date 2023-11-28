@@ -1,5 +1,9 @@
 package refraction.tilemap;
 
+import helpers.DebugLogger;
+import haxe.Timer;
+import js.html.AbortController;
+import refraction.utils.Pair;
 import kha.math.Vector2;
 import refraction.ds2d.Face;
 import refraction.ds2d.Polygon;
@@ -9,7 +13,8 @@ import refraction.ds2d.Polygon;
  * @author worldedit
  */
 class TilemapUtils {
-	public static function raycast(targetTilemap:Tilemap, x1:Float, y1:Float, x2:Float, y2:Float):Bool {
+
+	public static function raycast(targetTilemap:TileMap, x1:Float, y1:Float, x2:Float, y2:Float):Bool {
 		var i:Int = Math.floor(x1 / targetTilemap.tilesize);
 		var j:Int = Math.floor(y1 / targetTilemap.tilesize);
 
@@ -19,29 +24,17 @@ class TilemapUtils {
 		var di:Int = ((x1 < x2) ? 1 : ((x1 > x2) ? -1 : 0));
 		var dj:Int = ((y1 < y2) ? 1 : ((y1 > y2) ? -1 : 0));
 
-		var minX:Float = targetTilemap.tilesize * Math.floor(
-			x1 / targetTilemap.tilesize
-		);
+		var minX:Float = targetTilemap.tilesize * Math.floor(x1 / targetTilemap.tilesize);
 		var maxX:Float = minX + targetTilemap.tilesize;
 
-		var minY:Float = targetTilemap.tilesize * Math.floor(
-			y1 / targetTilemap.tilesize
-		);
+		var minY:Float = targetTilemap.tilesize * Math.floor(y1 / targetTilemap.tilesize);
 		var maxY:Float = minY + targetTilemap.tilesize;
 
-		var tx:Float = ((x1 > x2) ? (x1 - minX) : (maxX - x1)) / Math.abs(
-			x2 - x1
-		);
-		var ty:Float = ((y1 > y2) ? (y1 - minY) : (maxY - y1)) / Math.abs(
-			y2 - y1
-		);
+		var tx:Float = ((x1 > x2) ? (x1 - minX) : (maxX - x1)) / Math.abs(x2 - x1);
+		var ty:Float = ((y1 > y2) ? (y1 - minY) : (maxY - y1)) / Math.abs(y2 - y1);
 
-		var deltaX:Float = targetTilemap.tilesize / Math.abs(
-			x2 - x1
-		);
-		var deltaY:Float = targetTilemap.tilesize / Math.abs(
-			y2 - y1
-		);
+		var deltaX:Float = targetTilemap.tilesize / Math.abs(x2 - x1);
+		var deltaY:Float = targetTilemap.tilesize / Math.abs(y2 - y1);
 
 		while (true) {
 			var t:Tile;
@@ -73,7 +66,7 @@ class TilemapUtils {
 		return false;
 	}
 
-	static function generatePolygonForTileInd(_tilemapData:Tilemap, i:Int, j:Int):Polygon {
+	static function generatePolygonForTileInd(_tilemapData:TileMap, i:Int, j:Int):Polygon {
 		var p:Polygon = new Polygon();
 
 		final left:Int = j * _tilemapData.tilesize;
@@ -99,10 +92,7 @@ class TilemapUtils {
 		}
 		if (!_tilemapData.data[i - 1][j].solid) {
 			p.faces.push(
-				new Face(
-					new Vector2(left, top),
-					new Vector2(right, top),
-				)
+				new Face(new Vector2(left, top), new Vector2(right, top),)
 			);
 		}
 		if (!_tilemapData.data[i + 1][j].solid) {
@@ -116,18 +106,14 @@ class TilemapUtils {
 		return p;
 	}
 
-	public static function computeGeometry(_tilemapData:Tilemap):Array<Polygon> {
+	public static function computeGeometry(_tilemap:TileMap):Array<Polygon> {
 		var ret:Array<Polygon> = [];
-		for (i in 1..._tilemapData.height - 1) {
-			for (j in 1..._tilemapData.width - 1) {
-				if (!_tilemapData.data[i][j].solid) {
+		for (i in 1..._tilemap.height - 1) {
+			for (j in 1..._tilemap.width - 1) {
+				if (!_tilemap.data[i][j].solid) {
 					continue;
 				}
-				var p:Polygon = generatePolygonForTileInd(
-					_tilemapData,
-					i,
-					j
-				);
+				var p:Polygon = generatePolygonForTileInd(_tilemap, i, j);
 				ret.push(p);
 			}
 		}

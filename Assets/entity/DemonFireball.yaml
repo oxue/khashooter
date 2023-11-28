@@ -1,0 +1,20 @@
+---
+entity_name: DemonFireball
+components:
+- type: Position
+- type: SurfaceSet
+  resource: projectiles
+  name: projectiles
+- type: AnimatedRender/SelfLit
+  args:
+    animations:
+    - name: bullet
+      frames: [2]
+    initialAnimation: bullet
+    surface: projectiles
+    frameTime: 100
+- type: Velocity
+- type: HitCircle
+  args:
+    tag: demon_fireball
+    radius: 3

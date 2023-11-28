@@ -1,5 +1,6 @@
 package refraction.ds2d;
 
+import hxblit.Camera;
 import kha.math.Vector2;
 
 /**
@@ -7,6 +8,7 @@ import kha.math.Vector2;
  * @author ...
  */
 class Polygon {
+
 	public var vertices:Array<Vector2>;
 	public var faces:Array<Face>;
 	public var x:Int;
@@ -35,8 +37,15 @@ class Polygon {
 		while (i-- > 0) {
 			faces.push(new Face(vertices[i], vertices[i + 1]));
 		}
-		faces.push(
-			new Face(vertices[_numVertices - 1], vertices[0])
-		);
+		faces.push(new Face(vertices[_numVertices - 1], vertices[0]));
+	}
+
+	public function debugDraw(camera:Camera, g:kha.graphics2.Graphics) {
+		for (f in faces) {
+			g.color = Green;
+			final p1:Vector2 = camera.toScreenPos(f.v1);
+			final p2:Vector2 = camera.toScreenPos(f.v2);
+			g.drawLine(p1.x, p1.y, p2.x, p2.y);
+		}
 	}
 }

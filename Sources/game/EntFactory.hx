@@ -23,7 +23,8 @@ import refraction.display.LightSourceCmp;
 import refraction.display.ResourceFormat;
 import refraction.generic.*;
 import refraction.tilemap.TileCollisionCmp;
-import refraction.tilemap.Tilemap;
+import refraction.tilemap.TileMap;
+import refraction.tilemap.Tilesheet;
 
 /**
  * ...
@@ -58,6 +59,10 @@ class EntFactory {
 		entityTemplates = TemplateParser.parse();
 	}
 
+	public function getEntityTemplates():StringMap<Dynamic> {
+		return entityTemplates;
+	}
+
 	public function reloadEntityBlobs() {
 		TemplateParser.reloadEntityBlobs("../../Assets/entity", (templateMap) -> {
 			this.entityTemplates = templateMap;
@@ -67,10 +72,10 @@ class EntFactory {
 
 	public function worldMouse():Vector2 {
 		var invZoom:Float = 1 / Application.getScreenZoom();
-		return new Vector2(
-			cast Application.mouseX * invZoom + gameContext.camera.x,
-			cast Application.mouseY * invZoom + gameContext.camera.y
-		);
+		return {
+			x: cast Application.mouseX * invZoom + gameContext.camera.x,
+			y: cast Application.mouseY * invZoom + gameContext.camera.y
+		};
 	}
 
 	public function createItem(_x, _y, itemType:Items):Entity {
@@ -224,6 +229,34 @@ class EntFactory {
 		return e;
 	}
 
+	public function spawnProjectile(projectileName:String, _position:Vector2, direction:Vector2):Entity {
+		var e:Entity = autoBuild(projectileName);
+		e
+			.getComponent(PositionCmp)
+			.setPosition(
+				_position.x,
+				_position.y,
+				Utils.direction2Degrees(direction)
+			);
+
+		var projectileConfig:Dynamic = Reflect.field(gameContext.config.projectiles_info, projectileName);
+
+		// refactor this
+		direction = direction
+			.normalized()
+			.mult(projectileConfig.speed);
+
+		e
+			.getComponent(VelocityCmp)
+			.setBoth(direction.x, direction.y);
+
+		gameContext.hitCheckSystem
+			.procure(e, Projectile)
+			.tilemapData = gameContext.tilemap;
+
+		return e;
+	}
+
 	public function createBullet(_position:Vector2, direction:Vector2):Entity {
 		var e:Entity = autoBuild("MGBullet");
 		e
@@ -233,10 +266,9 @@ class EntFactory {
 				_position.y,
 				Utils.direction2Degrees(direction)
 			);
-		e.addComponent(ResourceFormat.surfacesets.get("projectiles"));
 		var lightSource = new LightSourceCmp(
 			gameContext.lightingSystem,
-			0x111100,
+			0xFFFF00,
 			gameContext.config.crossbow_bolt_light_radius,
 			0,
 			0
@@ -257,7 +289,7 @@ class EntFactory {
 	}
 
 	public function createProjectile(_position:Vector2, direction:Vector2):Entity {
-		var e:Entity = autoBuild("MGBullet");
+		var e:Entity = new Entity();
 		e.addComponent(
 			new PositionCmp(
 				_position.x,
@@ -304,14 +336,19 @@ class EntFactory {
 		return e;
 	}
 
-	public function createTilemap(_width:Int, _height:Int, _tilesize:Int, _colIndex:Int,
-			_data:Array<Array<Int>>, _tileset:String = "all_tiles"):Entity {
+	public function createTilemap(_width:Int, _height:Int, tilesize:Int, _colIndex:Int,
+			_data:Array<Array<Int>>, _tileset:String = "all_tiles",
+			_original_tilesheet_name = "tilesheet"):Entity {
 
-		var tilemap:Tilemap = new Tilemap(
-			ResourceFormat.surfacesets.get(_tileset),
+		var tilemap:TileMap = new TileMap(
+			new Tilesheet(
+				tilesize,
+				ResourceFormat.surfacesets.get(_tileset),
+				_original_tilesheet_name
+			),
 			_width,
 			_height,
-			_tilesize,
+			tilesize,
 			_colIndex
 		);
 		tilemap.setDataIntArray(_data);

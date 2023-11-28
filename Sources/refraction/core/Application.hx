@@ -36,6 +36,8 @@ class Application {
 
 	static var keyDownListeners:Array<KeyCode -> Void>;
 	static var keyUpListeners:Array<KeyCode -> Void>;
+	static var mouseDownListeners:Array<(Int, Int, Int) -> Void>;
+	static var mouseUpListeners:Array<(Int, Int, Int) -> Void>;
 
 	static var mouseWasDown:Bool;
 	static var mouse2WasDown:Bool;
@@ -56,6 +58,8 @@ class Application {
 
 		keyDownListeners = [];
 		keyUpListeners = [];
+		mouseDownListeners = [];
+		mouseUpListeners = [];
 
 		System.start(
 			{title: _title, width: _width, height: _height},
@@ -77,7 +81,7 @@ class Application {
 	}
 
 	/**
-	 * width in pixels of the graphics, not the window
+	 * width in pixels of the window, not the graphics
 	 * @return Int
 	 */
 	public static function getScreenWidth():Int {
@@ -85,7 +89,7 @@ class Application {
 	}
 
 	/**
-	 * height in pixels of the graphics, not the window
+	 * height in pixels of the window, not the graphics
 	 * @return Int
 	 */
 	public static function getScreenHeight():Int {
@@ -93,7 +97,7 @@ class Application {
 	}
 
 	/**
-	 * zoom of the graphics, zoom x the width and height is the window size
+	 * zoom of the graphics, width and height divided by zoom is the window size
 	 * @return Int
 	 */
 	public static function getScreenZoom():Int {
@@ -114,6 +118,9 @@ class Application {
 	}
 
 	static function mouseDown(button:Int, x:Int, y:Int) {
+		for (method in mouseDownListeners) {
+			method(button, x, y);
+		}
 		if (button == 0)
 			mouseIsDown = true;
 		if (button == 1)
@@ -121,6 +128,9 @@ class Application {
 	}
 
 	static function mouseUp(button:Int, x:Int, y:Int) {
+		for (method in mouseUpListeners) {
+			method(button, x, y);
+		}
 		if (button == 0)
 			mouseIsDown = false;
 		if (button == 1)
@@ -151,6 +161,7 @@ class Application {
 	static function update() {
 		var m2:Bool = mouse2IsDown;
 		var m:Bool = mouseIsDown;
+
 		currentState.update();
 		mouse2JustDown = m2 && !mouse2WasDown;
 		mouseJustDown = m && !mouseWasDown;
@@ -174,5 +185,13 @@ class Application {
 
 	public static function addKeyDownListener(method:KeyCode -> Void) {
 		keyDownListeners.push(method);
+	}
+
+	public static function addMouseDownListener(method:(Int, Int, Int) -> Void) {
+		mouseDownListeners.push(method);
+	}
+
+	public static function addMouseUpListener(method:(Int, Int, Int) -> Void) {
+		mouseUpListeners.push(method);
 	}
 }

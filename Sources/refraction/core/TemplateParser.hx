@@ -8,18 +8,20 @@ import yaml.Parser;
 import yaml.Yaml;
 
 class TemplateParser {
+
 	public static var FALL_BACK_TO_JSON:Array<String> = [];
 
 	public static function parse():StringMap<Dynamic> {
-		var yamlObj:Dynamic = Yaml.parse(Assets.blobs.entity_entities_yaml.toString());
+		var entityYamlNames:Array<String> = Reflect
+			.fields(Assets.blobs)
+			.filter(
+				(field) -> (field.indexOf("entity_") == 0 && field.substr(field.length - 4) == "yaml")
+			);
 		var ret:StringMap<Dynamic> = new StringMap<Dynamic>();
-		var i:Int = yamlObj
-			.get("entities")
-			.length;
 
-		while (i-- > 0) {
-			var entityName:String = yamlObj.get("entities")[i];
-			ret.set(entityName, getEntityTemplate(entityName));
+		for (entityYaml in entityYamlNames) {
+			var template:Dynamic = getEntityTemplate(entityYaml);
+			ret.set(template.entity_name, template);
 		}
 
 		return ret;
@@ -33,7 +35,7 @@ class TemplateParser {
 		);
 	}
 
-	public static function reloadConfigurations(_dirPath, _done:Dynamic->Void) {
+	public static function reloadConfigurations(_dirPath, _done:Dynamic -> Void) {
 		Assets.loadBlobFromPath('${_dirPath}/config.yaml', (blob) -> {
 			var yamlObj:Dynamic = Yaml.parse(blob.toString(), Parser
 				.options()
@@ -44,7 +46,7 @@ class TemplateParser {
 		});
 	}
 
-	public static function reloadEntityBlobs(_dirPath:String, _done:StringMap<Dynamic>->Void) {
+	public static function reloadEntityBlobs(_dirPath:String, _done:StringMap<Dynamic> -> Void) {
 		Assets.loadBlobFromPath('${_dirPath}/entities.yaml', (blob) -> {
 			var yamlObj:Dynamic = Yaml.parse(blob.toString());
 			var ret = new StringMap<Dynamic>();
@@ -64,28 +66,24 @@ class TemplateParser {
 		});
 	}
 
-	public static function loadEntityTemplate(_dirPath:String, _name:String, _done:Dynamic->Void) {
+	public static function loadEntityTemplate(_dirPath:String, _name:String, _done:Dynamic -> Void) {
 		Assets.loadBlobFromPath('${_dirPath}/${_name}.yaml', (blob) -> {
-			_done(Yaml.parse(blob.toString(), Parser
-				.options()
-				.useObjects()
-			));
+			_done(
+				Yaml.parse(blob.toString(), Parser
+					.options()
+					.useObjects()
+				)
+			);
 		});
 	}
 
 	static function getEntityTemplate(_entityName:String):Dynamic {
-		if (FALL_BACK_TO_JSON.indexOf(_entityName) == -1) {
-			var entityBlobYaml = Reflect
-				.field(Assets.blobs, 'entity_${_entityName}_yaml')
-				.toString();
-			return Yaml.parse(entityBlobYaml, Parser
-				.options()
-				.useObjects()
-			);
-		}
-		var entityBlob:String = Reflect
-			.field(Assets.blobs, 'entity_json_${_entityName}_json')
+		var entityBlobYaml:String = Reflect
+			.field(Assets.blobs, _entityName)
 			.toString();
-		return Json.parse(entityBlob);
+		return Yaml.parse(entityBlobYaml, Parser
+			.options()
+			.useObjects()
+		);
 	}
 }

@@ -6,7 +6,8 @@ import refraction.core.Sys;
 import refraction.generic.DimensionsCmp;
 
 class TileCollisionSys extends Sys<TileCollisionCmp> {
-	var tilemapData:Tilemap;
+
+	var tilemapData:TileMap;
 	var pool:Array<TileCollisionCmp>;
 
 	public function new() {
@@ -21,7 +22,7 @@ class TileCollisionSys extends Sys<TileCollisionCmp> {
 		return null;
 	}
 
-	public function setTilemap(_tilemapData:Tilemap) {
+	public function setTilemap(_tilemapData:TileMap) {
 		tilemapData = _tilemapData;
 	}
 
@@ -33,7 +34,9 @@ class TileCollisionSys extends Sys<TileCollisionCmp> {
 				removeIndex(i, pool);
 				continue;
 			}
-			collide(tc);
+			if (tc.enabled) {
+				collide(tc);
+			}
 			++i;
 		}
 	}
@@ -51,18 +54,10 @@ class TileCollisionSys extends Sys<TileCollisionCmp> {
 	}
 
 	function getCollisionBounds(_bound:FloatRect):IntBounds {
-		var bottom = Math.floor(
-			_bound.bottom() / tilemapData.tilesize
-		) + 1;
-		var top = Math.floor(
-			_bound.top() / tilemapData.tilesize
-		) - 1;
-		var right = Math.floor(
-			_bound.right() / tilemapData.tilesize
-		) + 1;
-		var left = Math.floor(
-			_bound.left() / tilemapData.tilesize
-		) - 1;
+		var bottom = Math.floor(_bound.bottom() / tilemapData.tilesize) + 1;
+		var top = Math.floor(_bound.top() / tilemapData.tilesize) - 1;
+		var right = Math.floor(_bound.right() / tilemapData.tilesize) + 1;
+		var left = Math.floor(_bound.left() / tilemapData.tilesize) - 1;
 
 		top = clamp(top, 0, tilemapData.height - 1);
 		left = clamp(left, 0, tilemapData.width - 1);
@@ -115,7 +110,7 @@ class TileCollisionSys extends Sys<TileCollisionCmp> {
 		while (i <= bounds.b) {
 			var j = bounds.l;
 			while (j <= bounds.r) {
-				if (tilemapData.data[i][j].solid) {
+				if (tilemapData.data[i][j] != null && tilemapData.data[i][j].solid) {
 					var cdata = solveRect(
 						tc,
 						j * tilemapData.tilesize,
@@ -135,10 +130,7 @@ class TileCollisionSys extends Sys<TileCollisionCmp> {
 	}
 
 	public function collideOneAxis(tc:TileCollisionCmp) {
-		var datas:Array<CollisionData> = getCollisionsInBound(
-			tc,
-			getCollisionBounds(sweptRect(tc))
-		);
+		var datas:Array<CollisionData> = getCollisionsInBound(tc, getCollisionBounds(sweptRect(tc)));
 
 		if (datas.length <= 0) {
 			return;

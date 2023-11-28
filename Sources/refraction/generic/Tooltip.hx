@@ -5,8 +5,6 @@ import kha.Color;
 import kha.math.Vector2;
 import refraction.core.Application;
 import refraction.core.Component;
-import refraction.generic.DimensionsCmp;
-import refraction.generic.PositionCmp;
 
 /**
  * ...
@@ -29,18 +27,18 @@ class Tooltip extends Component {
 		super();
 	}
 
-	override public function autoParams(_args:Dynamic):Void {
+	override public function autoParams(_args:Dynamic) {
 		message = _args.message;
 		color = _args.color;
 	}
 
-	override public function load():Void {
+	override public function load() {
 		position = entity.getComponent(PositionCmp);
 		mouseBox = entity.getComponent(DimensionsCmp);
 	}
 
 	public function containsPoint(mouseCoords:Vector2):Bool {
-		var deltaCoords = new Vector2(mouseCoords.x + camera.x - position.x,
+		var deltaCoords:Vector2 = new Vector2(mouseCoords.x + camera.x - position.x,
 			mouseCoords.y + camera.y - position.y);
 		return mouseBox.containsPoint(deltaCoords);
 	}

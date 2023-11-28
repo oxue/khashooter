@@ -1,0 +1,39 @@
+---
+entity_name: LesserDemon
+base_entity: Actor
+components:
+- type: SurfaceSet
+  resource: lesser_demon
+- type: SurfaceSet
+  resource: lesser_demon_eyes
+  name: lesser_demon_eyes_surface
+- type: AnimatedRender
+  name:
+  args:
+    animations:
+    - name: idle
+      frames: [0]
+    initialAnimation: idle
+    frameTime: 10
+- type: HitCircle
+  name: zombie_hitcircle
+  args:
+    tag: enemy
+    radius: 15
+- type: AnimatedRender/SelfLit
+  name: lesser_demon_eyes_render
+  args:
+    surface: lesser_demon_eyes_surface
+    animations:
+    - name: idle
+      frames: [0]
+    initialAnimation: idle
+    frameTime: 10
+- type: LesserDemonBehaviour
+- type: Health
+  args:
+    maxValue: 100
+- type: TileCollision
+  args:
+    hitboxX: -10
+    hitboxY: -10
