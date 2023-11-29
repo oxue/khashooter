@@ -14,28 +14,28 @@ import refraction.generic.PositionCmp;
  */
 class InteractableCmp extends Component {
 
-	public var interactFunc:Entity -> Void;
+    public var interactFunc:Entity -> Void;
 
-	var position:PositionCmp;
-	var dimensions:DimensionsCmp;
-	var camera:Camera;
+    var position:PositionCmp;
+    var dimensions:DimensionsCmp;
+    var camera:Camera;
 
-	public function new(_cam:Camera, _interactFunc:Entity -> Void) {
-		camera = _cam;
-		interactFunc = _interactFunc;
-		super();
-	}
+    public function new(_cam:Camera, _interactFunc:Entity -> Void) {
+        camera = _cam;
+        interactFunc = _interactFunc;
+        super();
+    }
 
-	override public function load() {
-		position = entity.getComponent(PositionCmp);
-		dimensions = entity.getComponent(DimensionsCmp);
-	}
+    override public function load() {
+        position = entity.getComponent(PositionCmp);
+        dimensions = entity.getComponent(DimensionsCmp);
+    }
 
-	public function containsCursor():Bool {
-		var worldMouseCoords:Vector2 = Application
-			.mouseCoords()
-			.div(Application.getScreenZoom())
-			.add(camera.position());
-		return dimensions.containsPoint(worldMouseCoords.sub(position.vec()));
-	}
+    public function containsCursor():Bool {
+        var worldMouseCoords:Vector2 = Application
+            .mouseCoords()
+            .div(Application.getScreenZoom())
+            .add(camera.position());
+        return dimensions.containsPoint(worldMouseCoords.sub(position.vec()));
+    }
 }

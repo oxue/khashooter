@@ -20,6 +20,7 @@ enum ToolType {
     ChangeMapWidth;
     IncreaseMapHeight;
     ExportMap;
+	ExportLayoutConfig;
 }
 
 @:structInit
@@ -112,7 +113,6 @@ class Toolbox extends EditorWindow {
                 toolDescription: "Change Map Width",
                 toolFunc: setToolFunc,
                 toolDownFunc: function(worldPos:Vector2, tileSelected:Int) {
-                    trace("tool paint func");
                     var tm:TileMap = gameContext.tilemap;
                     var tx:Int = tm.getIndexAtFloat(worldPos.x);
                     var ty:Int = tm.getIndexAtFloat(worldPos.y);
@@ -136,6 +136,15 @@ class Toolbox extends EditorWindow {
                 toolDescription: "Export Map",
                 toolFunc: function(tool:Tool, context:GameContext) {
                     this.levelLoader.export();
+                }
+            },
+            {
+                toolNum: ++toolnumCounter,
+                toolType: ToolType.ExportLayoutConfig,
+                toolLabel: "Export Layout",
+                toolDescription: "Export Editor Layout",
+                toolFunc: function(tool:Tool, context:GameContext) {
+                    editor.exportLayoutConfig();
                 }
             }
         ];

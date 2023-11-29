@@ -119,7 +119,7 @@ class GameState extends refraction.core.State {
     function initIntervals():Array<Interval> {
         var ret:Array<Interval> = [];
 
-        intervals.push(new Interval(() -> {
+        ret.push(new Interval(() -> {
             var e:Entity = gameContext.beaconSystem.getOne("player");
             var p:PositionCmp = e.getComponent(PositionCmp);
             var t:Vector2i = gameContext.dijkstraMap.getTileIndexesContaining(p.x, p.y);

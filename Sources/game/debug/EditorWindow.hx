@@ -30,6 +30,15 @@ class EditorWindow {
         return windowContains(Application.mouseX, Application.mouseY);
     }
 
+    public function getName():String {
+        return name;
+    }
+
+    public function setStartPositions(x:Int, y:Int) {
+        startX = x;
+        startY = y;
+    }
+
     public function windowContains(x:Float, y:Float):Bool {
         return (x >= windowHandle.dragX + startX
             && x <= windowHandle.dragX + startX
@@ -46,5 +55,13 @@ class EditorWindow {
             height,
             draggable
         );
+    }
+
+    public function getSettings():Dynamic {
+        return {
+            name: name,
+            x: startX + windowHandle.dragX,
+            y: startY + windowHandle.dragY,
+        };
     }
 }
