@@ -505,6 +505,9 @@ class GameState extends refraction.core.State {
 
         g4.end();
 
+        // Player name labels (after entities, before UI)
+        renderPlayerLabels(frame, gameContext);
+
         // UI
         if (Application.mouse2JustDown) {
             mapEditor.off();
@@ -621,6 +624,92 @@ class GameState extends refraction.core.State {
         f.g2.end();
     }
 
+    function renderPlayerLabels(f:Framebuffer, gc:GameContext) {
+        var zoom:Int = Application.getScreenZoom();
+        var camX:Float = gc.camera.x;
+        var camY:Float = gc.camera.y;
+        var font = Assets.fonts.fonts_OpenSans;
+        var fontSize:Int = 13;
+
+        f.g2.begin(false);
+        f.g2.font = font;
+        f.g2.fontSize = fontSize;
+
+        // Draw local player label
+        if (gc.playerEntity != null) {
+            var pos:PositionCmp = gc.playerEntity.getComponent(PositionCmp);
+            if (pos != null) {
+                var label:String = "You";
+                if (gc.netState != null && gc.netState.isConnected()) {
+                    label = "Player " + Std.string(gc.netState.localId);
+                }
+                var screenX:Float = (pos.x - camX) * zoom;
+                var screenY:Float = (pos.y - camY - 20) * zoom;
+                var textWidth:Float = font.width(fontSize, label);
+                f.g2.color = 0xffffffff;
+                f.g2.drawString(label, screenX - textWidth / 2, screenY);
+            }
+        }
+
+        // Draw remote player labels
+        if (gc.netState != null && gc.remotePlayers != null) {
+            for (id => entity in gc.remotePlayers) {
+                if (entity != null) {
+                    var rpos:PositionCmp = entity.getComponent(PositionCmp);
+                    if (rpos != null) {
+                        var rlabel:String = "Player " + Std.string(id);
+                        var rscreenX:Float = (rpos.x - camX) * zoom;
+                        var rscreenY:Float = (rpos.y - camY - 20) * zoom;
+                        var rtextWidth:Float = font.width(fontSize, rlabel);
+                        f.g2.color = 0xffaaaaff;
+                        f.g2.drawString(rlabel, rscreenX - rtextWidth / 2, rscreenY);
+                    }
+                }
+            }
+        }
+
+        f.g2.end();
+    }
+
+    function renderConnectionStatus(f:Framebuffer, gc:GameContext) {
+        var font = Assets.fonts.fonts_OpenSans;
+        var fontSize:Int = 13;
+        var x:Float = 10;
+        var y:Float = 10;
+        var lineHeight:Float = 18;
+
+        f.g2.font = font;
+        f.g2.fontSize = fontSize;
+
+        if (gc.netState != null && gc.netState.isConnected()) {
+            // Connection status line
+            f.g2.color = 0xff44ff44;
+            var statusLine:String = "Connected: Player " + Std.string(gc.netState.localId);
+            f.g2.drawString(statusLine, x, y);
+
+            // Player count
+            var playerCount:Int = 1; // local player
+            if (gc.netState.remotePlayers != null) {
+                for (_ in gc.netState.remotePlayers) {
+                    playerCount++;
+                }
+            }
+            y += lineHeight;
+            f.g2.color = 0xffcccccc;
+            f.g2.drawString("Players online: " + Std.string(playerCount), x, y);
+
+            // Host badge
+            if (gc.netState.isHost()) {
+                y += lineHeight;
+                f.g2.color = 0xffffcc00;
+                f.g2.drawString("[HOST]", x, y);
+            }
+        } else {
+            f.g2.color = 0xffff4444;
+            f.g2.drawString("Offline", x, y);
+        }
+    }
+
     function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
         f.g2.begin(false);
         gameContext.healthBar.render(f);
@@ -628,6 +717,7 @@ class GameState extends refraction.core.State {
         gameContext.statusText.render(f.g2);
         gameContext.tooltipSystem.draw(f.g2);
         gameContext.killFeed.render(f.g2, f.width);
+        renderConnectionStatus(f, gc);
         f.g2.end();
     }
 
