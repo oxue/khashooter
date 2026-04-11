@@ -21,6 +21,12 @@ class ZombieResourceLoader {
         var configs:Dynamic = getSpriteConfigs();
         var sprites:Array<Dynamic> = cast configs.get("sprites");
         for (spriteConfig in sprites) {
+            if (game.GameState.testMode) {
+                var name:String = spriteConfig.get("name");
+                if (name != "shiro" && name != "mine_tiles" && name != "projectiles" && name != "gibs" && name != "crossbow") {
+                    continue;
+                }
+            }
             formatSprite(spriteConfig);
         }
 

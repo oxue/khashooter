@@ -1,0 +1,1 @@
+{"data": [[322, 322, 322, 322, 322], [322, 2, 2, 2, 322], [322, 2, 2, 2, 322], [322, 2, 2, 2, 322], [322, 322, 322, 322, 322]], "width": 5, "height": 5, "tilesize": 16, "tileset_name": "mine_tiles", "original_tilesheet_name": "mine_tiles", "col_index": 255, "start": {"x": 40, "y": 40}, "zombies": [], "warps": []}

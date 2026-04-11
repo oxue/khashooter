@@ -32,6 +32,8 @@ import refraction.generic.PositionCmp;
 
 class GameState extends refraction.core.State {
 
+    public static var testMode:Bool = false;
+
     var isRenderingReady:Bool;
 
     var gameContext:GameContext;
@@ -78,6 +80,15 @@ class GameState extends refraction.core.State {
         gameContext = GameContext.instance(gameCamera, ui);
         Application.defaultCamera = gameCamera;
 
+        // Detect test mode from query param
+        #if js
+        var search:String = untyped js.Browser.window.location.search;
+        if (search != null && search.indexOf("testmode=true") >= 0) {
+            testMode = true;
+        }
+        if (testMode) untyped __js__("console.log('[GAME:TESTMODE] active')");
+        #end
+
         // Load resources
         formatResources();
 
@@ -94,20 +105,24 @@ class GameState extends refraction.core.State {
         // TODO: reset DC stuff
 
         mapEditor = new MapEditor(gameContext, levelLoader, ui);
-        gameContext.dijkstraMap = new DijkstraField(
-            gameContext.tilemap.width,
-            gameContext.tilemap.height,
-            gameContext.tilemap.tilesize,
-            (i, j) -> {
-                var tile:Tile = gameContext.tilemap.getTileAt(i, j);
-                if (tile == null) {
-                    return false;
-                }
-                tile.solid;
-            }
-        );
 
-        intervals = initIntervals();
+        if (!testMode) {
+            gameContext.dijkstraMap = new DijkstraField(
+                gameContext.tilemap.width,
+                gameContext.tilemap.height,
+                gameContext.tilemap.tilesize,
+                (i, j) -> {
+                    var tile:Tile = gameContext.tilemap.getTileAt(i, j);
+                    if (tile == null) {
+                        return false;
+                    }
+                    tile.solid;
+                }
+            );
+            intervals = initIntervals();
+        } else {
+            intervals = [];
+        }
 
         configureDebugKeys();
 

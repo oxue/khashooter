@@ -92,7 +92,9 @@ class LevelLoader {
             Items.MachineGun
         );
 
-        entityFactory.createNPC(levelData.start.x, levelData.start.y, "mimi");
+        if (!game.GameState.testMode) {
+            entityFactory.createNPC(levelData.start.x, levelData.start.y, "mimi");
+        }
     }
 
     function spawnLights(levelData:Dynamic) {
