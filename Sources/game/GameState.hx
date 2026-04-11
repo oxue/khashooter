@@ -195,6 +195,10 @@ class GameState extends refraction.core.State {
             }
         };
 
+        gameContext.netState.onChat = function(fromId:Int, name:String, text:String) {
+            gameContext.chatSystem.addMessage(name, text);
+        };
+
         gameContext.netState.onRemoteShoot = function(from:Int, weapon:String, x:Float, y:Float, dir:Float, damage:Float) {
             // Convert degrees back to a direction vector
             var rad:Float = dir * (3.1415926 / 180);
@@ -267,6 +271,18 @@ class GameState extends refraction.core.State {
 
     function configureDebugKeys() {
         Application.addKeyDownListener((code) -> {
+            // When chat input is active, route all keys to chat system
+            if (gameContext.chatSystem.isInputActive) {
+                gameContext.chatSystem.handleKeyDown(code);
+                return;
+            }
+
+            // T opens chat
+            if (KeyCode.T == code) {
+                gameContext.chatSystem.handleKeyDown(code);
+                return;
+            }
+
             if (KeyCode.F9 == code) {
                 gameContext.reloadConfigs();
                 DebugLogger.info("RESOURCE", "reloading configs");
@@ -332,7 +348,9 @@ class GameState extends refraction.core.State {
             var isHost = gameContext.netState == null || !gameContext.netState.isConnected() || gameContext.netState.isHost();
 
             // Local player systems (always run)
-            gameContext.controlSystem.update();
+            if (!gameContext.chatSystem.isInputActive) {
+                gameContext.controlSystem.update();
+            }
             gameContext.spacingSystem.update();
             gameContext.dampingSystem.update();
             gameContext.velocitySystem.update();
@@ -746,6 +764,7 @@ class GameState extends refraction.core.State {
         renderConnectionStatus(f, gc);
         var localId:Int = (gc.netState != null && gc.netState.isConnected()) ? gc.netState.localId : 0;
         gc.scoreboard.render(f.g2, localId, gc.netState != null ? gc.netState.remotePlayers : null);
+        gc.chatSystem.render(f.g2);
         f.g2.end();
     }
 

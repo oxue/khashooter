@@ -30,6 +30,7 @@ class NetState {
     public var onRemoteShoot:Int -> String -> Float -> Float -> Float -> Float -> Void;
     public var onNpcState:Map<String, NpcState> -> Void;
     public var onHostChange:Int -> Void;
+    public var onChat:Int -> String -> String -> Void;
 
     var sendTimer:Int;
     var npcSendTimer:Int;
@@ -121,6 +122,13 @@ class NetState {
                     log("REMOTE_SHOOT", 'from=$fromId weapon=${msg.weapon}');
                     if (onRemoteShoot != null) onRemoteShoot(fromId, msg.weapon, msg.x, msg.y, msg.dir, msg.damage);
                 }
+
+            case "chat":
+                var fromId:Int = msg.from;
+                var name:String = Std.string(msg.name);
+                var text:String = Std.string(msg.text);
+                log("CHAT", 'from=$fromId name=$name text=$text');
+                if (onChat != null) onChat(fromId, name, text);
 
             case "npc_state":
                 applyNpcState(msg.npcs);
@@ -214,6 +222,10 @@ class NetState {
             npcSendTimer = 0;
             client.send({type: "npc_update", npcs: npcs});
         }
+    }
+
+    public function sendChat(text:String) {
+        client.send({type: "chat", text: text});
     }
 
     public function sendShoot(weapon:String, x:Float, y:Float, dir:Float, damage:Float) {

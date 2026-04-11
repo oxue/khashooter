@@ -233,6 +233,17 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'chat': {
+        log('CHAT', `Client ${clientId}: ${msg.text}`);
+        broadcastAll({
+          type: 'chat',
+          from: clientId,
+          name: players[clientId].name,
+          text: msg.text,
+        });
+        break;
+      }
+
       case 'ping': {
         sendTo(clientId, { type: 'pong', time: msg.time, serverTime: Date.now() });
         break;

@@ -114,6 +114,9 @@ class GameContext {
     // Scoreboard
     public var scoreboard:Scoreboard;
 
+    // Chat
+    public var chatSystem:ChatSystem;
+
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
         values = new Values(config);
@@ -162,6 +165,7 @@ class GameContext {
         debugMenu = new DebugMenu();
         killFeed = new KillFeed();
         scoreboard = new Scoreboard();
+        chatSystem = new ChatSystem();
         reloadGraphics = false;
         // initConsole();
     }
