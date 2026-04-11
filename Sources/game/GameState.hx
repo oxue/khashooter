@@ -1,5 +1,7 @@
 package game;
 
+import net.NetState;
+import net.NetState.RemotePlayerState;
 import refraction.display.AnimatedRenderCmp;
 import rendering.TextureAtlas;
 import zui.Zui;
@@ -111,11 +113,81 @@ class GameState extends refraction.core.State {
 
         isRenderingReady = true;
 
+        initMultiplayer();
         playMusic();
     }
 
     function playMusic() {
         // Audio.play(Assets.sounds.sound_song, true);
+    }
+
+    function initMultiplayer() {
+        gameContext.netState = new NetState();
+        gameContext.remotePlayers = new Map<Int, Entity>();
+
+        gameContext.netState.onPlayerJoined = function(id:Int, x:Float, y:Float) {
+            spawnRemotePlayer(id, x, y);
+        };
+
+        gameContext.netState.onPlayerLeft = function(id:Int) {
+            removeRemotePlayer(id);
+        };
+
+        gameContext.netState.onHit = function(target:Int, source:Int, damage:Float, health:Float) {
+            if (target == gameContext.netState.localId) {
+                // Local player got hit
+                var healthCmp = gameContext.playerEntity.getComponent(components.Health);
+                if (healthCmp != null) {
+                    healthCmp.value = Std.int(health);
+                }
+            }
+        };
+
+        gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
+            if (id == gameContext.netState.localId) {
+                var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+                pos.x = x;
+                pos.y = y;
+            }
+        };
+
+        // Connect to server - get URL from query param or default to localhost
+        var serverUrl:String = "ws://localhost:3000";
+        #if js
+        var search:String = untyped js.Browser.window.location.search;
+        if (search != null && search.indexOf("server=") >= 0) {
+            var idx = search.indexOf("server=") + 7;
+            var end = search.indexOf("&", idx);
+            serverUrl = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+        }
+        #end
+        gameContext.netState.connect(serverUrl);
+    }
+
+    function spawnRemotePlayer(id:Int, x:Float, y:Float) {
+        // Use autoBuild to get a fully set up Player entity
+        var e:Entity = entFactory.autoBuild("Player");
+        var pos:PositionCmp = e.getComponent(PositionCmp);
+        pos.setPosition(x, y);
+
+        // Disable input controls so this entity doesn't respond to local keyboard
+        var keyCtrl = e.getComponent(refraction.control.KeyControl);
+        if (keyCtrl != null) keyCtrl.remove = true;
+        var rotCtrl = e.getComponent(refraction.control.RotationControl);
+        if (rotCtrl != null) rotCtrl.remove = true;
+        // Disable tile collision for remote players (server handles their position)
+        var tileColl = e.getComponent(refraction.tilemap.TileCollisionCmp);
+        if (tileColl != null) tileColl.remove = true;
+
+        gameContext.remotePlayers.set(id, e);
+    }
+
+    function removeRemotePlayer(id:Int) {
+        var e:Entity = gameContext.remotePlayers.get(id);
+        if (e != null) {
+            e.remove();
+            gameContext.remotePlayers.remove(id);
+        }
     }
 
     function initIntervals():Array<Interval> {
@@ -217,6 +289,41 @@ class GameState extends refraction.core.State {
                 gameContext.playerEntity
                     .getComponent(InventoryCmp)
                     .persistentAction();
+            }
+
+            // Multiplayer sync
+            updateNetworking();
+        }
+    }
+
+    function updateNetworking() {
+        var netState = gameContext.netState;
+        if (netState == null || !netState.isConnected()) return;
+
+        // Write local player state to SyncVars
+        var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+        netState.localPosX.set(pos.x);
+        netState.localPosY.set(pos.y);
+        netState.localRotation.set(pos.rotationDegrees);
+
+        // Update net state (sends updates, interpolates remote players)
+        netState.update(1.0 / 60.0);
+
+        // Apply remote player positions from interpolated SyncVars
+        for (id => rp in netState.remotePlayers) {
+            var entity:Entity = gameContext.remotePlayers.get(id);
+            if (entity == null) {
+                // Remote player joined but entity doesn't exist yet
+                spawnRemotePlayer(id, rp.posX.value, rp.posY.value);
+                entity = gameContext.remotePlayers.get(id);
+            }
+            if (entity != null) {
+                var remotePos:PositionCmp = entity.getComponent(PositionCmp);
+                if (remotePos != null) {
+                    remotePos.x = rp.posX.lerpValue;
+                    remotePos.y = rp.posY.lerpValue;
+                    remotePos.rotationDegrees = rp.rotation.lerpValue;
+                }
             }
         }
     }

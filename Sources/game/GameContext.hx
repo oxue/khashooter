@@ -29,6 +29,7 @@ import systems.BeaconSys;
 import systems.HitTestSys;
 import systems.InteractSys;
 import systems.ParticleSys;
+import net.NetState;
 import ui.HealthBar;
 import zui.Zui;
 
@@ -102,6 +103,10 @@ class GameContext {
 
     public var values:Values;
     public var reloadGraphics:Bool;
+
+    // Multiplayer
+    public var netState:NetState;
+    public var remotePlayers:Map<Int, refraction.core.Entity>;
 
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
