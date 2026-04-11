@@ -264,25 +264,32 @@ class GameState extends refraction.core.State {
         }
 
         if (gameContext != null) {
+            var isHost = gameContext.netState == null || !gameContext.netState.isConnected() || gameContext.netState.isHost();
+
+            // Local player systems (always run)
             gameContext.controlSystem.update();
             gameContext.spacingSystem.update();
             gameContext.dampingSystem.update();
             gameContext.velocitySystem.update();
             gameContext.collisionSystem.update();
+
+            // Visual systems (always run on all clients)
             gameContext.environmentSystem.update();
             gameContext.lightSourceSystem.update();
             gameContext.particleSystem.update();
 
-            gameContext.breadCrumbsSystem.update();
+            // Host-authoritative systems (only host runs AI, pathfinding, hit detection)
+            if (isHost) {
+                gameContext.breadCrumbsSystem.update();
+                gameContext.hitCheckSystem.update();
+                gameContext.aiSystem.update();
+                gameContext.hitTestSystem.update();
+            }
 
-            gameContext.hitCheckSystem.update();
-            gameContext.aiSystem.update();
-
-            gameContext.hitTestSystem.update();
             gameContext.beaconSystem.update();
 
             for (interval in intervals) {
-                interval.tick();
+                if (isHost) interval.tick();
             }
 
             if (Application.mouseIsDown) {
@@ -313,7 +320,6 @@ class GameState extends refraction.core.State {
         for (id => rp in netState.remotePlayers) {
             var entity:Entity = gameContext.remotePlayers.get(id);
             if (entity == null) {
-                // Remote player joined but entity doesn't exist yet
                 spawnRemotePlayer(id, rp.posX.value, rp.posY.value);
                 entity = gameContext.remotePlayers.get(id);
             }
@@ -325,6 +331,54 @@ class GameState extends refraction.core.State {
                     remotePos.rotationDegrees = rp.rotation.lerpValue;
                 }
             }
+        }
+
+        // Host sends NPC positions to other clients
+        if (netState.isHost()) {
+            sendNpcPositions();
+        } else {
+            // Non-host applies NPC positions from network
+            applyNpcPositions();
+        }
+    }
+
+    function sendNpcPositions() {
+        var npcs:Array<Dynamic> = [];
+        var idx:Int = 0;
+        for (comp in gameContext.aiSystem.components) {
+            if (comp.entity != null) {
+                var npcPos:PositionCmp = comp.entity.getComponent(PositionCmp);
+                if (npcPos != null) {
+                    npcs.push({
+                        id: idx,
+                        x: npcPos.x,
+                        y: npcPos.y,
+                        rot: npcPos.rotationDegrees
+                    });
+                }
+            }
+            idx++;
+        }
+        if (npcs.length > 0) {
+            gameContext.netState.sendNpcStates(npcs);
+        }
+    }
+
+    function applyNpcPositions() {
+        var npcStates = gameContext.netState.npcStates;
+        if (npcStates == null) return;
+        var idx:Int = 0;
+        for (comp in gameContext.aiSystem.components) {
+            var state = npcStates.get(Std.string(idx));
+            if (state != null && comp.entity != null) {
+                var npcPos:PositionCmp = comp.entity.getComponent(PositionCmp);
+                if (npcPos != null) {
+                    npcPos.x = state.posX.lerpValue;
+                    npcPos.y = state.posY.lerpValue;
+                    npcPos.rotationDegrees = state.rotation.lerpValue;
+                }
+            }
+            idx++;
         }
     }
 

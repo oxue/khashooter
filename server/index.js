@@ -4,10 +4,9 @@ import http from 'http';
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) => {
-  // Health check endpoint
   if (req.url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', players: Object.keys(players).length }));
+    res.end(JSON.stringify({ status: 'ok', players: Object.keys(players).length, host: hostId }));
     return;
   }
   res.writeHead(404);
@@ -17,7 +16,8 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocketServer({ server });
 
 let nextId = 0;
-const players = {}; // id -> { ws, vars, name }
+let hostId = -1; // First connected client is the host
+const players = {};
 const MAP = 'level2';
 const SPAWN_POINTS = [
   { x: 30, y: 100 },
@@ -40,6 +40,15 @@ function broadcast(excludeId, msg) {
   }
 }
 
+function broadcastAll(msg) {
+  const payload = JSON.stringify(msg);
+  for (const player of Object.values(players)) {
+    if (player.ws.readyState === 1) {
+      player.ws.send(payload);
+    }
+  }
+}
+
 function sendTo(id, msg) {
   const player = players[id];
   if (player && player.ws.readyState === 1) {
@@ -49,6 +58,18 @@ function sendTo(id, msg) {
 
 function getSpawnPoint(id) {
   return SPAWN_POINTS[id % SPAWN_POINTS.length];
+}
+
+function electHost() {
+  const ids = Object.keys(players).map(Number);
+  if (ids.length === 0) {
+    hostId = -1;
+    return;
+  }
+  hostId = Math.min(...ids);
+  log('HOST', `New host elected: ${hostId}`);
+  // Notify all clients who the host is
+  broadcastAll({ type: 'host_change', hostId });
 }
 
 wss.on('connection', (ws) => {
@@ -66,18 +87,25 @@ wss.on('connection', (ws) => {
 
   log('CONNECT', `Client ${clientId} connected`, { totalPlayers: Object.keys(players).length });
 
-  // Send welcome with ID, map, and spawn point
+  // Elect host if needed
+  if (hostId === -1) {
+    hostId = clientId;
+    log('HOST', `${clientId} is the host (first connected)`);
+  }
+
+  // Send welcome
   sendTo(clientId, {
     type: 'welcome',
     id: clientId,
     map: MAP,
     spawn,
+    hostId,
     players: Object.entries(players)
       .filter(([id]) => parseInt(id) !== clientId)
       .map(([id, p]) => ({ id: parseInt(id), name: p.name, x: p.x, y: p.y, health: p.health })),
   });
 
-  // Tell others about new player
+  // Tell others
   broadcast(clientId, {
     type: 'player_joined',
     id: clientId,
@@ -90,29 +118,24 @@ wss.on('connection', (ws) => {
     try {
       msg = JSON.parse(raw);
     } catch {
-      log('ERROR', `Invalid JSON from client ${clientId}`);
       return;
     }
 
     switch (msg.type) {
       case 'update': {
-        // Client sending their synced variable updates
         const p = players[clientId];
         if (!p) break;
 
-        // Store latest position from vars
         if (msg.vars) {
           for (const [key, val] of Object.entries(msg.vars)) {
             p.vars[key] = val;
           }
-          // Extract position for server-side hit detection
           const pxKey = `${clientId}|pos_x`;
           const pyKey = `${clientId}|pos_y`;
           if (msg.vars[pxKey]) p.x = msg.vars[pxKey][0];
           if (msg.vars[pyKey]) p.y = msg.vars[pyKey][0];
         }
 
-        // Relay to all other clients
         broadcast(clientId, {
           type: 'state',
           from: clientId,
@@ -121,21 +144,32 @@ wss.on('connection', (ws) => {
         break;
       }
 
-      case 'shoot': {
-        // Client reports shooting — relay to others for visual effect
+      // Host sends NPC/world state updates
+      case 'npc_update': {
+        if (clientId !== hostId) break; // Only host can send NPC updates
         broadcast(clientId, {
+          type: 'npc_state',
+          npcs: msg.npcs, // array of {id, x, y, rot, anim}
+        });
+        break;
+      }
+
+      case 'shoot': {
+        // Relay shoot event to all clients (including shooter for confirmation)
+        broadcastAll({
           type: 'shoot',
           from: clientId,
           weapon: msg.weapon,
           x: msg.x,
           y: msg.y,
           dir: msg.dir,
+          damage: msg.damage || 10,
         });
 
-        log('SHOOT', `Client ${clientId} shot`, { weapon: msg.weapon, x: msg.x, y: msg.y });
+        log('SHOOT', `Client ${clientId}`, { weapon: msg.weapon });
 
-        // Simple hit detection: check if any other player is within hit radius
-        const HIT_RADIUS = 20;
+        // Server-side hit detection against other players
+        const HIT_RADIUS = 25;
         for (const [id, target] of Object.entries(players)) {
           const targetId = parseInt(id);
           if (targetId === clientId) continue;
@@ -148,47 +182,21 @@ wss.on('connection', (ws) => {
             const damage = msg.damage || 10;
             target.health -= damage;
 
-            log('HIT', `Client ${clientId} hit client ${targetId}`, { damage, health: target.health });
+            log('HIT', `${clientId} -> ${targetId}`, { damage, health: target.health });
 
-            // Notify the target they got hit
-            sendTo(targetId, {
-              type: 'hit',
-              target: targetId,
-              source: clientId,
-              damage,
-              health: target.health,
-            });
+            sendTo(targetId, { type: 'hit', target: targetId, source: clientId, damage, health: target.health });
+            sendTo(clientId, { type: 'hit_confirm', target: targetId, damage });
 
-            // Notify the shooter
-            sendTo(clientId, {
-              type: 'hit_confirm',
-              target: targetId,
-              damage,
-            });
-
-            // Check for kill
             if (target.health <= 0) {
-              log('KILL', `Client ${clientId} killed client ${targetId}`);
+              log('KILL', `${clientId} killed ${targetId}`);
+              broadcastAll({ type: 'kill', killed: targetId, killer: clientId });
 
-              broadcast(-1, {
-                type: 'kill',
-                killed: targetId,
-                killer: clientId,
-              });
-
-              // Respawn
               const newSpawn = getSpawnPoint(targetId);
               target.health = 100;
               target.x = newSpawn.x;
               target.y = newSpawn.y;
 
-              sendTo(targetId, {
-                type: 'spawn',
-                id: targetId,
-                x: newSpawn.x,
-                y: newSpawn.y,
-                health: 100,
-              });
+              sendTo(targetId, { type: 'spawn', id: targetId, x: newSpawn.x, y: newSpawn.y, health: 100 });
             }
           }
         }
@@ -199,9 +207,6 @@ wss.on('connection', (ws) => {
         sendTo(clientId, { type: 'pong', time: msg.time, serverTime: Date.now() });
         break;
       }
-
-      default:
-        log('WARN', `Unknown message type from ${clientId}: ${msg.type}`);
     }
   });
 
@@ -209,10 +214,15 @@ wss.on('connection', (ws) => {
     log('DISCONNECT', `Client ${clientId} disconnected`);
     delete players[clientId];
     broadcast(-1, { type: 'player_left', id: clientId });
+
+    // Re-elect host if the host disconnected
+    if (clientId === hostId) {
+      electHost();
+    }
   });
 
   ws.on('error', (err) => {
-    log('ERROR', `WebSocket error for client ${clientId}: ${err.message}`);
+    log('ERROR', `Client ${clientId}: ${err.message}`);
   });
 });
 

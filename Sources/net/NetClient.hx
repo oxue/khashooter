@@ -58,7 +58,11 @@ class NetClient {
         switch (Std.string(msg.type)) {
             case "welcome":
                 clientId = msg.id;
-                log("JOIN", 'assigned id=$clientId map=${msg.map}');
+                log("JOIN", 'assigned id=$clientId map=${msg.map} host=${msg.hostId}');
+                // Forward host_change before onConnect so hostId is set
+                if (onMessage != null) {
+                    onMessage({type: "host_change", hostId: msg.hostId});
+                }
                 if (onConnect != null) onConnect(clientId);
                 // Process existing players
                 if (msg.players != null) {

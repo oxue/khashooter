@@ -6,6 +6,7 @@ class NetState {
 
     public var client:NetClient;
     public var localId:Int;
+    public var hostId:Int;
 
     // Local player's synced vars
     public var localPosX:SyncVar;
@@ -17,27 +18,37 @@ class NetState {
     // Remote players' state: clientId -> RemotePlayerState
     public var remotePlayers:Map<Int, RemotePlayerState>;
 
-    // Callbacks for game integration
+    // NPC state from host
+    public var npcStates:Map<String, NpcState>;
+
+    // Callbacks
     public var onPlayerJoined:Int -> Float -> Float -> Void;
     public var onPlayerLeft:Int -> Void;
-    public var onHit:Int -> Int -> Float -> Float -> Void; // target, source, damage, health
-    public var onKill:Int -> Int -> Void; // killed, killer
-    public var onSpawn:Int -> Float -> Float -> Void; // id, x, y
-    public var onRemoteShoot:Int -> String -> Float -> Float -> Float -> Void; // from, weapon, x, y, dir
+    public var onHit:Int -> Int -> Float -> Float -> Void;
+    public var onKill:Int -> Int -> Void;
+    public var onSpawn:Int -> Float -> Float -> Void;
+    public var onRemoteShoot:Int -> String -> Float -> Float -> Float -> Float -> Void;
+    public var onNpcState:Map<String, NpcState> -> Void;
+    public var onHostChange:Int -> Void;
 
     var sendTimer:Int;
-    static inline var SEND_INTERVAL:Int = 3; // send every 3 frames (20Hz at 60fps)
+    var npcSendTimer:Int;
+    static inline var SEND_INTERVAL:Int = 3; // 20Hz at 60fps
+    static inline var NPC_SEND_INTERVAL:Int = 6; // 10Hz for NPCs
 
     public function new() {
         client = new NetClient();
         localId = -1;
+        hostId = -1;
         remotePlayers = new Map<Int, RemotePlayerState>();
+        npcStates = new Map<String, NpcState>();
         localPosX = new SyncVar(0);
         localPosY = new SyncVar(0);
         localRotation = new SyncVar(0);
         localAnimState = 0;
         localWeapon = 0;
         sendTimer = 0;
+        npcSendTimer = 0;
 
         client.onConnect = onConnected;
         client.onMessage = onServerMessage;
@@ -48,9 +59,13 @@ class NetState {
         client.connect(serverUrl);
     }
 
+    public function isHost():Bool {
+        return localId >= 0 && localId == hostId;
+    }
+
     function onConnected(id:Int) {
         localId = id;
-        log("STATE", 'connected as player $id');
+        log("STATE", 'connected as player $id host=$hostId');
     }
 
     function onDisconnected() {
@@ -79,6 +94,11 @@ class NetState {
                 remotePlayers.remove(leftId);
                 if (onPlayerLeft != null) onPlayerLeft(leftId);
 
+            case "host_change":
+                hostId = msg.hostId;
+                log("HOST_CHANGE", 'new host=$hostId isHost=${isHost()}');
+                if (onHostChange != null) onHostChange(hostId);
+
             case "hit":
                 log("HIT", 'target=${msg.target} source=${msg.source} damage=${msg.damage} health=${msg.health}');
                 if (onHit != null) onHit(msg.target, msg.source, msg.damage, msg.health);
@@ -95,8 +115,15 @@ class NetState {
                 if (onSpawn != null) onSpawn(msg.id, msg.x, msg.y);
 
             case "shoot":
-                log("REMOTE_SHOOT", 'from=${msg.from} weapon=${msg.weapon}');
-                if (onRemoteShoot != null) onRemoteShoot(msg.from, msg.weapon, msg.x, msg.y, msg.dir);
+                var fromId:Int = msg.from;
+                // Don't process our own shoot events
+                if (fromId != localId) {
+                    log("REMOTE_SHOOT", 'from=$fromId weapon=${msg.weapon}');
+                    if (onRemoteShoot != null) onRemoteShoot(fromId, msg.weapon, msg.x, msg.y, msg.dir, msg.damage);
+                }
+
+            case "npc_state":
+                applyNpcState(msg.npcs);
         }
     }
 
@@ -109,36 +136,41 @@ class NetState {
             remotePlayers.set(fromId, rp);
         }
 
-        // Parse synced vars
-        var posXKey = '${fromId}|pos_x';
-        var posYKey = '${fromId}|pos_y';
-        var rotKey = '${fromId}|rot';
+        var posXVal:Dynamic = Reflect.field(vars, '${fromId}|pos_x');
+        var posYVal:Dynamic = Reflect.field(vars, '${fromId}|pos_y');
+        var rotVal:Dynamic = Reflect.field(vars, '${fromId}|rot');
 
-        var posXVal:Dynamic = Reflect.field(vars, posXKey);
-        var posYVal:Dynamic = Reflect.field(vars, posYKey);
-        var rotVal:Dynamic = Reflect.field(vars, rotKey);
-
-        if (posXVal != null) {
-            rp.posX.applyRemote(posXVal[0], posXVal[1]);
-        }
-        if (posYVal != null) {
-            rp.posY.applyRemote(posYVal[0], posYVal[1]);
-        }
+        if (posXVal != null) rp.posX.applyRemote(posXVal[0], posXVal[1]);
+        if (posYVal != null) rp.posY.applyRemote(posYVal[0], posYVal[1]);
         if (rotVal != null) rp.rotation.applyRemote(rotVal[0], rotVal[1]);
+
+        var animVal:Dynamic = Reflect.field(vars, '${fromId}|anim');
+        var weapVal:Dynamic = Reflect.field(vars, '${fromId}|weapon');
+        if (animVal != null) rp.animState = Std.int(animVal[0]);
+        if (weapVal != null) rp.weapon = Std.int(weapVal[0]);
 
         if (posXVal != null || posYVal != null) {
             log("RECV_POS", 'from=$fromId x=${rp.posX.value} y=${rp.posY.value}');
         }
-
-        var animKey = '${fromId}|anim';
-        var weapKey = '${fromId}|weapon';
-        var animVal:Dynamic = Reflect.field(vars, animKey);
-        var weapVal:Dynamic = Reflect.field(vars, weapKey);
-        if (animVal != null) rp.animState = Std.int(animVal[0]);
-        if (weapVal != null) rp.weapon = Std.int(weapVal[0]);
     }
 
-    // Call every frame
+    function applyNpcState(npcs:Dynamic) {
+        if (npcs == null) return;
+        var npcArray:Array<Dynamic> = npcs;
+        for (npc in npcArray) {
+            var id:String = Std.string(npc.id);
+            var state = npcStates.get(id);
+            if (state == null) {
+                state = new NpcState();
+                npcStates.set(id, state);
+            }
+            state.posX.applyRemote(npc.x, 0);
+            state.posY.applyRemote(npc.y, 0);
+            state.rotation.applyRemote(npc.rot, 0);
+        }
+        if (onNpcState != null) onNpcState(npcStates);
+    }
+
     public function update(dt:Float) {
         // Interpolate remote players
         for (rp in remotePlayers) {
@@ -147,7 +179,16 @@ class NetState {
             rp.rotation.update(dt);
         }
 
-        // Send local state periodically
+        // Interpolate NPC states (for non-host clients)
+        if (!isHost()) {
+            for (npc in npcStates) {
+                npc.posX.update(dt);
+                npc.posY.update(dt);
+                npc.rotation.update(dt);
+            }
+        }
+
+        // Send local state
         sendTimer++;
         if (sendTimer >= SEND_INTERVAL && client.isConnected() && localId >= 0) {
             sendTimer = 0;
@@ -163,6 +204,20 @@ class NetState {
         Reflect.setField(vars, '${localId}|anim', [localAnimState, 0]);
         Reflect.setField(vars, '${localId}|weapon', [localWeapon, 0]);
         client.sendUpdate(vars);
+    }
+
+    // Host sends NPC positions to server for relay
+    public function sendNpcStates(npcs:Array<Dynamic>) {
+        if (!isHost() || !client.isConnected()) return;
+        npcSendTimer++;
+        if (npcSendTimer >= NPC_SEND_INTERVAL) {
+            npcSendTimer = 0;
+            client.send({type: "npc_update", npcs: npcs});
+        }
+    }
+
+    public function sendShoot(weapon:String, x:Float, y:Float, dir:Float, damage:Float) {
+        client.sendShoot(weapon, x, y, dir, damage);
     }
 
     public function isConnected():Bool {
@@ -189,5 +244,17 @@ class RemotePlayerState {
         rotation = new SyncVar(0);
         animState = 0;
         weapon = 0;
+    }
+}
+
+class NpcState {
+    public var posX:SyncVar;
+    public var posY:SyncVar;
+    public var rotation:SyncVar;
+
+    public function new() {
+        posX = new SyncVar(0);
+        posY = new SyncVar(0);
+        rotation = new SyncVar(0);
     }
 }
