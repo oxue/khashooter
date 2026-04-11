@@ -15,6 +15,9 @@ class NetClient {
     var serverUrl:String;
     var connected:Bool;
 
+    public var useWebRTC:Bool;
+    var rtcSend:String -> Void;
+
     public var clientId:Int;
     public var onConnect:Int -> Void;
     public var onDisconnect:Void -> Void;
@@ -22,7 +25,24 @@ class NetClient {
 
     public function new() {
         connected = false;
+        useWebRTC = false;
+        rtcSend = null;
         clientId = -1;
+    }
+
+    public function attachDataChannel(sendFn:String -> Void) {
+        useWebRTC = true;
+        rtcSend = sendFn;
+        connected = true;
+    }
+
+    public function onDataChannelMessage(data:String) {
+        try {
+            var msg = Json.parse(data);
+            handleMessage(msg);
+        } catch (e:Dynamic) {
+            log("ERROR", 'parse error: $e');
+        }
     }
 
     public function connect(url:String) {
@@ -89,10 +109,15 @@ class NetClient {
     public function send(msg:Dynamic) {
         if (!connected) return;
         #if js
-        try {
-            ws.send(Json.stringify(msg));
-        } catch (e:Dynamic) {
-            log("ERROR", 'send failed: $e');
+        var str = Json.stringify(msg);
+        if (useWebRTC && rtcSend != null) {
+            rtcSend(str);
+        } else {
+            try {
+                ws.send(str);
+            } catch (e:Dynamic) {
+                log("ERROR", 'send failed: $e');
+            }
         }
         #end
     }

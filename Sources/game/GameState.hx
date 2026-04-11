@@ -48,10 +48,14 @@ class GameState extends refraction.core.State {
     var levelLoader:LevelLoader;
 
     var defaultMap:String;
+    var serverUrl:String;
+    var multiplayerName:String;
     var intervals:Array<Interval>;
 
-    public function new(map:String = "level2") {
+    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String) {
         this.defaultMap = map;
+        this.serverUrl = serverUrl;
+        this.multiplayerName = playerName;
         this.showMenu = false;
         super();
     }
@@ -183,17 +187,20 @@ class GameState extends refraction.core.State {
             }
         };
 
-        // Connect to server - get URL from query param or default to localhost
-        var serverUrl:String = "ws://localhost:3000";
-        #if js
-        var search:String = untyped js.Browser.window.location.search;
-        if (search != null && search.indexOf("server=") >= 0) {
-            var idx = search.indexOf("server=") + 7;
-            var end = search.indexOf("&", idx);
-            serverUrl = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+        // Connect to server - use passed URL, query param, or default to localhost
+        var connectUrl:String = this.serverUrl;
+        if (connectUrl == null) {
+            connectUrl = "ws://localhost:3000";
+            #if js
+            var search:String = untyped js.Browser.window.location.search;
+            if (search != null && search.indexOf("server=") >= 0) {
+                var idx = search.indexOf("server=") + 7;
+                var end = search.indexOf("&", idx);
+                connectUrl = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+            }
+            #end
         }
-        #end
-        gameContext.netState.connect(serverUrl);
+        gameContext.netState.connect(connectUrl);
     }
 
     function spawnRemotePlayer(id:Int, x:Float, y:Float) {
@@ -281,12 +288,12 @@ class GameState extends refraction.core.State {
         );
     }
 
-    public static function loadLevel(map:String) {
+    public static function loadLevel(map:String, ?serverUrl:String, ?playerName:String) {
         EntFactory.destroyInstance();
         GameContext.destroyInstance();
         NetManager.destroy();
         Application.resetKeyListeners();
-        Application.setState(new GameState(map));
+        Application.setState(new GameState(map, serverUrl, playerName));
     }
 
     function mouseDown(button:Int, x:Int, y:Int) {

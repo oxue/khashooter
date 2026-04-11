@@ -1,5 +1,6 @@
 package game;
 
+import net.RoomClient;
 import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
@@ -138,7 +139,7 @@ class MenuState extends refraction.core.State {
         var btnY:Float = baseY + 140;
         var createBtnX:Float = centerX - 130;
         if (mx >= createBtnX && mx <= createBtnX + 120 && my >= btnY && my <= btnY + 45) {
-            Application.setState(new GameState(maps[selectedMap]));
+            handleCreateRoom();
             return;
         }
         // Back button
@@ -172,7 +173,7 @@ class MenuState extends refraction.core.State {
         var btnY:Float = baseY + 140;
         var joinBtnX:Float = centerX - 130;
         if (mx >= joinBtnX && mx <= joinBtnX + 120 && my >= btnY && my <= btnY + 45) {
-            Application.setState(new GameState("level2"));
+            handleJoinRoom();
             return;
         }
         // Back button
@@ -209,9 +210,9 @@ class MenuState extends refraction.core.State {
 
         if (key == KeyCode.Return) {
             if (screen == "create") {
-                Application.setState(new GameState(maps[selectedMap]));
+                handleCreateRoom();
             } else if (screen == "join") {
-                Application.setState(new GameState("level2"));
+                handleJoinRoom();
             }
             return;
         }
@@ -233,6 +234,42 @@ class MenuState extends refraction.core.State {
                 roomCode += ch.toUpperCase();
             }
         }
+    }
+
+    function handleCreateRoom() {
+        if (screen == "waiting") return; // already creating
+        screen = "waiting";
+        statusMessage = "Creating room...";
+        var mapName:String = maps[selectedMap];
+        var name:String = playerName;
+        RoomClient.createRoom(name, mapName, function(code:String) {
+            roomCode = code;
+            statusMessage = "Room code: " + code + " - Waiting for players...";
+            var wsUrl:String = "ws://localhost:3000";
+            // Store server URL in room for guests to find
+            RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
+            Application.setState(new GameState(mapName, wsUrl, name));
+        });
+    }
+
+    function handleJoinRoom() {
+        if (roomCode.length == 0) {
+            statusMessage = "Enter a room code!";
+            return;
+        }
+        statusMessage = "Looking up room...";
+        var name:String = playerName;
+        RoomClient.getRoom(roomCode, function(room:Dynamic) {
+            if (room == null) {
+                statusMessage = "Room not found!";
+                return;
+            }
+            var wsUrl:String = untyped room.serverUrl;
+            if (wsUrl == null) wsUrl = "ws://localhost:3000";
+            var mapName:String = untyped room.map;
+            if (mapName == null) mapName = "level2";
+            Application.setState(new GameState(mapName, wsUrl, name));
+        });
     }
 
     function keyCodeToChar(key:KeyCode):String {
@@ -309,6 +346,8 @@ class MenuState extends refraction.core.State {
             renderCreateScreen(g, screenW, screenH);
         } else if (screen == "join") {
             renderJoinScreen(g, screenW, screenH);
+        } else if (screen == "waiting") {
+            renderWaitingScreen(g, screenW, screenH);
         }
 
         g.end();
@@ -459,6 +498,29 @@ class MenuState extends refraction.core.State {
             g.color = Color.fromFloats(1.0, 0.5, 0.5, 1.0);
             var msgW:Float = font.width(14, statusMessage);
             g.drawString(statusMessage, (w - msgW) / 2, btnY + 60);
+        }
+    }
+
+    function renderWaitingScreen(g:kha.graphics2.Graphics, w:Float, h:Float) {
+        var centerX:Float = w / 2;
+        var baseY:Float = h * 0.35;
+
+        // Header
+        g.font = titleFont;
+        g.fontSize = 32;
+        g.color = Color.White;
+        var header:String = "WAITING FOR PLAYERS";
+        var headerW:Float = titleFont.width(32, header);
+        g.drawString(header, (w - headerW) / 2, baseY - 80);
+
+        g.font = font;
+        g.fontSize = 18;
+
+        // Status message
+        if (statusMessage.length > 0) {
+            g.color = Color.fromFloats(0.8, 0.8, 0.3, 1.0);
+            var msgW:Float = font.width(18, statusMessage);
+            g.drawString(statusMessage, (w - msgW) / 2, baseY + 10);
         }
     }
 
