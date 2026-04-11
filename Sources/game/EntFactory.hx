@@ -2,7 +2,7 @@ package game;
 
 import components.HitCircleCmp;
 import components.InteractableCmp;
-import components.Particle;
+import components.ParticleCmp;
 import components.Projectile;
 import entbuilders.ItemBuilder;
 import game.CollisionBehaviours.HG_CROSSBOW_BOLT;
@@ -166,7 +166,7 @@ class EntFactory {
 
         gameContext.collisionSystem
             .procure(e, TileCollisionCmp)
-            .autoParams({tilemap: gameContext.tilemap});
+            .autoParams({tilemap: gameContext.tilemap, hitboxX: -10, hitboxY: -10});
         gameContext.aiSystem.procure(e, MimiAI);
         gameContext.tooltipSystem
             .procure(e, Tooltip)
@@ -370,7 +370,7 @@ class EntFactory {
                 .getComponent(PositionCmp)
                 .setFromPosition(_p)
                 .getEntity()
-                .getComponent(Particle)
+                .getComponent(ParticleCmp)
                 .randomDirection(
                     gameContext.values.getRandomGibSplashMaginutude(),
                     _directionBiasRad,

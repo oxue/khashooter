@@ -3,7 +3,7 @@ system:
   width: 1300
   height: 800
   zoom: 2
-  noclip: true
+  noclip: false
 
 projectiles_info:
   DemonFireball:

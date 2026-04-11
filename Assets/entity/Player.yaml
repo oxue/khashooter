@@ -53,3 +53,9 @@ components:
 - type: Health
   args:
     maxValue: 100
+- type: LightSource
+  args:
+    color: 0xffffff
+    radius: 50
+    offsetX: 0
+    offsetY: 0

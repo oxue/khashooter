@@ -7,13 +7,13 @@ import kha.Framebuffer;
  * @author worldedit
  */
 class State {
-	public function new() {}
+    public function new() {}
 
-	public function load():Void {}
+    public function load() {}
 
-	public function unload():Void {}
+    public function unload() {}
 
-	public function update():Void {}
+    public function update() {}
 
-	public function render(frame:Framebuffer) {}
+    public function render(frame:Framebuffer) {}
 }

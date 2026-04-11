@@ -58,6 +58,7 @@ sprites:
   type: rotated_sprite
   dimensions: [29, 24]
   translation: [3, 4]
+  registration: [14.5, 12]
 
 - name: crossbow
   surface_name: weapons

@@ -1,6 +1,6 @@
 package components;
 
-import hxblit.Camera;
+import rendering.Camera;
 import kha.math.Vector2;
 import refraction.core.Application;
 import refraction.core.Component;

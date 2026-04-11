@@ -1,5 +1,6 @@
 package game.debug;
 
+import kha.math.Vector2;
 import refraction.core.Application;
 import zui.Zui;
 import zui.Zui.Handle;
@@ -26,6 +27,17 @@ class EditorWindow {
         this.windowHandle = new Handle();
     }
 
+    public function getWindowMousePosition(ui:Zui):Vector2 {
+        var windowPosition:Vector2 = new Vector2(
+            startX + windowHandle.dragX + ui.TAB_W(),
+            startY + windowHandle.dragY + ui.HEADER_DRAG_H()
+        );
+        var mousePosition:Vector2 = new Vector2(Application.mouseX, Application.mouseY);
+
+        var windowMousePosition:Vector2 = mousePosition.sub(windowPosition);
+        return windowMousePosition;
+    }
+
     public function windowContainsCursor():Bool {
         return windowContains(Application.mouseX, Application.mouseY);
     }
@@ -47,14 +59,7 @@ class EditorWindow {
     }
 
     public function windowActive(ui:Zui):Bool {
-        return ui.window(
-            windowHandle,
-            startX,
-            startY,
-            width,
-            height,
-            draggable
-        );
+        return ui.window(windowHandle, startX, startY, width, height, draggable);
     }
 
     public function getSettings():Dynamic {

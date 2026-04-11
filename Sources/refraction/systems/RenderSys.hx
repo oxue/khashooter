@@ -1,6 +1,6 @@
 package refraction.systems;
 
-import hxblit.Camera;
+import rendering.Camera;
 import refraction.core.Sys;
 import refraction.display.AnimatedRenderCmp;
 

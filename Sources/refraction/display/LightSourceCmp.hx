@@ -16,13 +16,20 @@ class LightSourceCmp extends Component {
     public var offset:FastVector2;
     public var position:PositionCmp;
 
-    public function new(lightingSystem:DS2D, _color:Int = 0xffff0000, _radius:Int = 100, _offsetX:Int,
-            _offsetY:Int) {
+    public function new(lightingSystem:DS2D = null, _color:Int = 0xffff0000, _radius:Int = 100, _offsetX:Int = 0,
+            _offsetY:Int = 0) {
         light = new LightSource(0, 0, _color, _radius);
-        lightingSystem.addLightSource(light);
+        if (lightingSystem != null) lightingSystem.addLightSource(light);
         offset = new FastVector2(_offsetX, _offsetY);
 
         super();
+    }
+
+    override public function autoParams(_args:Dynamic) {
+        light.setColorHex(_args.color);
+        light.radius = _args.radius;
+        offset.x = _args.offsetX;
+        offset.y = _args.offsetY;
     }
 
     override public function load() {

@@ -17,8 +17,8 @@ components:
     frameTime: 2
 - type: TileCollision
   args:
-    hitboxX: -0
-    hitboxY: -0
+    hitboxX: -10
+    hitboxY: -10
 - type: HitCircle
   name: GYO
   args:
@@ -33,7 +33,18 @@ components:
   args:
     acceptanceRadius: 20
     maxAcceleration: 1
-- type: MimiAI
+- type: HitCircle
+  name: gyo_hitcircle
+  args:
+    tag: enemy
+    radius: 15
+- type: ZombieAI
+- type: LightSource
+  args: 
+    color: 0xff0000
+    radius: 10
+    offsetX: 0
+    offsetY: 0
 - type: Health
   args:
-    maxValue: 300
+    maxValue: 20

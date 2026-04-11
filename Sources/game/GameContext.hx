@@ -6,7 +6,7 @@ import kha.math.Vector2;
 import game.debug.DebugMenu;
 import game.dialogue.DialogueManager;
 import helpers.DebugLogger;
-import hxblit.Camera;
+import rendering.Camera;
 import pgr.dconsole.DC;
 import refraction.control.Damping;
 import refraction.core.Application;
@@ -38,148 +38,146 @@ import zui.Zui;
  */
 class GameContext {
 
-	static var myInstance:GameContext = null;
+    static var myInstance:GameContext = null;
 
-	public static function instance(?_camera:Camera, ?_ui:Zui):GameContext {
-		if (myInstance == null) {
-			myInstance = new GameContext(_camera, _ui);
-		}
-		return myInstance;
-	}
+    public static function instance(?_camera:Camera, ?_ui:Zui):GameContext {
+        if (myInstance == null) {
+            myInstance = new GameContext(_camera, _ui);
+        }
+        return myInstance;
+    }
 
-	public static function destroyInstance() {
-		myInstance = null;
-	}
+    public static function destroyInstance() {
+        myInstance = null;
+    }
 
-	public var camera:Camera;
-	public var tilemap:TileMap;
-	public var dijkstraMap:DijkstraField;
+    public var camera:Camera;
+    public var tilemap:TileMap;
+    public var dijkstraMap:DijkstraField;
 
-	public var tilemapShadowPolys:Array<Polygon>;
+    public var tilemapShadowPolys:Array<Polygon>;
 
-	public var playerEntity:Entity;
+    public var playerEntity:Entity;
 
-	public var statusText:StatusText;
+    public var statusText:StatusText;
 
-	public var renderSystem:RenderSys;
-	public var selfLitRenderSystem:RenderSys;
-	public var controlSystem:Sys<Component>;
-	public var velocitySystem:Sys<VelocityCmp>;
-	public var dampingSystem:Sys<Damping>;
-	public var collisionSystem:TileCollisionSys;
-	public var interactSystem:InteractSys;
-	public var breadCrumbsSystem:BreadCrumbsSys;
-	public var aiSystem:Sys<Component>;
-	public var lightSourceSystem:LightSourceSystem;
-	public var beaconSystem:BeaconSys;
-	public var particleSystem:ParticleSys;
-	public var environmentSystem:Sys<Component>;
-	
-	public var debugDrawablesMisc:Array<IDebugDrawable>;
+    public var renderSystem:RenderSys;
+    public var selfLitRenderSystem:RenderSys;
+    public var controlSystem:Sys<Component>;
+    public var velocitySystem:Sys<VelocityCmp>;
+    public var dampingSystem:Sys<Damping>;
+    public var collisionSystem:TileCollisionSys;
+    public var interactSystem:InteractSys;
+    public var breadCrumbsSystem:BreadCrumbsSys;
+    public var aiSystem:Sys<Component>;
+    public var lightSourceSystem:LightSourceSystem;
+    public var beaconSystem:BeaconSys;
+    public var particleSystem:ParticleSys;
+    public var environmentSystem:Sys<Component>;
 
-	public var spacingSystem:SpacingSys;
-	public var tooltipSystem:TooltipSys;
-	public var lightingSystem:DS2D;
+    public var debugDrawablesMisc:Array<IDebugDrawable>;
 
-	public var hitCheckSystem:Sys<Component>;
-	public var hitTestSystem:HitTestSys;
+    public var spacingSystem:SpacingSys;
+    public var tooltipSystem:TooltipSys;
+    public var lightingSystem:DS2D;
 
-	public var nullSystem:Sys<Component>;
+    public var hitCheckSystem:Sys<Component>;
+    public var hitTestSystem:HitTestSys;
 
-	// TODO: Deprecate these ones.
-	public var worldMouseX:Int;
-	public var worldMouseY:Int;
+    public var nullSystem:Sys<Component>;
 
-	public var ui:Zui;
-	public var healthBar:HealthBar;
+    // TODO: Deprecate these ones.
+    public var worldMouseX:Int;
+    public var worldMouseY:Int;
 
-	public var config:Dynamic;
-	public var dialogueManager:DialogueManager;
-	public var debugMenu:DebugMenu;
-	public var console:Console;
+    public var ui:Zui;
+    public var healthBar:HealthBar;
 
-	public var shouldDrawHitBoxes:Bool;
+    public var config:Dynamic;
+    public var dialogueManager:DialogueManager;
+    public var debugMenu:DebugMenu;
+    public var console:Console;
 
-	public var values:Values;
-	public var reloadGraphics:Bool;
+    public var shouldDrawHitBoxes:Bool;
 
-	public function new(_camera:Camera, _ui:Zui) {
-		config = TemplateParser.parseConfig();
-		values = new Values(config);
+    public var values:Values;
+    public var reloadGraphics:Bool;
 
-		camera = _camera;
-		tilemap = null;
-		ui = _ui;
+    public function new(_camera:Camera, _ui:Zui) {
+        config = TemplateParser.parseConfig();
+        values = new Values(config);
 
-		tilemapShadowPolys = [];
+        camera = _camera;
+        tilemap = null;
+        ui = _ui;
 
-		statusText = new StatusText();
-		statusText.x = cast camera.w / 2 * Application.getScreenZoom();
-		statusText.y = cast camera.h / 2 * Application.getScreenZoom();
+        tilemapShadowPolys = [];
 
-		worldMouseX = worldMouseY = 0;
+        statusText = new StatusText();
+        statusText.x = cast camera.w / 2 * Application.getScreenZoom();
+        statusText.y = cast camera.h / 2 * Application.getScreenZoom();
 
-		renderSystem = new RenderSys(camera);
-		selfLitRenderSystem = new RenderSys(camera);
-		controlSystem = new Sys<Component>();
-		velocitySystem = new Sys<VelocityCmp>();
-		dampingSystem = new Sys<Damping>();
-		collisionSystem = new TileCollisionSys();
-		interactSystem = new InteractSys();
-		breadCrumbsSystem = new BreadCrumbsSys();
-		aiSystem = new Sys<Component>();
-		lightSourceSystem = new LightSourceSystem();
-		spacingSystem = new SpacingSys();
-		beaconSystem = new BeaconSys();
-		particleSystem = new ParticleSys();
-		environmentSystem = new Sys<Component>();
+        worldMouseX = worldMouseY = 0;
 
-		hitCheckSystem = new Sys<Component>();
-		hitTestSystem = new HitTestSys();
+        renderSystem = new RenderSys(camera);
+        selfLitRenderSystem = new RenderSys(camera);
+        controlSystem = new Sys<Component>();
+        velocitySystem = new Sys<VelocityCmp>();
+        dampingSystem = new Sys<Damping>();
+        collisionSystem = new TileCollisionSys();
+        interactSystem = new InteractSys();
+        breadCrumbsSystem = new BreadCrumbsSys();
+        aiSystem = new Sys<Component>();
+        
+        spacingSystem = new SpacingSys();
+        beaconSystem = new BeaconSys();
+        particleSystem = new ParticleSys();
+        environmentSystem = new Sys<Component>();
 
-		debugDrawablesMisc = [];
+        hitCheckSystem = new Sys<Component>();
+        hitTestSystem = new HitTestSys();
 
-		lightingSystem = new DS2D(
-			Std.int(
-				Application.getScreenWidth() / Application.getScreenZoom()
-			),
-			Std.int(
-				Application.getScreenHeight() / Application.getScreenZoom()
-			)
-		);
-		tooltipSystem = new TooltipSys(ui);
+        debugDrawablesMisc = [];
 
-		dialogueManager = new DialogueManager("../../Assets/dialogue");
-		debugMenu = new DebugMenu();
-		reloadGraphics = false;
-		// initConsole();
-	}
+        lightingSystem = new DS2D(
+            Std.int(Application.getScreenWidth() / Application.getScreenZoom()),
+            Std.int(Application.getScreenHeight() / Application.getScreenZoom())
+        );
+        lightSourceSystem = new LightSourceSystem(lightingSystem);
 
-	public function reloadConfigs() {
-		TemplateParser.reloadConfigurations("../../Assets", (c) -> {
-			DebugLogger.info("config", c);
-			config = c;
-		});
-	}
+        tooltipSystem = new TooltipSys(ui);
 
-	public function recomputeShadowPolys() {
-		tilemapShadowPolys = TilemapUtils.computeGeometry(tilemap);
-	}
+        dialogueManager = new DialogueManager("../../Assets/dialogue");
+        debugMenu = new DebugMenu();
+        reloadGraphics = false;
+        // initConsole();
+    }
 
-	function initConsole() {
-		console = new Console((s) -> {
-			DebugLogger.info("CONSOLE", s);
-		}, ui);
+    public function reloadConfigs() {
+        TemplateParser.reloadConfigurations("../../Assets", (c) -> {
+            DebugLogger.info("config", c);
+            config = c;
+        });
+    }
 
-		DC.init(300, "DOWN", null, new ConsoleInput(), console);
+    public function recomputeShadowPolys() {
+        tilemapShadowPolys = TilemapUtils.computeGeometry(tilemap);
+    }
 
-		DC.registerObject(config, "config");
-		DC.registerObject(Application, "app");
-		DC.registerObject(this, "context");
+    function initConsole() {
+        console = new Console((s) -> {
+            DebugLogger.info("CONSOLE", s);
+        }, ui);
 
-		DC.log("- Objects Available");
-		DC.log("    - context:GameContext");
-		DC.log("    - app:Application");
-		DC.log("    - config:Application");
-	}
+        DC.init(300, "DOWN", null, new ConsoleInput(), console);
+
+        DC.registerObject(config, "config");
+        DC.registerObject(Application, "app");
+        DC.registerObject(this, "context");
+
+        DC.log("- Objects Available");
+        DC.log("    - context:GameContext");
+        DC.log("    - app:Application");
+        DC.log("    - config:Application");
+    }
 }

@@ -1,5 +1,8 @@
 package game;
 
+import refraction.display.AnimatedRenderCmp;
+import rendering.TextureAtlas;
+import zui.Zui;
 import haxe.Timer;
 import refraction.tilemap.Tile;
 import refraction.core.Entity;
@@ -7,27 +10,23 @@ import kha.math.Vector2i;
 import refraction.utils.Interval;
 import haxe.ds.Vector;
 import refraction.tilemap.DijkstraField;
-import kha.graphics4.Graphics2;
-import refraction.tilemap.TilemapUtils;
 import kha.math.Vector2;
-import refraction.control.KeyControl;
 import game.CollisionBehaviours.defineCollisionBehaviours;
 import game.debug.MapEditor;
 import helpers.DebugLogger;
 import helpers.LevelLoader;
 import helpers.ZombieResourceLoader;
-import hxblit.Camera;
-import hxblit.KhaBlit;
+import rendering.Camera;
+import rendering.KhaVertexIndexer;
 import kha.Assets;
 import kha.Framebuffer;
+import kha.math.FastMatrix3;
 import kha.graphics4.Graphics;
 import kha.input.KeyCode;
 import kha.input.Mouse;
-import kha.input.MouseImpl;
 import refraction.core.Application;
 import refraction.display.ResourceFormat;
 import refraction.generic.PositionCmp;
-import zui.*;
 
 class GameState extends refraction.core.State {
 
@@ -45,8 +44,8 @@ class GameState extends refraction.core.State {
     var defaultMap:String;
     var intervals:Array<Interval>;
 
-    public function new() {
-        this.defaultMap = "level2";
+    public function new(map:String = "level2") {
+        this.defaultMap = map;
         this.showMenu = false;
         super();
     }
@@ -81,10 +80,7 @@ class GameState extends refraction.core.State {
         formatResources();
 
         // Init Ent Factory
-        entFactory = EntFactory.instance(
-            gameContext,
-            new ShooterComponentFactory(gameContext)
-        );
+        entFactory = EntFactory.instance(gameContext, new ShooterComponentFactory(gameContext));
 
         // load map
         levelLoader = new LevelLoader(defaultMap, entFactory, gameContext);
@@ -114,6 +110,12 @@ class GameState extends refraction.core.State {
         configureDebugKeys();
 
         isRenderingReady = true;
+
+        playMusic();
+    }
+
+    function playMusic() {
+        // Audio.play(Assets.sounds.sound_song, true);
     }
 
     function initIntervals():Array<Interval> {
@@ -159,14 +161,15 @@ class GameState extends refraction.core.State {
         );
     }
 
-    // public function newState(map:String) {
-    // 	EntFactory.destroyInstance();
-    // 	GameContext.destroyInstance();
-    // 	Application.resetKeyListeners();
-    // 	Application.setState(new GameState(map));
-    // }
+    public static function loadLevel(map:String) {
+        EntFactory.destroyInstance();
+        GameContext.destroyInstance();
+        Application.resetKeyListeners();
+        Application.setState(new GameState(map));
+    }
 
     function mouseDown(button:Int, x:Int, y:Int) {
+        if (!isRenderingReady) return;
         if (button == 0) {
             gameContext.interactSystem.update();
             var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
@@ -179,6 +182,8 @@ class GameState extends refraction.core.State {
     // =========
 
     override public function update() {
+        if (!isRenderingReady) return;
+
         if (Application.keys.get(KeyCode.Equals)) {
             gameContext.lightingSystem.globalRadius += 1;
         }
@@ -239,15 +244,16 @@ class GameState extends refraction.core.State {
 
         var g4:Graphics = frame.g4;
 
+        // g4.begin();
+        // KhaBlit.setContext(frame.g4);
+        // KhaBlit.clear(0, 0, 0, 0, 0, 0);
+        // g4.end();
+
         g4.begin();
-        KhaBlit.setContext(frame.g4);
-        KhaBlit.clear(0.1, 0.1, 0.1, 0, 1, 1);
-        KhaBlit.setPipeline(
-            KhaBlit.KHBTex2PipelineState,
-            "KHBTex2PipelineState"
-        );
-        KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-        KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+        KhaVertexIndexer.setContext(frame.g4);
+        KhaVertexIndexer.setPipeline(KhaVertexIndexer.Tex2PipelineState, "KHBTex2PipelineState");
+        KhaVertexIndexer.setUniformMatrix4("mproj", KhaVertexIndexer.matrix2);
+        KhaVertexIndexer.setUniformTexture("tex", ResourceFormat.atlases
             .get("all")
             .image
         );
@@ -258,27 +264,29 @@ class GameState extends refraction.core.State {
 
         gameContext.renderSystem.update();
 
-        KhaBlit.draw();
+        KhaVertexIndexer.draw();
 
         g4.end();
+
+        frame.g2.begin(false);
+        var a:AnimatedRenderCmp = gameContext.playerEntity.getComponent(AnimatedRenderCmp);
+        a.draw(gameContext.camera, frame);
+        frame.g2.end();
 
         gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
 
         g4.begin();
-        KhaBlit.setContext(frame.g4);
-        KhaBlit.setPipeline(
-            KhaBlit.KHBTex2PipelineState,
-            "KHBTex2PipelineState"
-        );
-        KhaBlit.setUniformMatrix4("mproj", KhaBlit.matrix2);
-        KhaBlit.setUniformTexture("tex", ResourceFormat.atlases
+        KhaVertexIndexer.setContext(frame.g4);
+        KhaVertexIndexer.setPipeline(KhaVertexIndexer.Tex2PipelineState, "KHBTex2PipelineState");
+        KhaVertexIndexer.setUniformMatrix4("mproj", KhaVertexIndexer.matrix2);
+        KhaVertexIndexer.setUniformTexture("tex", ResourceFormat.atlases
             .get("all")
             .image
         );
 
         gameContext.selfLitRenderSystem.update();
 
-        KhaBlit.draw();
+        KhaVertexIndexer.draw();
 
         g4.end();
 
@@ -325,10 +333,7 @@ class GameState extends refraction.core.State {
     function renderMiscDebug(f:Framebuffer, context:GameContext) {
         f.g2.begin(false);
         f.g2.pushTranslation(-context.camera.x, -context.camera.y);
-        f.g2.pushScale(
-            Application.getScreenZoom(),
-            Application.getScreenZoom()
-        );
+        f.g2.pushTransformation(FastMatrix3.scale(Application.getScreenZoom(), Application.getScreenZoom()));
         for (d in context.debugDrawablesMisc) {
             d.drawDebug(context.camera, f.g2);
         }
@@ -357,10 +362,7 @@ class GameState extends refraction.core.State {
 
     function drawVecArrow(v:Vector2, x:Float, y:Float, gc:GameContext, f:Framebuffer) {
         f.g2.pushTranslation(-gc.camera.x, -gc.camera.y);
-        f.g2.pushScale(
-            Application.getScreenZoom(),
-            Application.getScreenZoom()
-        );
+        f.g2.pushTransformation(FastMatrix3.scale(Application.getScreenZoom(), Application.getScreenZoom()));
         f.g2.color = 0xffebf2eb;
         f.g2.drawLine(x, y, x + v.x * 4, y + v.y * 4, 0.5);
         f.g2.color = 0xff00ff00;

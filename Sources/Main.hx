@@ -1,8 +1,12 @@
 package;
 
+import kha.Scheduler;
+import kha.input.Keyboard;
+import kha.input.Mouse;
+import kha.System;
 import game.PhysState;
 import game.GameState;
-import hxblit.KhaBlit;
+import rendering.KhaVertexIndexer;
 import kha.Assets;
 import refraction.core.Application;
 import refraction.display.ResourceFormat;
@@ -10,29 +14,47 @@ import yaml.Yaml;
 
 class Main {
 
-	public static function main() {
-		// Application.init("Physics Test", 600, 400, 1, function() {
-		// 	Application.setState(new PhysState());
-		// });
+    public static function main() {
+        // Application.init("Physics Test", 600, 400, 1, function() {
+        //     Application.setState(new PhysState());
+        // });
 
-		Assets.blobs.config_yamlLoad(() -> {
-			var config:Dynamic = Yaml.parse(Std.string(Assets.blobs.config_yaml));
+        var width = 1300;
+        var height = 800;
 
-			Application.init(
-				"Pew Pew",
-				config.get("system").get("width"),
-				config.get("system").get("height"),
-				config.get("system").get("zoom"),
-				function() {
-					KhaBlit.init(
-						Application.getScreenWidth(),
-						Application.getScreenHeight(),
-						Application.getScreenZoom()
-					);
-					ResourceFormat.init();
-					Application.setState(new GameState());
-				}
-			);
-		});
-	}
+        #if kha_osx
+        width *= 2;
+        height *= 2;
+        #end
+
+        System.start(
+            {title: "Pew Pew", width: width, height: height},
+            (window) -> {
+                Mouse
+                    .get()
+                    .notify(
+                        Application.mouseDown,
+                        Application.mouseUp,
+                        Application.mouseMove,
+                        null
+                    );
+                Keyboard
+                    .get()
+                    .notify(Application.keyDown, Application.keyUp);
+
+                Scheduler.addTimeTask(Application.update, 0, 1 / 60);
+                System.notifyOnFrames(Application.render);
+
+                Application.init("Pew Pew", 1300, 800, 2, () -> {
+                    KhaVertexIndexer.init(
+                        Application.getScreenWidth(),
+                        Application.getScreenHeight(),
+                        Application.getScreenZoom()
+                    );
+                    ResourceFormat.init();
+                    Application.setState(new GameState());
+                });
+            }
+        );
+    }
 }

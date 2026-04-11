@@ -17,8 +17,10 @@ project.addAssets('Assets/**', {
 	name: '{dir}/{name}'
 });
 
-project.windowOptions.width = 800;
-project.windowOptions.height = 600;
+project.windowOptions.width = 1300;
+project.windowOptions.height = 800;
+
+project.targetOptions.html5.disableContextMenu = true;
 
 resolve(project);
 

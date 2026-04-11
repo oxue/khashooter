@@ -1,6 +1,6 @@
 package game.debug;
 
-import components.Particle;
+import components.ParticleCmp;
 import haxe.ds.StringMap;
 import kha.Color;
 import refraction.core.Application;
@@ -56,6 +56,7 @@ class DebugMenu {
             entityCrate
                 .getComponent(PositionCmp)
                 .setPosition(worldMenuX, worldMenuY);
+
             gameContext.lightingSystem.addLightSource(
                 new LightSource(worldMenuX, worldMenuY, 0x00D0FF, 150)
             );
@@ -80,10 +81,10 @@ class DebugMenu {
         // var worldMenuX:Int = cast menuX / zoom + gameContext.camera.x;
         // var worldMenuY:Int = cast menuY / zoom + gameContext.camera.y;
         // if (ui.button("Teleport Here")) {
-        // 	showMenu = false;
-        // 	playerPos.x = worldMenuX;
-        // 	playerPos.y = worldMenuY;
-        // 	trace(gameContext.beaconSystem.getOne("player"));
+        //     showMenu = false;
+        //     playerPos.x = worldMenuX;
+        //     playerPos.y = worldMenuY;
+        //     trace(gameContext.beaconSystem.getOne("player"));
         // }
     }
 
@@ -167,7 +168,7 @@ class DebugMenu {
                     .getComponent(PositionCmp)
                     .setPosition(worldMenuX, worldMenuY)
                     .getEntity()
-                    .getComponent(Particle)
+                    .getComponent(ParticleCmp)
                     .randomDirection(Math.random() * 10 + 5);
             }
         }

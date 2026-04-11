@@ -29,7 +29,7 @@ typedef Tool = {
     toolType:ToolType,
     toolLabel:String,
     toolDescription:String,
-    ?toolCursor:MouseCursor,
+    // ?toolCursor:MouseCursor, // TODO: custom cursor support
     toolFunc:(Tool, GameContext) -> Void,
     ?toolPaintFunc:(Vector2, Int) -> Void,
     ?toolDownFunc:(Vector2, Int) -> Void
@@ -50,15 +50,6 @@ class Toolbox extends EditorWindow {
 
         function setToolFunc(tool:Tool, context:GameContext) {
             this.selectedTool = tool;
-            if (tool.toolCursor != null) {
-                Mouse
-                    .get()
-                    .setSystemCursor(tool.toolCursor);
-            } else {
-                Mouse
-                    .get()
-                    .setSystemCursor(MouseCursor.Default);
-            }
         }
 
         this.tools = [
@@ -75,7 +66,7 @@ class Toolbox extends EditorWindow {
                 toolLabel: "Brush",
                 toolDescription: "Brush",
                 toolFunc: setToolFunc,
-                toolCursor: MouseCursor.Custom(Assets.images.brush),
+                // toolCursor: MouseCursor.Custom(Assets.images.brush), // TODO
                 toolPaintFunc: function(worldPos:Vector2, tileSelected:Int) {
                     var tile:Tile = gameContext.tilemap.getTileContainingVec2(worldPos);
                     if (tile != null) {
@@ -90,7 +81,7 @@ class Toolbox extends EditorWindow {
                 toolLabel: "Bucket",
                 toolDescription: "Paint Bucket",
                 toolFunc: setToolFunc,
-                toolCursor: MouseCursor.Custom(Assets.images.bucket),
+                // toolCursor: MouseCursor.Custom(Assets.images.bucket), // TODO
                 toolPaintFunc: function(worldPos:Vector2, tileSelected:Int) {
                     var tm:TileMap = gameContext.tilemap;
                     var tx:Int = tm.getIndexAtFloat(worldPos.x);

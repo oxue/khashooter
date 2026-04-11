@@ -2,25 +2,32 @@ package game.debug;
 
 import haxe.ds.StringMap;
 import haxe.io.Mime;
-import js.html.URL;
-import js.Browser;
 import haxe.Json;
+import game.GameState;
 import helpers.LevelLoader;
-import hxblit.Camera;
+import rendering.Camera;
 import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
 import kha.input.Mouse;
 import kha.math.Vector2;
 import refraction.core.Application;
+import zui.Id;
 import zui.Zui;
+
+#if kha_html5
+import js.Browser;
+import js.html.URL;
+#end
 
 class MapEditor {
 
     static final FONTSIZE:Int = 16;
+    static final LEVEL_NAMES:Array<String> = ["level2", "bloodstrike_zm", "modern_home", "rooms"];
 
     var show:Bool;
     var levelLoader:LevelLoader;
+    var gameContext:GameContext;
 
     // element
     var tilePalette:TilePalette;
@@ -45,6 +52,7 @@ class MapEditor {
         importLayout();
 
         this.levelLoader = levelLoader;
+        this.gameContext = gameContext;
 
         Application.addMouseDownListener((button, x, y) -> {
             if (!mouseShouldPaint()) {
@@ -58,6 +66,7 @@ class MapEditor {
     }
 
     function saveFile(name:String, mime:Mime, data:String) {
+        #if kha_html5
         final blob = new js.html.Blob([data], {
             type: mime
         });
@@ -73,6 +82,7 @@ class MapEditor {
         a.click();
         Browser.document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        #end
     }
 
     public function importLayout() {
@@ -95,11 +105,7 @@ class MapEditor {
 
         trace(Json.stringify(layout));
 
-        saveFile(
-            "layout.json",
-            Mime.ApplicationJson,
-            Json.stringify(layout)
-        );
+        saveFile("layout.json", Mime.ApplicationJson, Json.stringify(layout));
     }
 
     function mouseShouldPaint():Bool {
@@ -116,7 +122,7 @@ class MapEditor {
         if (!show) {
             Mouse
                 .get()
-                .setSystemCursor(MouseCursor.Default);
+                .showSystemCursor();
         }
     }
 
@@ -124,7 +130,7 @@ class MapEditor {
         show = false;
         Mouse
             .get()
-            .setSystemCursor(MouseCursor.Default);
+            .showSystemCursor();
     }
 
     public function render(context:GameContext, f:Framebuffer, ui:Zui) {
@@ -167,6 +173,18 @@ class MapEditor {
         tilePalette.render(ui, context);
         toolbox.render(ui, context);
         entityLibrary.render(ui, context);
+        renderLevelSelector(ui);
+    }
+
+    function renderLevelSelector(ui:Zui) {
+        if (ui.window(Id.handle(), 10, 10, 180, 200, false)) {
+            ui.text("Load Level");
+            for (name in LEVEL_NAMES) {
+                if (ui.button(name)) {
+                    GameState.loadLevel(name);
+                }
+            }
+        }
     }
 
     function drawString(f:Framebuffer, s:String, x:Float, y:Float) {
@@ -177,13 +195,7 @@ class MapEditor {
 
     function drawLine(f:Framebuffer, x1:Float, y1:Float, x2:Float, y2:Float, strength:Float = 1.0) {
         var zoom:Int = Application.getScreenZoom();
-        f.g2.drawLine(
-            x1 * zoom,
-            y1 * zoom,
-            x2 * zoom,
-            y2 * zoom,
-            strength
-        );
+        f.g2.drawLine(x1 * zoom, y1 * zoom, x2 * zoom, y2 * zoom, strength);
     }
 
     function renderGrid(context:GameContext, framebuffer:Framebuffer) {

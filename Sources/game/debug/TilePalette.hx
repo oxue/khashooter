@@ -43,18 +43,8 @@ class TilePalette extends EditorWindow {
         }
     }
 
-    public function getWindowMousePosition(ui:Zui, windowHandle:Handle):Vector2 {
-        var windowPosition:Vector2 = new Vector2(0 + ui.TAB_W(), 0 + ui.HEADER_DRAG_H());
-        var windowDragPosition:Vector2 = new Vector2(windowHandle.dragX, windowHandle.dragY);
-        windowPosition = windowPosition.add(windowDragPosition);
-        var mousePosition:Vector2 = new Vector2(Application.mouseX, Application.mouseY);
-
-        var windowMousePosition:Vector2 = mousePosition.sub(windowPosition);
-        return windowMousePosition;
-    }
-
     function handleTilePaletteSelection(ui:Zui, context:GameContext) {
-        var windowMousePosition:Vector2 = getWindowMousePosition(ui, windowHandle);
+        var windowMousePosition:Vector2 = this.getWindowMousePosition(ui);
 
         tileSelected = context.tilemap.tilesheet.getTileIndex(windowMousePosition.x, windowMousePosition.y);
 

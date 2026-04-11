@@ -1,6 +1,6 @@
 package refraction.core;
 
-import hxblit.Camera;
+import rendering.Camera;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.System;
@@ -11,187 +11,181 @@ import kha.math.Vector2;
 
 class Application {
 
-	static var width:Int;
-	static var height:Int;
-	static var zoom:Int;
+    static var width:Int;
+    static var height:Int;
+    static var zoom:Int;
 
-	public static var currentState:State;
+    public static var currentState:State;
 
-	public static var mouseIsDown:Bool;
-	public static var mouse2IsDown:Bool;
-	public static var mouseX:Int;
-	public static var mouseY:Int;
+    public static var mouseIsDown:Bool;
+    public static var mouse2IsDown:Bool;
+    public static var mouseX:Int;
+    public static var mouseY:Int;
 
-	public static var mouseJustDown:Bool;
-	public static var mouse2JustDown:Bool;
-	public static var mouseJustUp:Bool;
-	public static var mouse2JustUp:Bool;
+    public static var mouseJustDown:Bool;
+    public static var mouse2JustDown:Bool;
+    public static var mouseJustUp:Bool;
+    public static var mouse2JustUp:Bool;
 
-	public static var defaultCamera:Camera;
+    public static var defaultCamera:Camera;
 
-	public static var keys:Map<Int, Bool>;
-	public static var frameClock:Int;
+    public static var keys:Map<Int, Bool>;
+    public static var frameClock:Int;
 
-	static var lastTime:Float;
+    static var lastTime:Float;
 
-	static var keyDownListeners:Array<KeyCode -> Void>;
-	static var keyUpListeners:Array<KeyCode -> Void>;
-	static var mouseDownListeners:Array<(Int, Int, Int) -> Void>;
-	static var mouseUpListeners:Array<(Int, Int, Int) -> Void>;
+    static var keyDownListeners:Array<KeyCode -> Void>;
+    static var keyUpListeners:Array<KeyCode -> Void>;
+    static var mouseDownListeners:Array<(Int, Int, Int) -> Void>;
+    static var mouseUpListeners:Array<(Int, Int, Int) -> Void>;
 
-	static var mouseWasDown:Bool;
-	static var mouse2WasDown:Bool;
+    static var mouseWasDown:Bool;
+    static var mouse2WasDown:Bool;
 
-	public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
-			__callback:Void -> Void) {
-		currentState = new State();
-		keys = new Map<Int, Bool>();
+    public static function init(_title:String, _width:Int = 800, _height:Int = 600, _zoom:Int = 2,
+            __callback:Void -> Void) {
+        currentState = new State();
+        keys = new Map<Int, Bool>();
 
-		width = _width;
-		height = _height;
-		zoom = _zoom;
+        width = _width;
+        height = _height;
+        zoom = _zoom;
 
-		mouseX = mouseY = 0;
-		mouseIsDown = mouseWasDown = mouse2IsDown = mouse2WasDown = false;
+        mouseX = mouseY = 0;
+        mouseIsDown = mouseWasDown = mouse2IsDown = mouse2WasDown = false;
 
-		frameClock = 0;
+        frameClock = 0;
 
-		keyDownListeners = [];
-		keyUpListeners = [];
-		mouseDownListeners = [];
-		mouseUpListeners = [];
+        keyDownListeners = [];
+        keyUpListeners = [];
+        mouseDownListeners = [];
+        mouseUpListeners = [];
 
-		System.start(
-			{title: _title, width: _width, height: _height},
-			(window) -> {
-				Mouse
-					.get()
-					.notify(mouseDown, mouseUp, mouseMove, null);
-				Keyboard
-					.get()
-					.notify(keyDown, keyUp);
+        __callback();
+    }
 
-				Scheduler.addTimeTask(update, 0, 1 / 60);
-				System.notifyOnFrames(render);
+    /**
+     * width in pixels of the window, not the graphics
+     * @return Int
+     */
+    public static function getScreenWidth():Int {
+        return width;
+    }
 
-				lastTime = Scheduler.time();
-				__callback();
-			}
-		);
-	}
+    /**
+     * height in pixels of the window, not the graphics
+     * @return Int
+     */
+    public static function getScreenHeight():Int {
+        return height;
+    }
 
-	/**
-	 * width in pixels of the window, not the graphics
-	 * @return Int
-	 */
-	public static function getScreenWidth():Int {
-		return width;
-	}
+    /**
+     * zoom of the graphics, width and height divided by zoom is the window size
+     * @return Int
+     */
+    public static function getScreenZoom():Int {
+        return zoom;
+    }
 
-	/**
-	 * height in pixels of the window, not the graphics
-	 * @return Int
-	 */
-	public static function getScreenHeight():Int {
-		return height;
-	}
+    public static function resetKeyListeners() {
+        keyDownListeners = [];
+        keyUpListeners = [];
+        mouseDownListeners = [];
+        mouseUpListeners = [];
+    }
 
-	/**
-	 * zoom of the graphics, width and height divided by zoom is the window size
-	 * @return Int
-	 */
-	public static function getScreenZoom():Int {
-		return zoom;
-	}
+    public static function mouseCoords():Vector2 {
+        return new Vector2(mouseX, mouseY);
+    }
 
-	public static function resetKeyListeners() {
-		keyDownListeners = keyUpListeners = [];
-	}
+    public static function mouseMove(x:Int, y:Int, dX:Int, dY:Int) {
+        mouseX = x;
+        mouseY = y;
+    }
 
-	public static function mouseCoords():Vector2 {
-		return new Vector2(mouseX, mouseY);
-	}
+    public static function mouseDown(button:Int, x:Int, y:Int) {
+        for (method in mouseDownListeners) {
+            method(button, x, y);
+        }
+        if (button == 0)
+            mouseIsDown = true;
+        if (button == 1)
+            mouse2IsDown = true;
+    }
 
-	static function mouseMove(x:Int, y:Int, dX:Int, dY:Int) {
-		mouseX = x;
-		mouseY = y;
-	}
+    public static function mouseUp(button:Int, x:Int, y:Int) {
+        for (method in mouseUpListeners) {
+            method(button, x, y);
+        }
+        if (button == 0)
+            mouseIsDown = false;
+        if (button == 1)
+            mouse2IsDown = false;
+    }
 
-	static function mouseDown(button:Int, x:Int, y:Int) {
-		for (method in mouseDownListeners) {
-			method(button, x, y);
-		}
-		if (button == 0)
-			mouseIsDown = true;
-		if (button == 1)
-			mouse2IsDown = true;
-	}
+    public static function keyDown(key:KeyCode) {
+        keys.set(key, true);
+        for (method in keyDownListeners) {
+            method(key);
+        }
+    }
 
-	static function mouseUp(button:Int, x:Int, y:Int) {
-		for (method in mouseUpListeners) {
-			method(button, x, y);
-		}
-		if (button == 0)
-			mouseIsDown = false;
-		if (button == 1)
-			mouse2IsDown = false;
-	}
+    public static function keyUp(key:KeyCode) {
+        // if(char != null)
+        keys.set(key, false);
+        for (method in keyUpListeners) {
+            method(key);
+        }
+    }
 
-	static function keyDown(key:KeyCode) {
-		keys.set(key, true);
-		for (method in keyDownListeners) {
-			method(key);
-		}
-	}
+    public static function setState(_state:State) {
+        currentState.unload();
+        currentState = _state;
+        _state.load();
+    }
 
-	static function keyUp(key:KeyCode) {
-		// if(char != null)
-		keys.set(key, false);
-		for (method in keyUpListeners) {
-			method(key);
-		}
-	}
+    public static function update() {
+        var m2:Bool = mouse2IsDown;
+        var m:Bool = mouseIsDown;
 
-	public static function setState(_state:State) {
-		currentState.unload();
-		currentState = _state;
-		_state.load();
-	}
+        currentState.update();
 
-	static function update() {
-		var m2:Bool = mouse2IsDown;
-		var m:Bool = mouseIsDown;
+        // Accumulate JustDown/JustUp flags so they persist until render() clears them.
+        // The scheduler may call update() multiple times between renders.
+        if (m2 && !mouse2WasDown) mouse2JustDown = true;
+        if (m && !mouseWasDown) mouseJustDown = true;
+        if (!m2 && mouse2WasDown) mouse2JustUp = true;
+        if (!m && mouseWasDown) mouseJustUp = true;
 
-		currentState.update();
-		mouse2JustDown = m2 && !mouse2WasDown;
-		mouseJustDown = m && !mouseWasDown;
+        mouse2WasDown = m2;
+        mouseWasDown = m;
 
-		mouse2JustUp = !m2 && mouse2WasDown;
-		mouseJustUp = !m && mouseWasDown;
+        frameClock++;
+    }
 
-		mouse2WasDown = m2;
-		mouseWasDown = m;
+    public static function render(frame:Array<Framebuffer>) {
+        currentState.render(frame[0]);
+        // Clear edge-triggered flags after render has had a chance to read them
+        mouse2JustDown = false;
+        mouseJustDown = false;
+        mouse2JustUp = false;
+        mouseJustUp = false;
+    }
 
-		frameClock++;
-	}
+    public static function addKeyUpListener(method:KeyCode -> Void) {
+        keyUpListeners.push(method);
+    }
 
-	public static function render(frame:Array<Framebuffer>) {
-		currentState.render(frame[0]);
-	}
+    public static function addKeyDownListener(method:KeyCode -> Void) {
+        keyDownListeners.push(method);
+    }
 
-	public static function addKeyUpListener(method:KeyCode -> Void) {
-		keyUpListeners.push(method);
-	}
+    public static function addMouseDownListener(method:(Int, Int, Int) -> Void) {
+        mouseDownListeners.push(method);
+    }
 
-	public static function addKeyDownListener(method:KeyCode -> Void) {
-		keyDownListeners.push(method);
-	}
-
-	public static function addMouseDownListener(method:(Int, Int, Int) -> Void) {
-		mouseDownListeners.push(method);
-	}
-
-	public static function addMouseUpListener(method:(Int, Int, Int) -> Void) {
-		mouseUpListeners.push(method);
-	}
+    public static function addMouseUpListener(method:(Int, Int, Int) -> Void) {
+        mouseUpListeners.push(method);
+    }
 }
