@@ -6,6 +6,7 @@ import kha.input.Mouse;
 import kha.System;
 import game.PhysState;
 import game.GameState;
+import game.MenuState;
 import rendering.KhaVertexIndexer;
 import kha.Assets;
 import refraction.core.Application;
@@ -52,7 +53,7 @@ class Main {
                         Application.getScreenZoom()
                     );
                     ResourceFormat.init();
-                    Application.setState(new GameState());
+                    Application.setState(new MenuState());
                 });
             }
         );
