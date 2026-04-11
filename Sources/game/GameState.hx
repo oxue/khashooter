@@ -50,12 +50,14 @@ class GameState extends refraction.core.State {
     var defaultMap:String;
     var serverUrl:String;
     var multiplayerName:String;
+    var roomCode:String;
     var intervals:Array<Interval>;
 
-    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String) {
+    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String) {
         this.defaultMap = map;
         this.serverUrl = serverUrl;
         this.multiplayerName = playerName;
+        this.roomCode = roomCode;
         this.showMenu = false;
         super();
     }
@@ -336,11 +338,11 @@ class GameState extends refraction.core.State {
             gameContext.environmentSystem.update();
             gameContext.lightSourceSystem.update();
             gameContext.particleSystem.update();
+            gameContext.hitCheckSystem.update(); // Projectile wall collision — must run on all clients
 
             // Host-authoritative systems (only host runs AI, pathfinding, hit detection)
             if (isHost) {
                 gameContext.breadCrumbsSystem.update();
-                gameContext.hitCheckSystem.update();
                 gameContext.aiSystem.update();
                 gameContext.hitTestSystem.update();
             }
@@ -635,10 +637,7 @@ class GameState extends refraction.core.State {
         if (gc.playerEntity != null) {
             var pos:PositionCmp = gc.playerEntity.getComponent(PositionCmp);
             if (pos != null) {
-                var label:String = "You";
-                if (gc.netState != null && gc.netState.isConnected()) {
-                    label = "Player " + Std.string(gc.netState.localId);
-                }
+                var label:String = (multiplayerName != null && multiplayerName.length > 0) ? multiplayerName : "You";
                 var screenX:Float = (pos.x - camX) * zoom;
                 var screenY:Float = (pos.y - camY - 20) * zoom;
                 var textWidth:Float = font.width(fontSize, label);
@@ -706,6 +705,23 @@ class GameState extends refraction.core.State {
         }
     }
 
+    function renderRoomCode(f:Framebuffer) {
+        if (roomCode == null || roomCode.length == 0) return;
+        var font = Assets.fonts.fonts_OpenSans;
+        var screenW:Float = Application.getScreenWidth();
+        // Top center
+        f.g2.font = font;
+        f.g2.fontSize = 24;
+        var label:String = "Room: " + roomCode;
+        var labelW:Float = font.width(24, label);
+        // Background
+        f.g2.color = 0x88000000;
+        f.g2.fillRect((screenW - labelW) / 2 - 10, 5, labelW + 20, 30);
+        // Text
+        f.g2.color = 0xff55ccff;
+        f.g2.drawString(label, (screenW - labelW) / 2, 7);
+    }
+
     function renderGameUI(f:Framebuffer, gc:GameContext, ui:Zui) {
         f.g2.begin(false);
         gameContext.healthBar.render(f);
@@ -714,6 +730,7 @@ class GameState extends refraction.core.State {
         gameContext.tooltipSystem.draw(f.g2);
         gameContext.killFeed.render(f.g2, f.width);
         renderConnectionStatus(f, gc);
+        renderRoomCode(f);
         var localId:Int = (gc.netState != null && gc.netState.isConnected()) ? gc.netState.localId : 0;
         gc.scoreboard.render(f.g2, localId, gc.netState != null ? gc.netState.remotePlayers : null);
         gc.chatSystem.render(f.g2);

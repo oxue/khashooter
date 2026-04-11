@@ -86,36 +86,6 @@ class MenuState extends refraction.core.State {
             handleCreateClick(x, y, screenW, screenH);
         } else if (screen == "join") {
             handleJoinClick(x, y, screenW, screenH);
-        } else if (screen == "waiting") {
-            handleWaitingClick(x, y, screenW, screenH);
-        }
-    }
-
-    function handleWaitingClick(mx:Int, my:Int, w:Float, h:Float) {
-        var baseY:Float = h * 0.3;
-        var btnW:Float = 200;
-        var btnH:Float = 40;
-        var btnX:Float = (w - btnW) / 2;
-        var btnY:Float = baseY + 140;
-
-        // Start Now button
-        if (mx >= btnX && mx <= btnX + btnW && my >= btnY && my <= btnY + btnH) {
-            #if js
-            if (pollTimer != null) untyped __js__("clearInterval({0})", pollTimer);
-            #end
-            startGame();
-            return;
-        }
-
-        // Cancel button (text below)
-        var cancelY:Float = btnY + 55;
-        if (my >= cancelY && my <= cancelY + 20 && mx >= (w / 2) - 40 && mx <= (w / 2) + 40) {
-            #if js
-            if (pollTimer != null) untyped __js__("clearInterval({0})", pollTimer);
-            #end
-            screen = "main";
-            roomCode = "";
-            return;
         }
     }
 
@@ -266,54 +236,17 @@ class MenuState extends refraction.core.State {
         }
     }
 
-    var waitingForGuest:Bool;
-    var waitingMapName:String;
-    var waitingServerUrl:String;
-    var waitingPlayerName:String;
-    var pollTimer:Dynamic;
-
     function handleCreateRoom() {
-        if (screen == "waiting") return;
-        screen = "waiting";
-        statusMessage = "Creating room...";
-        waitingMapName = maps[selectedMap];
-        waitingPlayerName = playerName;
-        waitingServerUrl = "ws://localhost:3000";
-        waitingForGuest = false;
+        var mapName:String = maps[selectedMap];
+        var name:String = playerName;
+        var wsUrl:String = "ws://localhost:3000";
 
-        RoomClient.createRoom(waitingPlayerName, waitingMapName, function(code:String) {
-            roomCode = code;
-            statusMessage = "Share this code with your friend:";
-            waitingForGuest = true;
-            // Store server URL in room
-            RoomClient.updateRoom(code, cast {serverUrl: waitingServerUrl}, function(room:Dynamic) {});
-            // Poll for guest joining
-            #if js
-            pollTimer = untyped __js__("setInterval(() => {0}(), 2000)", pollForGuest);
-            #end
+        RoomClient.createRoom(name, mapName, function(code:String) {
+            // Store server URL in room for guests to find
+            RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
+            // Go straight to game — room code shown as in-game overlay
+            Application.setState(new GameState(mapName, wsUrl, name, code));
         });
-    }
-
-    function pollForGuest() {
-        RoomClient.getRoom(roomCode, function(room:Dynamic) {
-            if (room == null) return;
-            var guests:Dynamic = untyped room.guests;
-            if (guests != null && untyped guests.length > 0) {
-                // Guest joined! Stop polling and start game
-                #if js
-                untyped __js__("clearInterval({0})", pollTimer);
-                #end
-                statusMessage = "Player joined! Starting...";
-                // Short delay so host sees the message
-                #if js
-                untyped __js__("setTimeout(() => {0}(), 500)", startGame);
-                #end
-            }
-        });
-    }
-
-    function startGame() {
-        Application.setState(new GameState(waitingMapName, waitingServerUrl, waitingPlayerName));
     }
 
     function handleJoinRoom() {
@@ -410,8 +343,6 @@ class MenuState extends refraction.core.State {
             renderCreateScreen(g, screenW, screenH);
         } else if (screen == "join") {
             renderJoinScreen(g, screenW, screenH);
-        } else if (screen == "waiting") {
-            renderWaitingScreen(g, screenW, screenH);
         }
 
         g.end();
@@ -563,69 +494,6 @@ class MenuState extends refraction.core.State {
             var msgW:Float = font.width(14, statusMessage);
             g.drawString(statusMessage, (w - msgW) / 2, btnY + 60);
         }
-    }
-
-    function renderWaitingScreen(g:kha.graphics2.Graphics, w:Float, h:Float) {
-        var centerX:Float = w / 2;
-        var baseY:Float = h * 0.3;
-
-        // Header
-        g.font = titleFont;
-        g.fontSize = 28;
-        g.color = Color.White;
-        var header:String = "WAITING FOR PLAYERS";
-        var headerW:Float = titleFont.width(28, header);
-        g.drawString(header, (w - headerW) / 2, baseY - 60);
-
-        g.font = font;
-
-        // Status message
-        if (statusMessage.length > 0) {
-            g.fontSize = 16;
-            g.color = Color.fromFloats(0.7, 0.7, 0.7, 1.0);
-            var msgW:Float = font.width(16, statusMessage);
-            g.drawString(statusMessage, (w - msgW) / 2, baseY);
-        }
-
-        // Room code (big and prominent)
-        if (roomCode.length > 0) {
-            g.fontSize = 48;
-            g.color = Color.fromFloats(0.4, 0.8, 1.0, 1.0);
-            // Space out the letters
-            var spaced:String = roomCode.split("").join("  ");
-            var codeW:Float = font.width(48, spaced);
-            g.drawString(spaced, (w - codeW) / 2, baseY + 30);
-        }
-
-        // Map info
-        g.fontSize = 14;
-        g.color = Color.fromFloats(0.5, 0.5, 0.5, 1.0);
-        var mapInfo:String = "Map: " + waitingMapName;
-        var mapW:Float = font.width(14, mapInfo);
-        g.drawString(mapInfo, (w - mapW) / 2, baseY + 100);
-
-        // Start Now button (host can start solo)
-        var btnW:Float = 200;
-        var btnH:Float = 40;
-        var btnX:Float = (w - btnW) / 2;
-        var btnY:Float = baseY + 140;
-        g.color = Color.fromFloats(0.2, 0.5, 0.2, 1.0);
-        g.fillRect(btnX, btnY, btnW, btnH);
-        g.color = Color.fromFloats(0.3, 0.7, 0.3, 1.0);
-        g.drawRect(btnX, btnY, btnW, btnH, 2.0);
-        g.color = Color.White;
-        g.fontSize = 16;
-        var startText:String = "Start Now";
-        var startW:Float = font.width(16, startText);
-        g.drawString(startText, (w - startW) / 2, btnY + 10);
-
-        // Cancel button
-        var cancelY:Float = btnY + 55;
-        g.color = Color.fromFloats(0.5, 0.5, 0.5, 0.5);
-        var cancelText:String = "Cancel";
-        var cancelW:Float = font.width(14, cancelText);
-        g.fontSize = 14;
-        g.drawString(cancelText, (w - cancelW) / 2, cancelY);
     }
 
     function renderTextField(g:kha.graphics2.Graphics, x:Float, y:Float, w:Float, h:Float, text:String, active:Bool) {
