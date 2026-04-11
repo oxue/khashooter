@@ -14,6 +14,8 @@ cat > build/html5/index.html << 'EOF'
     <script>
         var c=document.getElementById('khanvas');c.focus();
         c.addEventListener('contextmenu',function(e){e.preventDefault();return false});
+        // Expose game globals for Playwright testing
+        window.__kha = { app: function() { return refraction_core_Application; } };
     </script>
 </body>
 </html>

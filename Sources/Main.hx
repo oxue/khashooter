@@ -53,7 +53,21 @@ class Main {
                         Application.getScreenZoom()
                     );
                     ResourceFormat.init();
-                    Application.setState(new MenuState());
+                    // Expose game state for Playwright testing
+                    #if js
+                    untyped js.Browser.window.__gameApp = Application;
+                    #end
+                    // ?autostart=true bypasses menu for testing
+                    var autostart:Bool = false;
+                    #if js
+                    var search:String = untyped js.Browser.window.location.search;
+                    if (search != null && search.indexOf("autostart=true") >= 0) autostart = true;
+                    #end
+                    if (autostart) {
+                        Application.setState(new GameState());
+                    } else {
+                        Application.setState(new MenuState());
+                    }
                 });
             }
         );
