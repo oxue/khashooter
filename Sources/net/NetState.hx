@@ -118,9 +118,17 @@ class NetState {
         var posYVal:Dynamic = Reflect.field(vars, posYKey);
         var rotVal:Dynamic = Reflect.field(vars, rotKey);
 
-        if (posXVal != null) rp.posX.applyRemote(posXVal[0], posXVal[1]);
-        if (posYVal != null) rp.posY.applyRemote(posYVal[0], posYVal[1]);
+        if (posXVal != null) {
+            rp.posX.applyRemote(posXVal[0], posXVal[1]);
+        }
+        if (posYVal != null) {
+            rp.posY.applyRemote(posYVal[0], posYVal[1]);
+        }
         if (rotVal != null) rp.rotation.applyRemote(rotVal[0], rotVal[1]);
+
+        if (posXVal != null || posYVal != null) {
+            log("RECV_POS", 'from=$fromId x=${rp.posX.value} y=${rp.posY.value}');
+        }
 
         var animKey = '${fromId}|anim';
         var weapKey = '${fromId}|weapon';

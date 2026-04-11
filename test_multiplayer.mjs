@@ -90,11 +90,9 @@ try {
   await pageA.keyboard.up('d');
   await new Promise(r => setTimeout(r, 1000));
 
-  // Check server relayed updates (Tab B should have received state messages)
-  // The NET:STATE logs would be in the Haxe game's console output
-  // Since we don't log every state receive (too noisy), we check if there were no errors
-  results.noErrorsDuringMovement = allErrors.tabA.length === 0 && allErrors.tabB.length === 0;
-  console.log(`Test 2 - No errors during movement: ${results.noErrorsDuringMovement ? 'PASS' : 'FAIL'}`);
+  // Test 2: Tab B received position updates from Tab A's movement
+  results.positionSync = allLogs.tabB.some(l => l.includes('[NET:RECV_POS]'));
+  console.log(`Test 2 - Position sync (B sees A move): ${results.positionSync ? 'PASS' : 'FAIL'}`);
 
   // Test 3: No page errors at all
   results.noPageErrors = allErrors.tabA.length === 0 && allErrors.tabB.length === 0;
