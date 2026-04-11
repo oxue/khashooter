@@ -148,6 +148,7 @@ class GameState extends refraction.core.State {
             var killerName:String = "Player " + Std.string(killer);
             var victimName:String = "Player " + Std.string(killed);
             gameContext.killFeed.addKill(killerName, victimName);
+            gameContext.scoreboard.addKill(killer, killed);
 
             if (killed == gameContext.netState.localId) {
                 // Local player was killed - show gib splash at player position
@@ -271,6 +272,9 @@ class GameState extends refraction.core.State {
             if (KeyCode.P == code) {
                 mapEditor.toggle();
                 gameContext.debugMenu.off();
+            }
+            if (KeyCode.Tab == code) {
+                gameContext.scoreboard.toggleVisible();
             }
         });
     }
@@ -728,6 +732,8 @@ class GameState extends refraction.core.State {
         gameContext.tooltipSystem.draw(f.g2);
         gameContext.killFeed.render(f.g2, f.width);
         renderConnectionStatus(f, gc);
+        var localId:Int = (gc.netState != null && gc.netState.isConnected()) ? gc.netState.localId : 0;
+        gc.scoreboard.render(f.g2, localId, gc.netState != null ? gc.netState.remotePlayers : null);
         f.g2.end();
     }
 

@@ -111,6 +111,9 @@ class GameContext {
     // Kill feed
     public var killFeed:KillFeed;
 
+    // Scoreboard
+    public var scoreboard:Scoreboard;
+
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
         values = new Values(config);
@@ -158,6 +161,7 @@ class GameContext {
         dialogueManager = new DialogueManager("../../Assets/dialogue");
         debugMenu = new DebugMenu();
         killFeed = new KillFeed();
+        scoreboard = new Scoreboard();
         reloadGraphics = false;
         // initConsole();
     }
