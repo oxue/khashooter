@@ -384,6 +384,16 @@ class GameState extends refraction.core.State {
                     remotePos.y = rp.posY.lerpValue;
                     remotePos.rotationDegrees = rp.rotation.lerpValue;
                 }
+                // Sync animation: detect movement from interpolation delta and set anim directly
+                var isMoving = Math.abs(rp.posX.value - rp.posX.lerpValue) > 0.5 || Math.abs(rp.posY.value - rp.posY.lerpValue) > 0.5;
+                var animCmp:AnimatedRenderCmp = entity.getComponent(AnimatedRenderCmp);
+                if (animCmp != null) {
+                    var targetAnim = isMoving ? "running" : "idle";
+                    if (animCmp.curAnimation != targetAnim) {
+                        animCmp.curAnimation = targetAnim;
+                        animCmp.frame = 0;
+                    }
+                }
             }
         }
 
