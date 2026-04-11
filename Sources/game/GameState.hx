@@ -166,12 +166,11 @@ class GameState extends refraction.core.State {
         };
 
         gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
-            // NetDamageable handles local/remote spawn via net:spawn message.
-            // Here we only handle the case where a remote player entity doesn't exist yet.
+            // Re-create remote player entity if it was killed (entity.remove marks components)
             if (id != gameContext.netState.localId) {
-                if (!gameContext.remotePlayers.exists(id)) {
-                    spawnRemotePlayer(id, x, y);
-                }
+                // Always re-create remote players on spawn — they were removed on kill
+                gameContext.remotePlayers.remove(id);
+                spawnRemotePlayer(id, x, y);
             }
         };
 
