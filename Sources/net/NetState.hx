@@ -31,6 +31,7 @@ class NetState {
     public var onNpcState:Map<String, NpcState> -> Void;
     public var onHostChange:Int -> Void;
     public var onChat:Int -> String -> String -> Void;
+    public var onReady:Int -> Void;
 
     var sendTimer:Int;
     var npcSendTimer:Int;
@@ -67,6 +68,7 @@ class NetState {
     function onConnected(id:Int) {
         localId = id;
         log("STATE", 'connected as player $id host=$hostId');
+        if (onReady != null) onReady(id);
     }
 
     function onDisconnected() {

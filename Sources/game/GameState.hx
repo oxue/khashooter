@@ -2,12 +2,10 @@ package game;
 
 import net.NetManager;
 import net.NetState;
-import net.NetState.RemotePlayerState;
 import net.NetDamageable;
 import net.NetIdentity;
 import net.NetTransformReceiver;
 import refraction.display.AnimatedRenderCmp;
-import rendering.TextureAtlas;
 import zui.Zui;
 import haxe.Timer;
 import refraction.tilemap.Tile;
@@ -153,64 +151,20 @@ class GameState extends refraction.core.State {
             removeRemotePlayer(id);
         };
 
-        gameContext.netState.onHit = function(target:Int, source:Int, damage:Float, health:Float) {
-            if (target == gameContext.netState.localId) {
-                // Local player got hit
-                var healthCmp = gameContext.playerEntity.getComponent(components.Health);
-                if (healthCmp != null) {
-                    healthCmp.value = Std.int(health);
-                }
-            }
-        };
-
         gameContext.netState.onKill = function(killed:Int, killer:Int) {
-            // Add kill feed message
+            // Scoreboard and kill feed (game-wide UI, not entity-specific)
             var killerName:String = "Player " + Std.string(killer);
             var victimName:String = "Player " + Std.string(killed);
             gameContext.killFeed.addKill(killerName, victimName);
             gameContext.scoreboard.addKill(killer, killed);
-
-            if (killed == gameContext.netState.localId) {
-                // Local player was killed - show gib splash at player position
-                if (gameContext.playerEntity == null) return;
-                var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
-                if (pos == null) return;
-                entFactory.createGibSplash(12, pos);
-            } else {
-                // Remote player was killed - show gib splash and hide entity
-                var remoteEntity:Entity = gameContext.remotePlayers.get(killed);
-                if (remoteEntity != null) {
-                    var remotePos:PositionCmp = remoteEntity.getComponent(PositionCmp);
-                    entFactory.createGibSplash(12, remotePos);
-                    remoteEntity.remove();
-                    gameContext.remotePlayers.remove(killed);
-                }
-            }
         };
 
         gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
-            if (id == gameContext.netState.localId) {
-                // Respawn local player at server-assigned position with full health
-                if (gameContext.playerEntity == null) return;
-                var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
-                if (pos == null) return;
-                pos.x = x;
-                pos.y = y;
-                var healthCmp = gameContext.playerEntity.getComponent(components.Health);
-                if (healthCmp != null) {
-                    healthCmp.value = healthCmp.maxValue;
-                }
-            } else {
-                // Remote player respawned - re-create their entity
+            // NetDamageable handles local/remote spawn via net:spawn message.
+            // Here we only handle the case where a remote player entity doesn't exist yet.
+            if (id != gameContext.netState.localId) {
                 if (!gameContext.remotePlayers.exists(id)) {
                     spawnRemotePlayer(id, x, y);
-                } else {
-                    var remoteEntity:Entity = gameContext.remotePlayers.get(id);
-                    if (remoteEntity != null) {
-                        var remotePos:PositionCmp = remoteEntity.getComponent(PositionCmp);
-                        remotePos.x = x;
-                        remotePos.y = y;
-                    }
                 }
             }
         };
@@ -219,8 +173,15 @@ class GameState extends refraction.core.State {
             gameContext.chatSystem.addMessage(name, text);
         };
 
-        // Add NetShootSender to local player entity
-        gameContext.netSys.procure(gameContext.playerEntity, net.NetShootSender);
+        gameContext.netState.onReady = function(id:Int) {
+            // Add net components to local player once we know our localId
+            if (gameContext.playerEntity != null) {
+                gameContext.playerEntity.addComponent(new NetIdentity("player_" + id, id, true));
+                gameContext.netSys.procure(gameContext.playerEntity, net.NetTransformSender);
+                gameContext.netSys.procure(gameContext.playerEntity, NetDamageable);
+                gameContext.netSys.procure(gameContext.playerEntity, net.NetShootSender);
+            }
+        };
 
         // Connect to server - get URL from query param or default to localhost
         var serverUrl:String = "ws://localhost:3000";
@@ -408,13 +369,7 @@ class GameState extends refraction.core.State {
         var netState = gameContext.netState;
         if (netState == null || !netState.isConnected()) return;
 
-        // Write local player state to SyncVars
-        if (gameContext.playerEntity == null) return;
-        var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
-        if (pos == null) return;
-        netState.localPosX.set(pos.x);
-        netState.localPosY.set(pos.y);
-        netState.localRotation.set(pos.rotationDegrees);
+        // Position sending is handled by NetTransformSender component
 
         // Update net state (sends updates, interpolates remote players)
         netState.update(1.0 / 60.0);
