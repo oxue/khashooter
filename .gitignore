@@ -1,4 +1,7 @@
 .DS_Store
 /build
 /korefile.js
+node_modules/
 server/node_modules/
+package-lock.json
+package.json

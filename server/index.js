@@ -3,13 +3,24 @@ import http from 'http';
 
 const PORT = process.env.PORT || 3000;
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 const server = http.createServer((req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, CORS_HEADERS);
+    res.end();
+    return;
+  }
   if (req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
     res.end(JSON.stringify({ status: 'ok', players: Object.keys(players).length, host: hostId }));
     return;
   }
-  res.writeHead(404);
+  res.writeHead(404, CORS_HEADERS);
   res.end();
 });
 
@@ -168,21 +179,40 @@ wss.on('connection', (ws) => {
 
         log('SHOOT', `Client ${clientId}`, { weapon: msg.weapon });
 
-        // Server-side hit detection against other players
-        const HIT_RADIUS = 25;
+        // Server-side hit detection using ray-cast
+        // Weapon-specific parameters
+        const weapon = msg.weapon || 'machine_gun';
+        const isFlamethrower = weapon === 'flamethrower';
+        const HIT_RADIUS = isFlamethrower ? 30 : 15;
+        const MAX_RANGE = isFlamethrower ? 100 : 300;
+
+        // Ray direction unit vector from angle in degrees
+        const dirRad = (msg.dir * Math.PI) / 180;
+        const rayDx = Math.cos(dirRad);
+        const rayDy = Math.sin(dirRad);
+
         for (const [id, target] of Object.entries(players)) {
           const targetId = parseInt(id);
           if (targetId === clientId) continue;
 
-          const dx = target.x - msg.x;
-          const dy = target.y - msg.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          // Vector from shooter to target
+          const toTargetX = target.x - msg.x;
+          const toTargetY = target.y - msg.y;
 
-          if (dist < HIT_RADIUS) {
+          // Project target position onto the ray to get distance along it
+          const alongRay = toTargetX * rayDx + toTargetY * rayDy;
+
+          // Target must be in front of shooter and within range
+          if (alongRay < 0 || alongRay > MAX_RANGE) continue;
+
+          // Perpendicular distance from the ray line
+          const perpDist = Math.abs(toTargetX * rayDy - toTargetY * rayDx);
+
+          if (perpDist < HIT_RADIUS) {
             const damage = msg.damage || 10;
             target.health -= damage;
 
-            log('HIT', `${clientId} -> ${targetId}`, { damage, health: target.health });
+            log('HIT', `${clientId} -> ${targetId}`, { damage, health: target.health, perpDist: perpDist.toFixed(1), alongRay: alongRay.toFixed(1) });
 
             sendTo(targetId, { type: 'hit', target: targetId, source: clientId, damage, health: target.health });
             sendTo(clientId, { type: 'hit_confirm', target: targetId, damage });
@@ -213,7 +243,7 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     log('DISCONNECT', `Client ${clientId} disconnected`);
     delete players[clientId];
-    broadcast(-1, { type: 'player_left', id: clientId });
+    broadcastAll({ type: 'player_left', id: clientId });
 
     // Re-elect host if the host disconnected
     if (clientId === hostId) {
