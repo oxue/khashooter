@@ -197,24 +197,14 @@ class GameState extends refraction.core.State {
     }
 
     function spawnRemotePlayer(id:Int, x:Float, y:Float) {
-        // Use autoBuild to get a fully set up Player entity
-        var e:Entity = entFactory.autoBuild("Player");
+        // Build from RemotePlayer template — no input/physics, just render + net
+        var e:Entity = entFactory.autoBuild("RemotePlayer");
         var pos:PositionCmp = e.getComponent(PositionCmp);
-        pos.setPosition(x, y);
+        if (pos != null) pos.setPosition(x, y);
 
-        // Disable input controls so this entity doesn't respond to local keyboard
-        var keyCtrl = e.getComponent(refraction.control.KeyControl);
-        if (keyCtrl != null) keyCtrl.remove = true;
-        var rotCtrl = e.getComponent(refraction.control.RotationControl);
-        if (rotCtrl != null) rotCtrl.remove = true;
-        // Disable tile collision for remote players (server handles their position)
-        var tileColl = e.getComponent(refraction.tilemap.TileCollisionCmp);
-        if (tileColl != null) tileColl.remove = true;
-
-        // Add networking components for remote player
+        // Add networking components
         e.addComponent(new NetIdentity("player_" + id, id, false));
         var receiver:NetTransformReceiver = gameContext.netSys.procure(e, NetTransformReceiver);
-        // Initialize receiver SyncVars with spawn position
         receiver.posX.applyRemote(x, 0);
         receiver.posY.applyRemote(y, 0);
         gameContext.netSys.procure(e, NetDamageable);

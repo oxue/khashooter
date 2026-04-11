@@ -1,0 +1,36 @@
+---
+entity_name: RemotePlayer
+components:
+- type: Position
+- type: Dimensions
+  args:
+    w: 20
+    h: 20
+- type: SurfaceSet
+  resource: shiro
+- type: AnimatedRender
+  name:
+  args:
+    animations:
+    - name: idle
+      frames:
+      - 0
+    - name: running
+      frames: [0, 1, 0, 2]
+    - name: idle with weapon
+      frames: [3]
+    - name: running with weapon
+      frames: [3, 4, 3, 5]
+    initialAnimation: idle
+    surface:
+    frameTime: 8
+- type: HitCircle
+  args:
+    tag: player
+    radius: 10
+- type: Beacon
+  args:
+    tag: remote_player
+- type: Health
+  args:
+    maxValue: 100
