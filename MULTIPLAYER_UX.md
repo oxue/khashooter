@@ -190,6 +190,25 @@ Start with Option A since it matches the "two guys in different tabs" use case a
 - "Connection failed" — WebRTC/network issue
 - "Host disconnected" — room closed
 
+## Development Workflow
+
+**Game client (Haxe):** Iterate locally only. Build with `./build.sh`, serve with `python3 -m http.server 8081 --directory build/html5`. Do NOT deploy to Vercel website until a milestone is reached and manually tested.
+
+**Signaling API (Vercel routes):** Deploy only the API routes to Vercel when they change. The game on localhost can call the production Vercel API for signaling since it's just REST endpoints.
+
+**Testing order:**
+1. Build + test locally with Playwright (`node test_suite.mjs --filter=...`)
+2. Manual test in two browser tabs on localhost
+3. Only deploy to website when a full flow works end-to-end
+
+**What gets deployed where:**
+| Component | Where | When |
+|-----------|-------|------|
+| Game client (kha.js) | localhost during dev, Vercel website at milestones | After manual testing |
+| Room API routes | Vercel (dev-website) | When API changes |
+| WebRTC signaling | In-browser (no server) | N/A |
+| WebSocket server | localhost only (for local testing fallback) | Never in prod if using WebRTC |
+
 ## Player Name Flow
 
 - Stored in localStorage so you don't re-enter each time
