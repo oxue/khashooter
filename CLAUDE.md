@@ -85,17 +85,45 @@ After every `node Kha/make html5`, the generated `build/html5/index.html` resets
 - **Send rate**: 20Hz (every 3 frames at 60fps) for player state, 10Hz for NPCs
 - **Hit detection**: Server-side ray-cast along shoot direction
 
+### NetBehaviour Component System (Sources/net/)
+
+Networking is component-based. See NET_ARCHITECTURE.md for the full design.
+
+| Component | Purpose | On |
+|-----------|---------|-----|
+| `NetIdentity` | netId/ownerId/isLocal, registers with NetManager | All networked entities |
+| `NetTransformSender` | Reads PositionCmp → writes to NetState SyncVars | Local player |
+| `NetTransformReceiver` | Receives net:pos → interpolates → writes PositionCmp | Remote players |
+| `NetDamageable` | Handles net:hit/kill/spawn → health, gib, respawn | All players |
+| `NetShootSender` | Observes weapon_fired → sends shoot event | Local player |
+| `NetShootReceiver` | Receives net:shoot → spawns projectiles | Remote players |
+
+**NetManager** singleton routes incoming messages to entities via `entity.notify("net:" + msgType, data)`.
+**NetSys** ticks all NetComponents each frame for interpolation.
+
+### Adding a New Synced Feature
+
+1. Create `Sources/net/NetMyFeatureSender.hx` extending `NetComponent`
+2. Create `Sources/net/NetMyFeatureReceiver.hx` extending `NetComponent`
+3. Register both in `ShooterComponentFactory.hx`
+4. Add sender to local player, receiver to remote players
+5. Route messages in `NetState.onServerMessage` via `NetManager.routeMessage`
+6. NetManager stays untouched — components subscribe via `entity.on("net:myevent", ...)`
+
 ## Testing
 
 ```bash
-# Single-player smoke test (no server needed)
-node test_game.mjs http://localhost:8081 10
+# Full test suite (13 scenarios, ~2 min)
+python3 -m http.server 8081 --directory build/html5 &
+node test_suite.mjs
 
-# Multiplayer 2-tab test (starts its own server on port 3000)
-node test_multiplayer.mjs
+# Single scenario (fast, ~5-8s)
+node test_suite.mjs --filter=SP01   # Single-player boot
+node test_suite.mjs --filter=MP03   # Position sync
+node test_suite.mjs --filter=DC01   # Disconnect handling
+
+# Test mode (?testmode=true) skips 9 sprite bakes for 33% faster loads
 ```
-
-Tests verify: connection, player discovery, position sync, shooting sync, no page errors.
 
 ## Adding a New Component
 
@@ -106,6 +134,12 @@ Tests verify: connection, player discovery, position sync, shooting sync, no pag
    ```
 3. Add to entity YAML: `- type: MyComponent`
 4. If it needs a system, create one extending `Sys<MyComponent>` and add to GameContext
+
+## Entity Templates
+
+- `Player.yaml` — local player (input controls, physics, weapons)
+- `RemotePlayer.yaml` — remote player (render + health only, no input/physics)
+- `Actor.yaml` — base template (position, dimensions, velocity, damping)
 
 ## Debug Controls
 
