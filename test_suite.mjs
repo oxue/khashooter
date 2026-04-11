@@ -7,7 +7,7 @@
  * Usage: node test_suite.mjs [--filter=pattern]
  */
 import { chromium } from 'playwright';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 
 const SERVER_PORT = 3000;
 const GAME_PORT = 8081;
@@ -30,7 +30,7 @@ const results = [];
 function startServer() {
   return new Promise((resolve) => {
     // Kill any existing server on the port
-    try { require('child_process').execSync(`lsof -ti:${SERVER_PORT} | xargs kill -9 2>/dev/null`); } catch {}
+    try { execSync(`lsof -ti:${SERVER_PORT} | xargs kill -9 2>/dev/null`); } catch {}
     serverProc = spawn('node', ['server/index.js'], {
       env: { ...process.env, PORT: String(SERVER_PORT) },
       stdio: ['ignore', 'pipe', 'pipe'],
