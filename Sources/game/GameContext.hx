@@ -31,6 +31,7 @@ import systems.InteractSys;
 import systems.ParticleSys;
 import net.NetManager;
 import net.NetState;
+import net.NetSys;
 import ui.HealthBar;
 import zui.Zui;
 
@@ -108,6 +109,7 @@ class GameContext {
     // Multiplayer
     public var netState:NetState;
     public var netManager:NetManager;
+    public var netSys:NetSys;
     public var remotePlayers:Map<Int, refraction.core.Entity>;
 
     // Kill feed
@@ -152,6 +154,8 @@ class GameContext {
 
         hitCheckSystem = new Sys<Component>();
         hitTestSystem = new HitTestSys();
+
+        netSys = new NetSys();
 
         debugDrawablesMisc = [];
 

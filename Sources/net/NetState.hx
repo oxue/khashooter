@@ -159,6 +159,11 @@ class NetState {
 
         if (posXVal != null || posYVal != null) {
             log("RECV_POS", 'from=$fromId x=${rp.posX.value} y=${rp.posY.value}');
+            // Route position to NetTransformReceiver via entity message system
+            var nm = NetManager.instance();
+            if (nm != null) {
+                nm.routeMessage("player_" + fromId, "pos", {x: rp.posX.value, y: rp.posY.value, rot: rp.rotation.value});
+            }
         }
     }
 

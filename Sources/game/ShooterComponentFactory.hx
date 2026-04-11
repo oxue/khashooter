@@ -23,6 +23,8 @@ import refraction.generic.VelocityCmp;
 import refraction.systems.SpacingSys.SpacingCmp;
 import refraction.tilemap.TileCollisionCmp;
 import net.NetIdentity;
+import net.NetTransformSender;
+import net.NetTransformReceiver;
 
 class ShooterComponentFactory extends ComponentFactory {
 
@@ -118,6 +120,14 @@ class ShooterComponentFactory extends ComponentFactory {
         typeToMethodMap.set(
             "NetIdentity",
             (e:Entity, name:String) -> e.addComponent(new NetIdentity("", -1, false))
+        );
+        typeToMethodMap.set(
+            "NetTransformSender",
+            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetTransformSender, name)
+        );
+        typeToMethodMap.set(
+            "NetTransformReceiver",
+            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetTransformReceiver, name)
         );
     }
 

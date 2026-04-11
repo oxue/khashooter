@@ -3,6 +3,8 @@ package game;
 import net.NetManager;
 import net.NetState;
 import net.NetState.RemotePlayerState;
+import net.NetIdentity;
+import net.NetTransformReceiver;
 import refraction.display.AnimatedRenderCmp;
 import rendering.TextureAtlas;
 import zui.Zui;
@@ -259,6 +261,13 @@ class GameState extends refraction.core.State {
         var tileColl = e.getComponent(refraction.tilemap.TileCollisionCmp);
         if (tileColl != null) tileColl.remove = true;
 
+        // Add networking components for remote player
+        e.addComponent(new NetIdentity("player_" + id, id, false));
+        var receiver:NetTransformReceiver = gameContext.netSys.procure(e, NetTransformReceiver);
+        // Initialize receiver SyncVars with spawn position
+        receiver.posX.applyRemote(x, 0);
+        receiver.posY.applyRemote(y, 0);
+
         gameContext.remotePlayers.set(id, e);
     }
 
@@ -388,6 +397,7 @@ class GameState extends refraction.core.State {
             }
 
             gameContext.beaconSystem.update();
+            gameContext.netSys.update();
 
             for (interval in intervals) {
                 if (isHost) interval.tick();
@@ -418,30 +428,11 @@ class GameState extends refraction.core.State {
         // Update net state (sends updates, interpolates remote players)
         netState.update(1.0 / 60.0);
 
-        // Apply remote player positions from interpolated SyncVars
+        // Ensure remote player entities exist for all known remote players
         for (id => rp in netState.remotePlayers) {
             var entity:Entity = gameContext.remotePlayers.get(id);
             if (entity == null) {
                 spawnRemotePlayer(id, rp.posX.value, rp.posY.value);
-                entity = gameContext.remotePlayers.get(id);
-            }
-            if (entity != null) {
-                var remotePos:PositionCmp = entity.getComponent(PositionCmp);
-                if (remotePos != null) {
-                    remotePos.x = rp.posX.lerpValue;
-                    remotePos.y = rp.posY.lerpValue;
-                    remotePos.rotationDegrees = rp.rotation.lerpValue;
-                }
-                // Sync animation: detect movement from interpolation delta and set anim directly
-                var isMoving = Math.abs(rp.posX.value - rp.posX.lerpValue) > 0.5 || Math.abs(rp.posY.value - rp.posY.lerpValue) > 0.5;
-                var animCmp:AnimatedRenderCmp = entity.getComponent(AnimatedRenderCmp);
-                if (animCmp != null) {
-                    var targetAnim = isMoving ? "running" : "idle";
-                    if (animCmp.curAnimation != targetAnim) {
-                        animCmp.curAnimation = targetAnim;
-                        animCmp.frame = 0;
-                    }
-                }
             }
         }
 
