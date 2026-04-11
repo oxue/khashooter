@@ -108,6 +108,9 @@ class GameContext {
     public var netState:NetState;
     public var remotePlayers:Map<Int, refraction.core.Entity>;
 
+    // Kill feed
+    public var killFeed:KillFeed;
+
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
         values = new Values(config);
@@ -154,6 +157,7 @@ class GameContext {
 
         dialogueManager = new DialogueManager("../../Assets/dialogue");
         debugMenu = new DebugMenu();
+        killFeed = new KillFeed();
         reloadGraphics = false;
         // initConsole();
     }

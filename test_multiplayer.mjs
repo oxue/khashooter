@@ -94,19 +94,23 @@ try {
   results.positionSync = allLogs.tabB.some(l => l.includes('[NET:RECV_POS]'));
   console.log(`Test 2 - Position sync (B sees A move): ${results.positionSync ? 'PASS' : 'FAIL'}`);
 
-  // Test 3: Verify shooting infrastructure is wired (no errors during interaction)
-  // Note: automated shooting requires weapon pickup which needs player movement to item
-  // This test verifies the networking layer handles interaction without crashing
-  console.log('\nSimulating interaction in Tab A...');
+  // Test 3: Shooting sync - players now spawn with crossbow, so clicks should fire
+  console.log('\nShooting in Tab A (dispatching mousedown)...');
   await pageA.evaluate(() => {
     const canvas = document.getElementById('khanvas');
-    canvas.dispatchEvent(new MouseEvent('mousedown', { button: 0, which: 1, clientX: 650, clientY: 400 }));
-    setTimeout(() => canvas.dispatchEvent(new MouseEvent('mouseup', { button: 0, which: 1 })), 100);
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        canvas.dispatchEvent(new MouseEvent('mousedown', { button: 0, which: 1, clientX: 650, clientY: 400, bubbles: true }));
+        setTimeout(() => canvas.dispatchEvent(new MouseEvent('mouseup', { button: 0, which: 1, bubbles: true })), 50);
+      }, i * 500);
+    }
   });
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 2500));
 
-  results.noInteractionErrors = allErrors.tabA.length === 0 && allErrors.tabB.length === 0;
-  console.log(`Test 3 - No errors during interaction: ${results.noInteractionErrors ? 'PASS' : 'FAIL'}`);
+  const aSentShoot = allLogs.tabA.some(l => l.includes('[NET:SHOOT]'));
+  const bReceivedShoot = allLogs.tabB.some(l => l.includes('[NET:REMOTE_SHOOT]'));
+  results.shootSync = aSentShoot || bReceivedShoot;
+  console.log(`Test 3 - Shooting sync (A sent: ${aSentShoot}, B received: ${bReceivedShoot}): ${results.shootSync ? 'PASS' : 'FAIL'}`);
 
   // Test 4: No page errors at all
   results.noPageErrors = allErrors.tabA.length === 0 && allErrors.tabB.length === 0;

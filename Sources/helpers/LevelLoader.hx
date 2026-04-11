@@ -4,6 +4,7 @@ import components.Health;
 import entbuilders.ItemBuilder.Items;
 import game.EntFactory;
 import game.GameContext;
+import game.InventoryCmp;
 import haxe.Json;
 import haxe.io.Mime;
 
@@ -116,6 +117,13 @@ class LevelLoader {
         gameContext.healthBar = new HealthBar(
             gameContext.playerEntity.getComponent(Health)
         );
+
+        // Spawn with crossbow equipped (CS2D style)
+        var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
+        if (inventory != null) {
+            inventory.pickup(Items.HuntersCrossbow);
+        }
+
         definePlayerBehaviours(levelData);
     }
 

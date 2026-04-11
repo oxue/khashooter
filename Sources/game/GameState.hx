@@ -144,6 +144,11 @@ class GameState extends refraction.core.State {
         };
 
         gameContext.netState.onKill = function(killed:Int, killer:Int) {
+            // Add kill feed message
+            var killerName:String = "Player " + Std.string(killer);
+            var victimName:String = "Player " + Std.string(killed);
+            gameContext.killFeed.addKill(killerName, victimName);
+
             if (killed == gameContext.netState.localId) {
                 // Local player was killed - show gib splash at player position
                 var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
@@ -622,6 +627,7 @@ class GameState extends refraction.core.State {
         gameContext.dialogueManager.render(f);
         gameContext.statusText.render(f.g2);
         gameContext.tooltipSystem.draw(f.g2);
+        gameContext.killFeed.render(f.g2, f.width);
         f.g2.end();
     }
 
