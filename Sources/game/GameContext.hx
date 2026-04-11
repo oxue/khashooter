@@ -29,6 +29,7 @@ import systems.BeaconSys;
 import systems.HitTestSys;
 import systems.InteractSys;
 import systems.ParticleSys;
+import net.NetManager;
 import net.NetState;
 import ui.HealthBar;
 import zui.Zui;
@@ -106,6 +107,7 @@ class GameContext {
 
     // Multiplayer
     public var netState:NetState;
+    public var netManager:NetManager;
     public var remotePlayers:Map<Int, refraction.core.Entity>;
 
     // Kill feed

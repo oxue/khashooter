@@ -22,6 +22,7 @@ import refraction.generic.PositionCmp;
 import refraction.generic.VelocityCmp;
 import refraction.systems.SpacingSys.SpacingCmp;
 import refraction.tilemap.TileCollisionCmp;
+import net.NetIdentity;
 
 class ShooterComponentFactory extends ComponentFactory {
 
@@ -113,6 +114,10 @@ class ShooterComponentFactory extends ComponentFactory {
         typeToMethodMap.set(
             "LightSource",
             (e:Entity, name:String) -> gameContext.lightSourceSystem.procure(e, LightSourceCmp, name)
+        );
+        typeToMethodMap.set(
+            "NetIdentity",
+            (e:Entity, name:String) -> e.addComponent(new NetIdentity("", -1, false))
         );
     }
 

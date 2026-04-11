@@ -1,5 +1,6 @@
 package game;
 
+import net.NetManager;
 import net.NetState;
 import net.NetState.RemotePlayerState;
 import refraction.display.AnimatedRenderCmp;
@@ -138,6 +139,7 @@ class GameState extends refraction.core.State {
 
     function initMultiplayer() {
         gameContext.netState = new NetState();
+        gameContext.netManager = NetManager.instance();
         gameContext.remotePlayers = new Map<Int, Entity>();
 
         gameContext.netState.onPlayerJoined = function(id:Int, x:Float, y:Float) {
@@ -331,6 +333,7 @@ class GameState extends refraction.core.State {
     public static function loadLevel(map:String) {
         EntFactory.destroyInstance();
         GameContext.destroyInstance();
+        NetManager.destroy();
         Application.resetKeyListeners();
         Application.setState(new GameState(map));
     }
