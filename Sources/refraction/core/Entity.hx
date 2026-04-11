@@ -54,9 +54,10 @@ class Entity {
     }
 
     public inline function removeComponent(_name:String) {
-        components
-            .get(_name)
-            .remove = true;
+        var comp = components.get(_name);
+        if (comp != null) {
+            comp.remove = true;
+        }
         components.remove(_name);
     }
 

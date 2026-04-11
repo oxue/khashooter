@@ -152,7 +152,9 @@ class GameState extends refraction.core.State {
 
             if (killed == gameContext.netState.localId) {
                 // Local player was killed - show gib splash at player position
+                if (gameContext.playerEntity == null) return;
                 var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+                if (pos == null) return;
                 entFactory.createGibSplash(12, pos);
             } else {
                 // Remote player was killed - show gib splash and hide entity
@@ -169,7 +171,9 @@ class GameState extends refraction.core.State {
         gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
             if (id == gameContext.netState.localId) {
                 // Respawn local player at server-assigned position with full health
+                if (gameContext.playerEntity == null) return;
                 var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+                if (pos == null) return;
                 pos.x = x;
                 pos.y = y;
                 var healthCmp = gameContext.playerEntity.getComponent(components.Health);
@@ -250,7 +254,9 @@ class GameState extends refraction.core.State {
 
         ret.push(new Interval(() -> {
             var e:Entity = gameContext.beaconSystem.getOne("player");
+            if (e == null) return;
             var p:PositionCmp = e.getComponent(PositionCmp);
+            if (p == null) return;
             var t:Vector2i = gameContext.dijkstraMap.getTileIndexesContaining(p.x, p.y);
             gameContext.dijkstraMap.setTarget(t.y, t.x);
             gameContext.dijkstraMap.smoothen(1);
@@ -302,8 +308,9 @@ class GameState extends refraction.core.State {
         if (!isRenderingReady) return;
         if (button == 0) {
             gameContext.interactSystem.update();
+            if (gameContext.playerEntity == null) return;
             var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
-            inventory.primaryAction();
+            if (inventory != null) inventory.primaryAction();
         }
     }
 
@@ -350,10 +357,9 @@ class GameState extends refraction.core.State {
                 if (isHost) interval.tick();
             }
 
-            if (Application.mouseIsDown) {
-                gameContext.playerEntity
-                    .getComponent(InventoryCmp)
-                    .persistentAction();
+            if (Application.mouseIsDown && gameContext.playerEntity != null) {
+                var inv:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
+                if (inv != null) inv.persistentAction();
             }
 
             // Multiplayer sync
@@ -366,7 +372,9 @@ class GameState extends refraction.core.State {
         if (netState == null || !netState.isConnected()) return;
 
         // Write local player state to SyncVars
+        if (gameContext.playerEntity == null) return;
         var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+        if (pos == null) return;
         netState.localPosX.set(pos.x);
         netState.localPosY.set(pos.y);
         netState.localRotation.set(pos.rotationDegrees);
@@ -452,7 +460,9 @@ class GameState extends refraction.core.State {
 
     function updateCamera() {
         gameContext.camera.updateShake();
+        if (gameContext.playerEntity == null) return;
         var playerPos:PositionCmp = cast gameContext.playerEntity.getComponent(PositionCmp);
+        if (playerPos == null) return;
 
         gameContext.camera.follow(
             playerPos.x,
@@ -498,8 +508,10 @@ class GameState extends refraction.core.State {
         g4.end();
 
         frame.g2.begin(false);
-        var a:AnimatedRenderCmp = gameContext.playerEntity.getComponent(AnimatedRenderCmp);
-        a.draw(gameContext.camera, frame);
+        if (gameContext.playerEntity != null) {
+            var a:AnimatedRenderCmp = gameContext.playerEntity.getComponent(AnimatedRenderCmp);
+            if (a != null) a.draw(gameContext.camera, frame);
+        }
         frame.g2.end();
 
         gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
@@ -745,9 +757,10 @@ class GameState extends refraction.core.State {
             tc.drawHitbox(gc.camera, f.g2);
         }
         for (p in gc.hitCheckSystem.components) {
-            p.entity
-                .getComponent(PositionCmp)
-                .drawPoint(gc.camera, f.g2);
+            if (p.entity != null) {
+                var ppos:PositionCmp = p.entity.getComponent(PositionCmp);
+                if (ppos != null) ppos.drawPoint(gc.camera, f.g2);
+            }
         }
         gc.lightingSystem.debugDraw(gc.camera, f.g2, [gameContext.tilemapShadowPolys]);
     }

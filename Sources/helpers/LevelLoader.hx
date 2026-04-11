@@ -52,6 +52,7 @@ class LevelLoader {
 
     public function export() {
         var levelData:Dynamic = getLevelData(name);
+        if (levelData == null) return;
         levelData.data = gameContext.tilemap.getTileArray();
         var filename:String = '${name}.json';
         saveFile(
@@ -63,6 +64,10 @@ class LevelLoader {
 
     public function loadMap() {
         var levelData:Dynamic = getLevelData(name);
+        if (levelData == null) {
+            trace("LevelLoader: failed to load level data for: " + name);
+            return;
+        }
         spawnTilemap(entityFactory, levelData);
         spawnPlayer(levelData);
         gameContext.tilemapShadowPolys = TilemapUtils.computeGeometry(gameContext.tilemap);
@@ -134,6 +139,10 @@ class LevelLoader {
     }
 
     function spawnTilemap(entFactory:EntFactory, levelData:Dynamic) {
+        if (levelData.data == null || levelData.data.length == 0) {
+            trace("LevelLoader: level data has no tile data");
+            return;
+        }
         var tilesetName:String = levelData.tileset_name;
         var colIndex:Null<Int> = levelData.col_index;
 
@@ -155,9 +164,12 @@ class LevelLoader {
     }
 
     function getLevelData(_name:String):Dynamic {
-        var levelPath:String = Reflect
-            .field(Assets.blobs, 'map_${_name}_json')
-            .toString();
+        var blob:Dynamic = Reflect.field(Assets.blobs, 'map_${_name}_json');
+        if (blob == null) {
+            trace("LevelLoader: map asset not found: " + _name);
+            return null;
+        }
+        var levelPath:String = blob.toString();
         var ret:Dynamic = Json.parse(levelPath);
         return ret;
     }

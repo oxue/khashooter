@@ -110,22 +110,21 @@ class EntFactory {
     }
 
     public function autoBuild(_entityName:String, ?_e:Entity):Entity {
-        if (entityTemplates
-            .get(_entityName)
-            .base_entity != null
-        ) {
-            _e = autoBuild(entityTemplates
-                .get(_entityName)
-                .base_entity
-            );
+        var template:Dynamic = entityTemplates.get(_entityName);
+        if (template == null) {
+            DebugLogger.info("ENT", "Entity template not found: " + _entityName);
+            return (_e != null) ? _e : new Entity();
+        }
+
+        if (template.base_entity != null) {
+            _e = autoBuild(template.base_entity);
         }
         if (_e == null) {
             _e = new Entity();
         }
 
-        var components:Array<Dynamic> = entityTemplates
-            .get(_entityName)
-            .components;
+        var components:Array<Dynamic> = template.components;
+        if (components == null) return _e;
 
         for (component in components) {
             autoComponent(component.type, component, _e);
@@ -231,27 +230,29 @@ class EntFactory {
 
     public function spawnProjectile(projectileName:String, _position:Vector2, direction:Vector2):Entity {
         var e:Entity = autoBuild(projectileName);
-        e
-            .getComponent(PositionCmp)
-            .setPosition(
+        var spPos:PositionCmp = e.getComponent(PositionCmp);
+        if (spPos != null) {
+            spPos.setPosition(
                 _position.x,
                 _position.y,
                 Utils.direction2Degrees(direction)
             );
+        }
 
         var projectileConfig:Dynamic = Reflect.field(
             gameContext.config.projectiles_info,
             projectileName
         );
 
-        // refactor this
-        direction = direction
-            .normalized()
-            .mult(projectileConfig.speed);
+        if (projectileConfig != null) {
+            // refactor this
+            direction = direction
+                .normalized()
+                .mult(projectileConfig.speed);
+        }
 
-        e
-            .getComponent(VelocityCmp)
-            .setBoth(direction.x, direction.y);
+        var spVel:VelocityCmp = e.getComponent(VelocityCmp);
+        if (spVel != null) spVel.setBoth(direction.x, direction.y);
 
         gameContext.hitCheckSystem
             .procure(e, Projectile)
@@ -262,13 +263,14 @@ class EntFactory {
 
     public function createBullet(_position:Vector2, direction:Vector2):Entity {
         var e:Entity = autoBuild("MGBullet");
-        e
-            .getComponent(PositionCmp)
-            .setPosition(
+        var bPos:PositionCmp = e.getComponent(PositionCmp);
+        if (bPos != null) {
+            bPos.setPosition(
                 _position.x,
                 _position.y,
                 Utils.direction2Degrees(direction)
             );
+        }
         var lightSource = new LightSourceCmp(
             gameContext.lightingSystem,
             0xFFFF00,
@@ -282,9 +284,8 @@ class EntFactory {
         direction = direction
             .normalized()
             .mult(gameContext.config.crossbow_projectile_speed);
-        e
-            .getComponent(VelocityCmp)
-            .setBoth(direction.x, direction.y);
+        var bVel:VelocityCmp = e.getComponent(VelocityCmp);
+        if (bVel != null) bVel.setBoth(direction.x, direction.y);
         gameContext.hitCheckSystem
             .procure(e, Projectile)
             .tilemapData = gameContext.tilemap;
@@ -365,17 +366,19 @@ class EntFactory {
     // Smaller Stuff
     public function createGibSplash(amount:Int, _p:PositionCmp, ?_directionBiasRad:Float,
             ?_directionStdRad:Float) {
+        if (_p == null) return;
         for (i in 0...amount) {
-            autoBuild("Blood")
-                .getComponent(PositionCmp)
-                .setFromPosition(_p)
-                .getEntity()
-                .getComponent(ParticleCmp)
-                .randomDirection(
-                    gameContext.values.getRandomGibSplashMaginutude(),
-                    _directionBiasRad,
-                    _directionStdRad
-                );
+            var e:Entity = autoBuild("Blood");
+            var pos:PositionCmp = e.getComponent(PositionCmp);
+            if (pos == null) continue;
+            pos.setFromPosition(_p);
+            var particle:ParticleCmp = e.getComponent(ParticleCmp);
+            if (particle == null) continue;
+            particle.randomDirection(
+                gameContext.values.getRandomGibSplashMaginutude(),
+                _directionBiasRad,
+                _directionStdRad
+            );
         }
     }
 }
