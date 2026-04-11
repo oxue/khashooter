@@ -140,6 +140,10 @@ class NetState {
                 log("CHAT", 'from=$fromId name=$name text=$text');
                 if (onChat != null) onChat(fromId, name, text);
 
+            case "name_change":
+                log("NAME_CHANGE", 'id=${msg.id} name=${msg.name}');
+                // Could update remote player labels, but for now just log
+
             case "npc_state":
                 applyNpcState(msg.npcs);
         }

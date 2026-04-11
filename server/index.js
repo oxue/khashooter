@@ -244,6 +244,17 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'set_name': {
+        const p = players[clientId];
+        if (p) {
+          p.name = msg.name || `Player${clientId}`;
+          log('NAME', `Client ${clientId} set name: ${p.name}`);
+          // Notify others of the name change
+          broadcast(clientId, { type: 'name_change', id: clientId, name: p.name });
+        }
+        break;
+      }
+
       case 'ping': {
         sendTo(clientId, { type: 'pong', time: msg.time, serverTime: Date.now() });
         break;

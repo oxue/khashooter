@@ -60,4 +60,6 @@ class Component {
 	public function unload() {}
 
 	public function update() {}
+
+	public function hostUpdate() {} // Override for host-only logic
 }

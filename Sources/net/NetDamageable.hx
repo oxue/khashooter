@@ -36,6 +36,10 @@ class NetDamageable extends NetComponent {
             var ef = EntFactory.instance();
             if (ef != null) ef.createGibSplash(5, position);
         }
+        // Only remove remote player entities — local player stays (respawn will reset them)
+        if (netIdentity != null && !netIdentity.isLocal) {
+            entity.remove();
+        }
         log("KILL_FEEDBACK", "death effect");
     }
 

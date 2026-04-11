@@ -187,6 +187,11 @@ class GameState extends refraction.core.State {
                 gameContext.netSys.procure(gameContext.playerEntity, NetDamageable);
                 gameContext.netSys.procure(gameContext.playerEntity, net.NetShootSender);
             }
+
+            // Send chosen name to server
+            if (multiplayerName != null && multiplayerName.length > 0) {
+                gameContext.netState.client.send({type: "set_name", name: multiplayerName});
+            }
         };
 
         // Connect to server - use passed URL, query param, or default to localhost
@@ -342,6 +347,7 @@ class GameState extends refraction.core.State {
 
             // Host-authoritative systems (only host runs AI, pathfinding, hit detection)
             if (isHost) {
+                gameContext.hitCheckSystem.hostUpdate(); // gameplay (damage) on host only
                 gameContext.breadCrumbsSystem.update();
                 gameContext.aiSystem.update();
                 gameContext.hitTestSystem.update();

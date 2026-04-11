@@ -85,4 +85,13 @@ class Sys<T:Component> {
             components.pop();
         }
     }
+
+    public function hostUpdate() {
+        var i = 0;
+        while (i < components.length) {
+            var comp = components[i];
+            if (!comp.remove) comp.hostUpdate();
+            i++;
+        }
+    }
 }
