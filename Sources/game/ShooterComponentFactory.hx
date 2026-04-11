@@ -26,6 +26,8 @@ import net.NetIdentity;
 import net.NetTransformSender;
 import net.NetTransformReceiver;
 import net.NetDamageable;
+import net.NetShootSender;
+import net.NetShootReceiver;
 
 class ShooterComponentFactory extends ComponentFactory {
 
@@ -133,6 +135,14 @@ class ShooterComponentFactory extends ComponentFactory {
         typeToMethodMap.set(
             "NetDamageable",
             (e:Entity, name:String) -> gameContext.netSys.procure(e, NetDamageable, name)
+        );
+        typeToMethodMap.set(
+            "NetShootSender",
+            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetShootSender, name)
+        );
+        typeToMethodMap.set(
+            "NetShootReceiver",
+            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetShootReceiver, name)
         );
     }
 

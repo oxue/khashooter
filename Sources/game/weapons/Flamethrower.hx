@@ -20,12 +20,12 @@ class Flamethrower extends Weapon {
 				muzzleDir
 			);
 
-		var netState = GameContext.instance().netState;
-		if (netState != null && netState.isConnected()) {
+		var gc = GameContext.instance();
+		if (gc.playerEntity != null) {
 			var dirDeg:Float = Math.atan2(muzzleDir.y, muzzleDir.x) * (180 / 3.1415926);
-			var dmgField:Dynamic = Reflect.field(GameContext.instance().config, "flamethrower_damage");
+			var dmgField:Dynamic = Reflect.field(gc.config, "flamethrower_damage");
 			var damage:Float = (dmgField != null) ? cast(dmgField, Float) : 3.0;
-			netState.sendShoot("flamethrower", muzzlePos.x, muzzlePos.y, dirDeg, damage);
+			gc.playerEntity.notify("weapon_fired", {weapon: "flamethrower", x: muzzlePos.x, y: muzzlePos.y, dir: dirDeg, damage: damage});
 		}
 	}
 }

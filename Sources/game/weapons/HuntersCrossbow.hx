@@ -19,10 +19,10 @@ class HuntersCrossbow extends Weapon {
 			.createProjectile(muzzlePos, muzzleDir);
 		Application.defaultCamera.shake(6, 4);
 
-		var netState = GameContext.instance().netState;
-		if (netState != null && netState.isConnected()) {
+		var gc = GameContext.instance();
+		if (gc.playerEntity != null) {
 			var dirDeg:Float = Math.atan2(muzzleDir.y, muzzleDir.x) * (180 / 3.1415926);
-			netState.sendShoot("crossbow", muzzlePos.x, muzzlePos.y, dirDeg, 10);
+			gc.playerEntity.notify("weapon_fired", {weapon: "crossbow", x: muzzlePos.x, y: muzzlePos.y, dir: dirDeg, damage: 10});
 		}
 	}
 }

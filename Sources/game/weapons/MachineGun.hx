@@ -35,10 +35,10 @@ class MachineGun extends Weapon {
             );
         Application.defaultCamera.shake(6, 4);
 
-        var netState = GameContext.instance().netState;
-        if (netState != null && netState.isConnected()) {
+        var gc = GameContext.instance();
+        if (gc.playerEntity != null) {
             var dirDeg:Float = Math.atan2(muzzleDir.y, muzzleDir.x) * (180 / 3.1415926);
-            netState.sendShoot("machinegun", muzzlePos.x, muzzlePos.y, dirDeg, 5);
+            gc.playerEntity.notify("weapon_fired", {weapon: "machinegun", x: muzzlePos.x, y: muzzlePos.y, dir: dirDeg, damage: 5});
         }
     }
 }

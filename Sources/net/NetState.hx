@@ -127,6 +127,8 @@ class NetState {
                 if (fromId != localId) {
                     log("REMOTE_SHOOT", 'from=$fromId weapon=${msg.weapon}');
                     if (onRemoteShoot != null) onRemoteShoot(fromId, msg.weapon, msg.x, msg.y, msg.dir, msg.damage);
+                    var nm = NetManager.instance();
+                    if (nm != null) nm.routeMessage("player_" + fromId, "shoot", {weapon: msg.weapon, x: msg.x, y: msg.y, dir: msg.dir, damage: msg.damage});
                 }
 
             case "chat":
