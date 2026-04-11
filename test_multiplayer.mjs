@@ -94,9 +94,20 @@ try {
   results.positionSync = allLogs.tabB.some(l => l.includes('[NET:RECV_POS]'));
   console.log(`Test 2 - Position sync (B sees A move): ${results.positionSync ? 'PASS' : 'FAIL'}`);
 
-  // Test 3: No page errors at all
+  // Test 3: Shooting sync - click in Tab A, check Tab B sees REMOTE_SHOOT
+  console.log('\nShooting in Tab A (clicking canvas)...');
+  await pageA.click('#khanvas');
+  await new Promise(r => setTimeout(r, 500));
+  // Click to shoot (left click fires weapon)
+  await pageA.mouse.click(650, 400);
+  await new Promise(r => setTimeout(r, 1000));
+
+  results.shootSync = allLogs.tabB.some(l => l.includes('[NET:REMOTE_SHOOT]'));
+  console.log(`Test 3 - Shooting sync (B sees A shoot): ${results.shootSync ? 'PASS' : 'FAIL'}`);
+
+  // Test 4: No page errors at all
   results.noPageErrors = allErrors.tabA.length === 0 && allErrors.tabB.length === 0;
-  console.log(`Test 3 - No page errors: ${results.noPageErrors ? 'PASS' : 'FAIL'}`);
+  console.log(`Test 4 - No page errors: ${results.noPageErrors ? 'PASS' : 'FAIL'}`);
 
   // Summary
   console.log('\n=== SUMMARY ===');

@@ -151,6 +151,21 @@ class GameState extends refraction.core.State {
             }
         };
 
+        gameContext.netState.onRemoteShoot = function(from:Int, weapon:String, x:Float, y:Float, dir:Float, damage:Float) {
+            // Convert degrees back to a direction vector
+            var rad:Float = dir * (3.1415926 / 180);
+            var dirVec:Vector2 = new Vector2(Math.cos(rad), Math.sin(rad));
+            var posVec:Vector2 = new Vector2(x, y);
+
+            if (weapon == "crossbow") {
+                entFactory.createProjectile(posVec, dirVec);
+            } else if (weapon == "machinegun") {
+                entFactory.createBullet(posVec, dirVec);
+            } else if (weapon == "flamethrower") {
+                entFactory.createFireball(posVec, dirVec);
+            }
+        };
+
         // Connect to server - get URL from query param or default to localhost
         var serverUrl:String = "ws://localhost:3000";
         #if js
