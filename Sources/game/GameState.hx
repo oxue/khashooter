@@ -143,11 +143,45 @@ class GameState extends refraction.core.State {
             }
         };
 
+        gameContext.netState.onKill = function(killed:Int, killer:Int) {
+            if (killed == gameContext.netState.localId) {
+                // Local player was killed - show gib splash at player position
+                var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
+                entFactory.createGibSplash(12, pos);
+            } else {
+                // Remote player was killed - show gib splash and hide entity
+                var remoteEntity:Entity = gameContext.remotePlayers.get(killed);
+                if (remoteEntity != null) {
+                    var remotePos:PositionCmp = remoteEntity.getComponent(PositionCmp);
+                    entFactory.createGibSplash(12, remotePos);
+                    remoteEntity.remove();
+                    gameContext.remotePlayers.remove(killed);
+                }
+            }
+        };
+
         gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
             if (id == gameContext.netState.localId) {
+                // Respawn local player at server-assigned position with full health
                 var pos:PositionCmp = gameContext.playerEntity.getComponent(PositionCmp);
                 pos.x = x;
                 pos.y = y;
+                var healthCmp = gameContext.playerEntity.getComponent(components.Health);
+                if (healthCmp != null) {
+                    healthCmp.value = healthCmp.maxValue;
+                }
+            } else {
+                // Remote player respawned - re-create their entity
+                if (!gameContext.remotePlayers.exists(id)) {
+                    spawnRemotePlayer(id, x, y);
+                } else {
+                    var remoteEntity:Entity = gameContext.remotePlayers.get(id);
+                    if (remoteEntity != null) {
+                        var remotePos:PositionCmp = remoteEntity.getComponent(PositionCmp);
+                        remotePos.x = x;
+                        remotePos.y = y;
+                    }
+                }
             }
         };
 
