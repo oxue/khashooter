@@ -103,6 +103,8 @@ class NetState {
             case "hit":
                 log("HIT", 'target=${msg.target} source=${msg.source} damage=${msg.damage} health=${msg.health}');
                 if (onHit != null) onHit(msg.target, msg.source, msg.damage, msg.health);
+                var nm = NetManager.instance();
+                if (nm != null) nm.routeMessage("player_" + msg.target, "hit", {damage: msg.damage, health: msg.health, source: msg.source});
 
             case "hit_confirm":
                 log("HIT_CONFIRM", 'target=${msg.target} damage=${msg.damage}');
@@ -110,10 +112,14 @@ class NetState {
             case "kill":
                 log("KILL", 'killed=${msg.killed} killer=${msg.killer}');
                 if (onKill != null) onKill(msg.killed, msg.killer);
+                var nm = NetManager.instance();
+                if (nm != null) nm.routeMessage("player_" + msg.killed, "kill", {killer: msg.killer});
 
             case "spawn":
                 log("SPAWN", 'id=${msg.id} x=${msg.x} y=${msg.y}');
                 if (onSpawn != null) onSpawn(msg.id, msg.x, msg.y);
+                var nm = NetManager.instance();
+                if (nm != null) nm.routeMessage("player_" + msg.id, "spawn", {x: msg.x, y: msg.y});
 
             case "shoot":
                 var fromId:Int = msg.from;

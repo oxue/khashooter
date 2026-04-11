@@ -25,6 +25,7 @@ import refraction.tilemap.TileCollisionCmp;
 import net.NetIdentity;
 import net.NetTransformSender;
 import net.NetTransformReceiver;
+import net.NetDamageable;
 
 class ShooterComponentFactory extends ComponentFactory {
 
@@ -128,6 +129,10 @@ class ShooterComponentFactory extends ComponentFactory {
         typeToMethodMap.set(
             "NetTransformReceiver",
             (e:Entity, name:String) -> gameContext.netSys.procure(e, NetTransformReceiver, name)
+        );
+        typeToMethodMap.set(
+            "NetDamageable",
+            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetDamageable, name)
         );
     }
 

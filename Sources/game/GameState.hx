@@ -3,6 +3,7 @@ package game;
 import net.NetManager;
 import net.NetState;
 import net.NetState.RemotePlayerState;
+import net.NetDamageable;
 import net.NetIdentity;
 import net.NetTransformReceiver;
 import refraction.display.AnimatedRenderCmp;
@@ -267,6 +268,7 @@ class GameState extends refraction.core.State {
         // Initialize receiver SyncVars with spawn position
         receiver.posX.applyRemote(x, 0);
         receiver.posY.applyRemote(y, 0);
+        gameContext.netSys.procure(e, NetDamageable);
 
         gameContext.remotePlayers.set(id, e);
     }
