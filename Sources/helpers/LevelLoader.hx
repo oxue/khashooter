@@ -73,24 +73,26 @@ class LevelLoader {
         gameContext.tilemapShadowPolys = TilemapUtils.computeGeometry(gameContext.tilemap);
         spawnLights(levelData);
 
-        // TODO: remove hardcode
-        entityFactory.createItem(
-            levelData.start.x,
-            levelData.start.y,
-            Items.HuntersCrossbow
-        );
+        // Spawn weapon items (skip in test mode — item sprites not baked)
+        if (!game.GameState.testMode) {
+            entityFactory.createItem(
+                levelData.start.x,
+                levelData.start.y,
+                Items.HuntersCrossbow
+            );
 
-        entityFactory.createItem(
-            levelData.start.x + 30,
-            levelData.start.y,
-            Items.Flamethrower
-        );
+            entityFactory.createItem(
+                levelData.start.x + 30,
+                levelData.start.y,
+                Items.Flamethrower
+            );
 
-        entityFactory.createItem(
-            levelData.start.x + 60,
-            levelData.start.y,
-            Items.MachineGun
-        );
+            entityFactory.createItem(
+                levelData.start.x + 60,
+                levelData.start.y,
+                Items.MachineGun
+            );
+        }
 
         if (!game.GameState.testMode) {
             entityFactory.createNPC(levelData.start.x, levelData.start.y, "mimi");
