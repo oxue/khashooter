@@ -93,8 +93,8 @@ Database (Supabase/Vercel KV):
 9. WebRTC data channel established → direct peer-to-peer
 10. No more server needed — all game data flows P2P
 
-**Pros:** No persistent server. Free. Uses existing infrastructure.
-**Cons:** Only supports 2 players per room (WebRTC mesh gets complex beyond 2). Polling-based signaling adds ~1-2s to connection time.
+**Pros:** No persistent server. Free. Uses existing infrastructure. Supports N players via star topology (host relays to all guests).
+**Cons:** Polling-based signaling adds ~1-2s to connection time. Host's browser does relay work (fine for <8 players with small JSON messages at 20Hz).
 
 ### Option B: Keep WebSocket Server (Deploy to Render/Railway)
 
@@ -108,10 +108,10 @@ Keep the existing `server/index.js` and deploy it:
 
 ### Recommendation
 
-**Option A** for 2-player (1v1 CS2D duels) — zero infrastructure cost, uses your existing Vercel.
-**Option B** for 2+ players — needs a deployed server but already built.
+**Option A** — zero infrastructure cost, supports N players via star topology (host relays), uses your existing Vercel stack.
+**Option B** — needs a deployed server but already built, slightly simpler networking code.
 
-Start with Option A since it matches the "two guys in different tabs" use case and uses your existing stack.
+Start with Option A. The host's browser acts as both game client and relay server — same role as the current Node.js server, just running in-browser. Each guest gets their own RTCPeerConnection to the host. Host broadcasts to all guests, same as server/index.js does today.
 
 ## Implementation Plan
 
