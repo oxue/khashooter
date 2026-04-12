@@ -121,6 +121,9 @@ class GameContext {
     // Chat
     public var chatSystem:ChatSystem;
 
+    // Player spawner
+    public var playerSpawner:PlayerSpawner;
+
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
         values = new Values(config);

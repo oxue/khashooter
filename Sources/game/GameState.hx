@@ -2,9 +2,6 @@ package game;
 
 import net.NetManager;
 import net.NetState;
-import net.NetDamageable;
-import net.NetIdentity;
-import net.NetTransformReceiver;
 import refraction.display.AnimatedRenderCmp;
 import zui.Zui;
 import haxe.Timer;
@@ -53,13 +50,20 @@ class GameState extends refraction.core.State {
     var roomCode:String;
     var intervals:Array<Interval>;
 
+    static var currentServerUrl:String;
+
     public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String) {
         this.defaultMap = map;
         this.serverUrl = serverUrl;
+        currentServerUrl = serverUrl;
         this.multiplayerName = playerName;
         this.roomCode = roomCode;
         this.showMenu = false;
         super();
+    }
+
+    public static function isMultiplayer():Bool {
+        return currentServerUrl != null;
     }
 
     function formatResources() {
@@ -102,6 +106,9 @@ class GameState extends refraction.core.State {
 
         // Init Ent Factory
         entFactory = EntFactory.instance(gameContext, new ShooterComponentFactory(gameContext));
+
+        // Init Player Spawner
+        gameContext.playerSpawner = new PlayerSpawner(gameContext, entFactory);
 
         // load map
         levelLoader = new LevelLoader(defaultMap, entFactory, gameContext);
@@ -150,11 +157,13 @@ class GameState extends refraction.core.State {
         gameContext.remotePlayers = new Map<Int, Entity>();
 
         gameContext.netState.onPlayerJoined = function(id:Int, x:Float, y:Float) {
-            spawnRemotePlayer(id, x, y);
+            gameContext.playerSpawner.spawnRemote(id, x, y);
         };
 
         gameContext.netState.onPlayerLeft = function(id:Int) {
-            removeRemotePlayer(id);
+            var e = gameContext.remotePlayers.get(id);
+            gameContext.playerSpawner.despawn(e);
+            gameContext.remotePlayers.remove(id);
         };
 
         gameContext.netState.onKill = function(killed:Int, killer:Int) {
@@ -166,11 +175,10 @@ class GameState extends refraction.core.State {
         };
 
         gameContext.netState.onSpawn = function(id:Int, x:Float, y:Float) {
-            // Re-create remote player entity if it was killed (entity.remove marks components)
-            if (id != gameContext.netState.localId) {
-                // Always re-create remote players on spawn — they were removed on kill
-                gameContext.remotePlayers.remove(id);
-                spawnRemotePlayer(id, x, y);
+            if (id == gameContext.netState.localId) {
+                gameContext.playerSpawner.respawnLocal(x, y);
+            } else {
+                gameContext.playerSpawner.respawnRemote(id, x, y);
             }
         };
 
@@ -179,13 +187,7 @@ class GameState extends refraction.core.State {
         };
 
         gameContext.netState.onReady = function(id:Int) {
-            // Add net components to local player once we know our localId
-            if (gameContext.playerEntity != null) {
-                gameContext.playerEntity.addComponent(new NetIdentity("player_" + id, id, true));
-                gameContext.netSys.procure(gameContext.playerEntity, net.NetTransformSender);
-                gameContext.netSys.procure(gameContext.playerEntity, NetDamageable);
-                gameContext.netSys.procure(gameContext.playerEntity, net.NetShootSender);
-            }
+            gameContext.playerSpawner.addNetComponentsToLocal(id);
 
             // Send chosen name to server
             if (multiplayerName != null && multiplayerName.length > 0) {
@@ -207,31 +209,6 @@ class GameState extends refraction.core.State {
             #end
         }
         gameContext.netState.connect(connectUrl);
-    }
-
-    function spawnRemotePlayer(id:Int, x:Float, y:Float) {
-        // Build from RemotePlayer template — no input/physics, just render + net
-        var e:Entity = entFactory.autoBuild("RemotePlayer");
-        var pos:PositionCmp = e.getComponent(PositionCmp);
-        if (pos != null) pos.setPosition(x, y);
-
-        // Add networking components
-        e.addComponent(new NetIdentity("player_" + id, id, false));
-        var receiver:NetTransformReceiver = gameContext.netSys.procure(e, NetTransformReceiver);
-        receiver.posX.applyRemote(x, 0);
-        receiver.posY.applyRemote(y, 0);
-        gameContext.netSys.procure(e, NetDamageable);
-        gameContext.netSys.procure(e, net.NetShootReceiver);
-
-        gameContext.remotePlayers.set(id, e);
-    }
-
-    function removeRemotePlayer(id:Int) {
-        var e:Entity = gameContext.remotePlayers.get(id);
-        if (e != null) {
-            e.remove();
-            gameContext.remotePlayers.remove(id);
-        }
     }
 
     function initIntervals():Array<Interval> {
@@ -382,7 +359,7 @@ class GameState extends refraction.core.State {
         for (id => rp in netState.remotePlayers) {
             var entity:Entity = gameContext.remotePlayers.get(id);
             if (entity == null) {
-                spawnRemotePlayer(id, rp.posX.value, rp.posY.value);
+                gameContext.playerSpawner.spawnRemote(id, rp.posX.value, rp.posY.value);
             }
         }
 

@@ -1,18 +1,14 @@
 package helpers;
 
-import components.Health;
 import entbuilders.ItemBuilder.Items;
 import game.EntFactory;
 import game.GameContext;
-import game.InventoryCmp;
 import haxe.Json;
 import haxe.io.Mime;
 
 import kha.Assets;
 import refraction.ds2d.LightSource;
-import refraction.generic.PositionCmp;
 import refraction.tilemap.TilemapUtils;
-import ui.HealthBar;
 
 #if kha_html5
 import js.Browser;
@@ -118,28 +114,14 @@ class LevelLoader {
     }
 
     public function spawnPlayer(levelData:Dynamic) {
-        gameContext.playerEntity = entityFactory
-            .autoBuild("Player")
-            .getComponent(PositionCmp)
-            .setPosition(levelData.start.x, levelData.start.y)
-            .getEntity();
-        gameContext.healthBar = new HealthBar(
-            gameContext.playerEntity.getComponent(Health)
-        );
+        gameContext.playerSpawner.spawnLocal(levelData.start.x, levelData.start.y);
 
-        // Spawn with crossbow equipped (CS2D style)
-        var inventory:InventoryCmp = gameContext.playerEntity.getComponent(InventoryCmp);
-        if (inventory != null) {
-            inventory.pickup(Items.HuntersCrossbow);
+        // In single player, respawn on death. In multiplayer, server handles respawn.
+        if (!game.GameState.isMultiplayer()) {
+            gameContext.playerEntity.on("death", function(data) {
+                spawnPlayer(levelData);
+            });
         }
-
-        definePlayerBehaviours(levelData);
-    }
-
-    function definePlayerBehaviours(levelData:Dynamic) {
-        gameContext.playerEntity.on("death", function(data) {
-            spawnPlayer(levelData);
-        });
     }
 
     function spawnTilemap(entFactory:EntFactory, levelData:Dynamic) {
