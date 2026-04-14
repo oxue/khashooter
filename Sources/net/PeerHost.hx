@@ -167,15 +167,12 @@ class PeerHost {
 
             var playerList:Dynamic = getPlayerListJS();
 
-            // Send welcome to the guest
+            // Send welcome to the guest (includes existing players list)
             sendToChannel(untyped __js__("{ type: 'welcome', id: {0}, map: {1}, hostId: 0, players: {2} }", guestId, mapName, playerList));
-
-            // Send player_joined to guest (for the guest to know about itself and others)
-            sendToChannel(untyped __js__("{ type: 'player_joined', id: {0}, name: {1}, spawn: { x: 200, y: 100 } }", guestId, guestName));
 
             log("HOST", "assigned id " + guestId + " to " + guestName);
 
-            // Notify local game about the new player
+            // Notify local (host) game about the new player
             if (onMessage != null) {
                 onMessage(untyped __js__("{ type: 'player_joined', id: {0}, name: {1}, spawn: { x: 200, y: 100 } }", guestId, guestName));
             }

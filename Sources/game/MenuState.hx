@@ -316,15 +316,23 @@ class MenuState extends refraction.core.State {
                 Application.setState(new GameState(mapName, wsUrl, name));
             });
         } else {
-            // WebRTC peer-to-peer path
-            statusMessage = "Joining room " + code + "...";
-            var guest:PeerGuest = new PeerGuest();
-            guest.joinRoom(code, name, function(error:String) {
-                statusMessage = error;
+            // WebRTC peer-to-peer path — fetch room first to get map
+            statusMessage = "Looking up room " + code + "...";
+            RoomClient.getRoom(code, function(room:Dynamic) {
+                if (room == null) {
+                    statusMessage = "Room not found!";
+                    return;
+                }
+                var roomMap:String = untyped room.map;
+                if (roomMap == null) roomMap = "level2";
+
+                statusMessage = "Connecting to host...";
+                var guest:PeerGuest = new PeerGuest();
+                guest.joinRoom(code, name, function(error:String) {
+                    statusMessage = error;
+                });
+                Application.setState(new GameState(roomMap, null, name, code, null, null, guest));
             });
-            // Transition to game; guest will receive map from host via welcome message
-            // For now use level2 as placeholder; GameState will get the real map from the welcome
-            Application.setState(new GameState("level2", null, name, code, null, null, guest));
         }
     }
 
