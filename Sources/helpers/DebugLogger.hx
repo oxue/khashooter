@@ -9,8 +9,11 @@ class DebugLogger {
     public static var traceLogs = true;
 
     public static final ENABLED_LOGS:Map<String, Bool> = [
-        "ROUTINE" => true,
+        "ROUTINE" => false,
         "PERF" => true,
+        "NOTIFY" => false,
+        "RESOURCE" => false,
+        "config" => false,
         "AIPERF" => false,
         "AIPERF2" => false,
         "AIPERF3" => false,
