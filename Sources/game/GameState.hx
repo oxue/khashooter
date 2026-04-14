@@ -143,7 +143,18 @@ class GameState extends refraction.core.State {
 
         isRenderingReady = true;
 
-        initMultiplayer();
+        // Only connect to multiplayer if a server URL is available
+        if (isMultiplayer()) {
+            initMultiplayer();
+        } else {
+            // Check query param as fallback
+            #if js
+            var search:String = untyped js.Browser.window.location.search;
+            if (search != null && search.indexOf("server=") >= 0) {
+                initMultiplayer();
+            }
+            #end
+        }
         playMusic();
     }
 
