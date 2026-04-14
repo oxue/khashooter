@@ -58,6 +58,20 @@ function defineCollisionBehaviours(gameContext:GameContext) {
 		knockback(enemy, knockbackRotation);
 	});
 
+	// Crossbow bolt hits player (multiplayer — other players are HG_PLAYER)
+	gameContext.hitTestSystem.onHit(HG_CROSSBOW_BOLT, HG_PLAYER, function(bolt:Entity, player:Entity) {
+		bolt.notify(MSG_COLLIDED);
+		final knockbackRotation:Float = bolt
+			.getComponent(PositionCmp)
+			.rotationDegrees;
+		entFactory.createGibSplash(
+			gameContext.config.single_hit_gibsplash_amount,
+			player.getComponent(PositionCmp),
+			Utils.a2rad(knockbackRotation)
+		);
+		knockback(player, knockbackRotation);
+	});
+
 	gameContext.hitTestSystem.onHit(HG_DEMON_FIREBALL, HG_PLAYER, function(fireball:Entity, player:Entity) {
 		player.notify(MSG_DAMAGE, {amount: -gameContext.config.demon_fireball_damage});
 		fireball.notify(MSG_COLLIDED);
