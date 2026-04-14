@@ -61,15 +61,13 @@ function defineCollisionBehaviours(gameContext:GameContext) {
 	// Crossbow bolt hits player (multiplayer — other players are HG_PLAYER)
 	gameContext.hitTestSystem.onHit(HG_CROSSBOW_BOLT, HG_PLAYER, function(bolt:Entity, player:Entity) {
 		bolt.notify(MSG_COLLIDED);
-		final knockbackRotation:Float = bolt
-			.getComponent(PositionCmp)
-			.rotationDegrees;
+		// Visual only — gib splash at impact point
 		entFactory.createGibSplash(
 			gameContext.config.single_hit_gibsplash_amount,
 			player.getComponent(PositionCmp),
-			Utils.a2rad(knockbackRotation)
+			Utils.a2rad(bolt.getComponent(PositionCmp).rotationDegrees)
 		);
-		knockback(player, knockbackRotation);
+		// NO knockback here — server sends hit event, victim applies knockback via NetDamageable
 	});
 
 	gameContext.hitTestSystem.onHit(HG_DEMON_FIREBALL, HG_PLAYER, function(fireball:Entity, player:Entity) {

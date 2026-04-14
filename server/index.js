@@ -214,7 +214,7 @@ wss.on('connection', (ws) => {
 
             log('HIT', `${clientId} -> ${targetId}`, { damage, health: target.health, perpDist: perpDist.toFixed(1), alongRay: alongRay.toFixed(1) });
 
-            sendTo(targetId, { type: 'hit', target: targetId, source: clientId, damage, health: target.health });
+            sendTo(targetId, { type: 'hit', target: targetId, source: clientId, damage, health: target.health, dir: msg.dir });
             sendTo(clientId, { type: 'hit_confirm', target: targetId, damage });
 
             if (target.health <= 0) {

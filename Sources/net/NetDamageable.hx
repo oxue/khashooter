@@ -3,6 +3,7 @@ package net;
 import components.Health;
 import game.EntFactory;
 import refraction.generic.PositionCmp;
+import refraction.generic.VelocityCmp;
 
 class NetDamageable extends NetComponent {
 
@@ -27,7 +28,16 @@ class NetDamageable extends NetComponent {
             var ef = EntFactory.instance();
             if (ef != null) ef.createGibSplash(1, position);
         }
-        log("HIT_FEEDBACK", "damage applied");
+        // Apply knockback from shot direction
+        if (data.dir != null) {
+            var velocity = entity.getComponent(VelocityCmp);
+            if (velocity != null) {
+                var rad:Float = data.dir * (3.1415926 / 180);
+                velocity.addVelX(Math.cos(rad) * 10);
+                velocity.addVelY(Math.sin(rad) * 10);
+            }
+        }
+        log("HIT_FEEDBACK", "damage applied, knockback from dir=" + data.dir);
     }
 
     function onKill(data:Dynamic) {

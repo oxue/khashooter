@@ -106,7 +106,7 @@ class NetState {
                 log("HIT", 'target=${msg.target} source=${msg.source} damage=${msg.damage} health=${msg.health}');
                 if (onHit != null) onHit(msg.target, msg.source, msg.damage, msg.health);
                 var nm = NetManager.instance();
-                if (nm != null) nm.routeMessage("player_" + msg.target, "hit", {damage: msg.damage, health: msg.health, source: msg.source});
+                if (nm != null) nm.routeMessage("player_" + msg.target, "hit", {damage: msg.damage, health: msg.health, source: msg.source, dir: msg.dir});
 
             case "hit_confirm":
                 log("HIT_CONFIRM", 'target=${msg.target} damage=${msg.damage}');
