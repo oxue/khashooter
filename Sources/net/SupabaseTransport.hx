@@ -54,21 +54,23 @@ class SupabaseTransport {
 
         var self = this;
         var filterObj:Dynamic = untyped __js__("{ event: 'game' }");
-        channel.on("broadcast", filterObj, untyped __js__("function(payload) { {0}(payload.payload); }", function(msg:Dynamic) {
-            self.handleIncoming(msg);
-        }));
+        var onBroadcast = function(payload:Dynamic) {
+            self.handleIncoming(payload.payload);
+        };
+        channel.on("broadcast", filterObj, onBroadcast);
 
-        channel.subscribe(untyped __js__("function(status) { {0}(status); }", function(status:String) {
-            if (status == "SUBSCRIBED") {
+        var onSubscribe = function(status:Dynamic) {
+            var s:String = Std.string(status);
+            if (s == "SUBSCRIBED") {
                 log("CONNECT", "joined channel " + channelName);
-
                 if (self.isHost) {
                     self.sendWelcomeToSelf(playerName);
                 } else {
                     self.broadcast(untyped __js__("{ type: 'join_request', name: {0} }", playerName));
                 }
             }
-        }));
+        };
+        channel.subscribe(onSubscribe);
         #end
     }
 
