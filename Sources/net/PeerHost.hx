@@ -163,11 +163,14 @@ class PeerHost {
         if (msgType == "join_request") {
             var guestId:Int = nextGuestId++;
             var guestName:String = Std.string(untyped msg.name);
-            players.set(guestId, new PlayerInfo(guestName, 200, 100, 100));
 
+            // Build player list BEFORE adding guest (so guest doesn't see itself as existing)
             var playerList:Dynamic = getPlayerListJS();
 
-            // Send welcome to the guest (includes existing players list)
+            // Now add guest to tracking
+            players.set(guestId, new PlayerInfo(guestName, 200, 100, 100));
+
+            // Send welcome to the guest (existing players only, not including self)
             sendToChannel(untyped __js__("{ type: 'welcome', id: {0}, map: {1}, hostId: 0, players: {2} }", guestId, mapName, playerList));
 
             log("HOST", "assigned id " + guestId + " to " + guestName);
