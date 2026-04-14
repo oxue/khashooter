@@ -8,7 +8,6 @@ import components.HitCircleCmp;
 import components.ParticleCmp;
 import game.behaviours.MimiAI;
 import game.behaviours.ZombieAI;
-import haxe.Constraints.Function;
 import refraction.control.BreadCrumbs;
 import refraction.control.Damping;
 import refraction.control.KeyControl;
@@ -31,126 +30,74 @@ import net.NetShootReceiver;
 
 class ShooterComponentFactory extends ComponentFactory {
 
-    var typeToMethodMap:Map<String, Function>;
-
-    public function new(_gameContext:GameContext) {
+    public function new(_gameContext:Dynamic) {
         super(_gameContext);
-        typeToMethodMap = new Map<String, Function>();
-        typeToMethodMap.set(
-            "AnimatedRender",
-            (e:Entity, name:String) -> gameContext.renderSystem.procure(e, AnimatedRenderCmp, name)
-        );
-        typeToMethodMap.set(
-            "AnimatedRender/SelfLit",
-            (e:Entity, name:String) -> gameContext.selfLitRenderSystem.procure(e, AnimatedRenderCmp, name)
-        );
-        typeToMethodMap.set(
-            "RotationControl",
-            (e:Entity, name:String) -> gameContext.controlSystem.procure(e, RotationControl, name)
-        );
-        typeToMethodMap.set(
-            "KeyControl",
-            (e:Entity, name:String) -> gameContext.controlSystem.procure(e, KeyControl, name)
-        );
-        typeToMethodMap.set(
-            "TileCollision",
-            (e:Entity, name:String) -> gameContext.collisionSystem.procure(e, TileCollisionCmp, name)
-        );
-        typeToMethodMap.set(
-            "PlayerAnimation",
-            (e:Entity, name:String) -> gameContext.controlSystem.procure(e, PlayerAnimation, name)
-        );
-        typeToMethodMap.set(
-            "Inventory",
-            (e:Entity, name:String) -> e.addComponent(new InventoryCmp())
-        );
-        typeToMethodMap.set(
-            "Position",
-            (e:Entity, name:String) -> e.addComponent(new PositionCmp())
-        );
-        typeToMethodMap.set(
-            "Dimensions",
-            (e:Entity, name:String) -> e.addComponent(new DimensionsCmp())
-        );
-        typeToMethodMap.set(
-            "Health",
-            (e:Entity, name:String) -> e.addComponent(new Health())
-        );
-        typeToMethodMap.set(
-            "Velocity",
-            (e:Entity, name:String) -> gameContext.velocitySystem.procure(e, VelocityCmp, name)
-        );
-        typeToMethodMap.set(
-            "Spacing",
-            (e:Entity, name:String) -> gameContext.spacingSystem.procure(e, SpacingCmp, name)
-        );
-        typeToMethodMap.set(
-            "Damping",
-            (e:Entity, name:String) -> gameContext.dampingSystem.procure(e, Damping, name)
-        );
-        typeToMethodMap.set(
-            "HitCircle",
-            (e:Entity, name:String) -> gameContext.hitTestSystem.procure(e, HitCircleCmp, name)
-        );
-        typeToMethodMap.set(
-            "BreadCrumbs",
-            (e:Entity, name:String) -> gameContext.breadCrumbsSystem.procure(e, BreadCrumbs, name)
-        );
-        typeToMethodMap.set(
-            "Beacon",
-            (e:Entity, name:String) -> gameContext.beaconSystem.procure(e, Beacon, name)
-        );
-        typeToMethodMap.set(
-            "ZombieAI",
-            (e:Entity, name:String) -> gameContext.aiSystem.procure(e, ZombieAI, name)
-        );
-        typeToMethodMap.set(
-            "MimiAI",
-            (e:Entity, name:String) -> gameContext.aiSystem.procure(e, MimiAI, name)
-        );
-        typeToMethodMap.set(
-            "LesserDemonBehaviour",
-            (e:Entity, name:String) -> gameContext.aiSystem.procure(e, LesserDemonBehaviour, name)
-        );
-        typeToMethodMap.set(
-            "Particle",
-            (e:Entity, name:String) -> gameContext.particleSystem.procure(e, ParticleCmp, name)
-        );
-        typeToMethodMap.set(
-            "LightSource",
-            (e:Entity, name:String) -> gameContext.lightSourceSystem.procure(e, LightSourceCmp, name)
-        );
-        typeToMethodMap.set(
-            "NetIdentity",
-            (e:Entity, name:String) -> e.addComponent(new NetIdentity("", -1, false))
-        );
-        typeToMethodMap.set(
-            "NetTransformSender",
-            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetTransformSender, name)
-        );
-        typeToMethodMap.set(
-            "NetTransformReceiver",
-            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetTransformReceiver, name)
-        );
-        typeToMethodMap.set(
-            "NetDamageable",
-            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetDamageable, name)
-        );
-        typeToMethodMap.set(
-            "NetShootSender",
-            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetShootSender, name)
-        );
-        typeToMethodMap.set(
-            "NetShootReceiver",
-            (e:Entity, name:String) -> gameContext.netSys.procure(e, NetShootReceiver, name)
-        );
     }
 
+    // Direct switch instead of lambda map — Haxe generics need concrete types
+    // at each call site for JS target. Lambda-captured procure() calls lose
+    // the generic specialization and compile to non-existent method names.
     override public function get(_type:String, _e:Entity, ?_name:String):Component {
-        if (typeToMethodMap.exists(_type)) {
-            return cast typeToMethodMap.get(_type)(_e, _name);
+        var gc:GameContext = cast gameContext;
+
+        switch (_type) {
+            case "AnimatedRender":
+                return gc.renderSystem.procure(_e, AnimatedRenderCmp, _name);
+            case "AnimatedRender/SelfLit":
+                return gc.selfLitRenderSystem.procure(_e, AnimatedRenderCmp, _name);
+            case "RotationControl":
+                return gc.controlSystem.procure(_e, RotationControl, _name);
+            case "KeyControl":
+                return gc.controlSystem.procure(_e, KeyControl, _name);
+            case "TileCollision":
+                return gc.collisionSystem.procure(_e, TileCollisionCmp, _name);
+            case "PlayerAnimation":
+                return gc.controlSystem.procure(_e, PlayerAnimation, _name);
+            case "Inventory":
+                return _e.addComponent(new InventoryCmp());
+            case "Position":
+                return _e.addComponent(new PositionCmp());
+            case "Dimensions":
+                return _e.addComponent(new DimensionsCmp());
+            case "Health":
+                return _e.addComponent(new Health());
+            case "Velocity":
+                return gc.velocitySystem.procure(_e, VelocityCmp, _name);
+            case "Spacing":
+                return gc.spacingSystem.procure(_e, SpacingCmp, _name);
+            case "Damping":
+                return gc.dampingSystem.procure(_e, Damping, _name);
+            case "HitCircle":
+                return gc.hitTestSystem.procure(_e, HitCircleCmp, _name);
+            case "BreadCrumbs":
+                return gc.breadCrumbsSystem.procure(_e, BreadCrumbs, _name);
+            case "Beacon":
+                return gc.beaconSystem.procure(_e, Beacon, _name);
+            case "ZombieAI":
+                return gc.aiSystem.procure(_e, ZombieAI, _name);
+            case "MimiAI":
+                return gc.aiSystem.procure(_e, MimiAI, _name);
+            case "LesserDemonBehaviour":
+                return gc.aiSystem.procure(_e, LesserDemonBehaviour, _name);
+            case "Particle":
+                return gc.particleSystem.procure(_e, ParticleCmp, _name);
+            case "LightSource":
+                return gc.lightSourceSystem.procure(_e, LightSourceCmp, _name);
+            case "NetIdentity":
+                return _e.addComponent(new NetIdentity("", -1, false));
+            case "NetTransformSender":
+                return gc.netSys.procure(_e, NetTransformSender, _name);
+            case "NetTransformReceiver":
+                return gc.netSys.procure(_e, NetTransformReceiver, _name);
+            case "NetDamageable":
+                return gc.netSys.procure(_e, NetDamageable, _name);
+            case "NetShootSender":
+                return gc.netSys.procure(_e, NetShootSender, _name);
+            case "NetShootReceiver":
+                return gc.netSys.procure(_e, NetShootReceiver, _name);
+            default:
+                throw "Component type does not exist: " + _type;
         }
-        throw "Component type does not exist: " + _type;
         return null;
     }
 }

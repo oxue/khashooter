@@ -10,6 +10,7 @@ import net.NetTransformReceiver;
 import net.NetTransformSender;
 import refraction.core.Entity;
 import refraction.generic.PositionCmp;
+import refraction.tilemap.TileCollisionCmp;
 import ui.HealthBar;
 
 class PlayerSpawner {
@@ -28,6 +29,12 @@ class PlayerSpawner {
 
         gameContext.playerEntity = e;
         gameContext.healthBar = new HealthBar(e.getComponent(Health));
+
+        // Apply noclip config (disables tile collision when noclip is on)
+        var tileCol = e.getComponent(TileCollisionCmp);
+        if (tileCol != null) {
+            tileCol.enabled = !gameContext.config.system.noclip;
+        }
 
         // Equip default weapon
         var inventory = e.getComponent(InventoryCmp);

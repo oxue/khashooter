@@ -8,7 +8,7 @@ class NetShootReceiver extends NetComponent {
     }
 
     function onRemoteShoot(data:Dynamic) {
-        var rad:Float = data.dir * (3.1415926 / 180);
+        var rad:Float = data.dir * (Math.PI / 180);
         var dirVec = new kha.math.Vector2(Math.cos(rad), Math.sin(rad));
         var posVec = new kha.math.Vector2(data.x, data.y);
         var ef = game.EntFactory.instance();

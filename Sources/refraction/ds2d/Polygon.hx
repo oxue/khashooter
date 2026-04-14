@@ -25,8 +25,7 @@ class Polygon {
     public function addDefaultFaces(_numVertices:Int, _radius:Int) {
         var i:Int = _numVertices;
         while (i-- > 0) {
-            var pi:Float = 3.1415;
-            var rads:Float = (pi * 2 / _numVertices) * i + pi / 4;
+            var rads:Float = (Math.PI * 2 / _numVertices) * i + Math.PI / 4;
             vertices.push(
                 new Vector2(
                     Math.cos(rads) * _radius + x,

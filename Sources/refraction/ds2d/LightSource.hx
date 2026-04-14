@@ -7,7 +7,6 @@ package refraction.ds2d;
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Vector3D; */
-import game.GameContext;
 import refraction.core.Application;
 import kha.Color;
 import kha.graphics4.Graphics2.ColoredShaderPainter;
@@ -46,10 +45,9 @@ class LightSource {
         v3Color = new FastVector4(r / 255, g / 255, b / 255, 1);
     }
 
-    public function debugDraw(camera:Camera, g2:kha.graphics2.Graphics) {
+    public function debugDraw(camera:Camera, g2:kha.graphics2.Graphics, globalRad:Float = 15.0) {
         var center:Vector2 = position.sub(camera.position());
         var numRot:Int = 12;
-        var globalRad:Float = GameContext.instance().lightingSystem.globalRadius;
         for (i in 0...numRot) {
             var offset1:Vector2 = {
                 x: Math.cos(2 * Math.PI * i / numRot) * globalRad,

@@ -48,9 +48,11 @@ class InventoryCmp extends Component {
 	function inventoryScroll(direction:Int) {
 		currentWeaponIndex += direction;
 		currentWeaponIndex = (currentWeaponIndex + weapons.length) % weapons.length;
-		while (!weapons[currentWeaponIndex].enabled) {
+		var guard:Int = 0;
+		while (!weapons[currentWeaponIndex].enabled && guard < weapons.length) {
 			currentWeaponIndex += direction;
 			currentWeaponIndex = (currentWeaponIndex + weapons.length) % weapons.length;
+			guard++;
 		}
 		setWeapon(currentWeaponIndex);
 	}

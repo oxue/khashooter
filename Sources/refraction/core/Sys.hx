@@ -3,22 +3,15 @@ package refraction.core;
 import haxe.Constraints.Constructible;
 import refraction.core.Entity;
 
+// Required for Haxe generic specialization of Sys.procure — do not remove
 class NullSystem<T:Component> {
-
     public function new() {}
-
     @:generic
     public function procure<G:Constructible<Dynamic> & T>(e:Entity, _type:Class<G>):G {
-        var ret:G = null;
-        e.addComponent(ret);
-        return ret;
+        return null;
     }
 }
 
-/**
- * ...
- * @author worldedit
- */
 @:generic
 class Sys<T:Component> {
 

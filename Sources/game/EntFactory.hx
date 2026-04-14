@@ -374,8 +374,9 @@ class EntFactory {
             pos.setFromPosition(_p);
             var particle:ParticleCmp = e.getComponent(ParticleCmp);
             if (particle == null) continue;
+            var gibRange:Float = gameContext.config.gib_splash_magnitude_max - gameContext.config.gib_splash_magnitude_min;
             particle.randomDirection(
-                gameContext.values.getRandomGibSplashMaginutude(),
+                Math.random() * gibRange + gameContext.config.gib_splash_magnitude_min,
                 _directionBiasRad,
                 _directionStdRad
             );

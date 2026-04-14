@@ -11,8 +11,8 @@ import { spawn, execSync } from 'child_process';
 
 const SERVER_PORT = 3000;
 const GAME_PORT = 8081;
-const BASE_URL = `http://localhost:${GAME_PORT}?testmode=true&server=ws://localhost:${SERVER_PORT}`;
-const BASE_URL_OFFLINE = `http://localhost:${GAME_PORT}?testmode=true`;
+const BASE_URL = `http://localhost:${GAME_PORT}?testmode=true&autostart=true&server=ws://localhost:${SERVER_PORT}`;
+const BASE_URL_OFFLINE = `http://localhost:${GAME_PORT}?testmode=true&autostart=true`;
 const BOOT_TIMEOUT = 12000;
 
 // Parse --filter arg

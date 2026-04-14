@@ -1,12 +1,11 @@
 package refraction.core;
 
 import refraction.core.Component;
-import game.GameContext;
 
 class ComponentFactory {
-	private var gameContext:GameContext;
+	private var gameContext:Dynamic;
 
-	public function new(_gameContext:GameContext) {
+	public function new(_gameContext:Dynamic) {
 		gameContext = _gameContext;
 	}
 

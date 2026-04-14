@@ -4,7 +4,6 @@ import kha.Assets;
 import kha.audio1.Audio;
 import entbuilders.ItemBuilder.Items;
 import refraction.core.Application;
-import game.GameContext;
 import refraction.generic.PositionCmp;
 
 class MachineGun extends Weapon {
@@ -34,11 +33,6 @@ class MachineGun extends Weapon {
                 muzzleDir
             );
         Application.defaultCamera.shake(6, 4);
-
-        var gc = GameContext.instance();
-        if (gc.playerEntity != null) {
-            var dirDeg:Float = Math.atan2(muzzleDir.y, muzzleDir.x) * (180 / 3.1415926);
-            gc.playerEntity.notify("weapon_fired", {weapon: "machinegun", x: muzzlePos.x, y: muzzlePos.y, dir: dirDeg, damage: 5});
-        }
+        notifyWeaponFired("machinegun", muzzlePos, muzzleDir, 5);
     }
 }

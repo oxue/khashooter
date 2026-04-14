@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "Kha",
+			"target": "Android",
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe"
+			],
+			"group": "build",
+			"label": "Kha: Build for Android"
+		},
+		{
+			"type": "Kha",
+			"target": "macOS (OpenGL, full build)",
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe"
+			],
+			"group": "build",
+			"label": "Kha: Build for macOS (OpenGL, full build)"
+		}
+	]
+}

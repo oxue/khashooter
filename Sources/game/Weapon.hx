@@ -14,7 +14,6 @@ class Weapon {
 
 	public var type:Items;
 	public var name:String;
-	public var ammo:AmmunitionObject;
 	public var muzzleOffset:Vector2;
 	public var enabled:Bool;
 
@@ -38,13 +37,20 @@ class Weapon {
 			.worldMouse();
 		// TODO: paramterize this later
 		return Utils.rotateVec2(
-			worldMouse.sub(position
-				.vec()
-				.add(new Vector2(0, 0))
-			),
+			worldMouse.sub(position.vec()),
 			// 0
 			Math.random() * 0.1 - 0.05
 		);
+	}
+
+	public function notifyWeaponFired(weaponName:String, muzzlePos:Vector2, muzzleDir:Vector2, damage:Float) {
+		var dirDeg:Float = Math.atan2(muzzleDir.y, muzzleDir.x) * (180.0 / Math.PI);
+		var gc = GameContext.instance();
+		if (gc != null && gc.playerEntity != null) {
+			gc.playerEntity.notify("weapon_fired", {
+				weapon: weaponName, x: muzzlePos.x, y: muzzlePos.y, dir: dirDeg, damage: damage
+			});
+		}
 	}
 
 	public function castWeapon(_position:PositionCmp) {}

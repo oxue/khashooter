@@ -499,7 +499,7 @@ class GameState extends refraction.core.State {
         }
         frame.g2.end();
 
-        gameContext.lightingSystem.renderSceneWithLighting(gameContext, [gameContext.tilemapShadowPolys]);
+        gameContext.lightingSystem.renderSceneWithLighting(gameContext.camera, gameContext.tilemap, [gameContext.tilemapShadowPolys]);
 
         g4.begin();
         KhaVertexIndexer.setContext(frame.g4);

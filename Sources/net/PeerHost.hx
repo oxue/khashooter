@@ -224,7 +224,7 @@ class PeerHost {
         var MAX_RANGE:Float = isFlamethrower ? 100 : 300;
 
         var dirVal:Float = untyped msg.dir;
-        var dirRad:Float = dirVal * (3.1415926535 / 180.0);
+        var dirRad:Float = dirVal * (Math.PI / 180.0);
         var rayDx:Float = Math.cos(dirRad);
         var rayDy:Float = Math.sin(dirRad);
         var shooterId:Int = untyped msg.from;

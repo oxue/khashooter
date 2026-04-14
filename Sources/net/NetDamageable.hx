@@ -32,7 +32,7 @@ class NetDamageable extends NetComponent {
         if (data.dir != null) {
             var velocity = entity.getComponent(VelocityCmp);
             if (velocity != null) {
-                var rad:Float = data.dir * (3.1415926 / 180);
+                var rad:Float = data.dir * (Math.PI / 180);
                 velocity.addVelX(Math.cos(rad) * 10);
                 velocity.addVelY(Math.sin(rad) * 10);
             }

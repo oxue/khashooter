@@ -21,70 +21,34 @@ class ItemBuilder {
 	private var gameContext:GameContext;
 
 	public function createHuntersCrossbow(_x = 0, _y = 0):Entity {
-		var e:Entity = makebaseItem(_x, _y);
-
-		var animatedRender = e.getComponent(AnimatedRenderCmp);
-		animatedRender.animations.set(CROSSBOW_DEFAULT_ANIMATION, [0]);
-		animatedRender.setCurrentAnimation(CROSSBOW_DEFAULT_ANIMATION);
-		animatedRender.frame = 0;
-		gameContext.renderSystem.addComponent(animatedRender);
-
-		var tt:Tooltip = new Tooltip("Demon Hunter's Crossbow", kha.Color.Green);
-		e.addComponent(tt);
-		gameContext.tooltipSystem.addComponent(tt);
-
-		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
-			gameContext.playerEntity
-				.getComponent(InventoryCmp)
-				.pickup(Items.HuntersCrossbow);
-			e.remove();
-		});
-		gameContext.interactSystem.addComponent(ic);
-		e.addComponent(ic);
-
-		return e;
+		return createWeaponItem(_x, _y, Items.HuntersCrossbow, CROSSBOW_DEFAULT_ANIMATION, [0], "Demon Hunter's Crossbow", kha.Color.Green);
 	}
 
 	public function createFlameThrower(_x = 0, _y = 0):Entity {
-		var e = makebaseItem(_x, _y);
-		var animatedRender = e.getComponent(AnimatedRenderCmp);
-		animatedRender.animations.set(FLAMETHROWER_DEFAULT_ANIMATION, [5]);
-		animatedRender.setCurrentAnimation(FLAMETHROWER_DEFAULT_ANIMATION);
-		animatedRender.frame = 0;
-		gameContext.renderSystem.addComponent(animatedRender);
-
-		var tt:Tooltip = new Tooltip("Flamethrower", kha.Color.Red);
-		e.addComponent(tt);
-		gameContext.tooltipSystem.addComponent(tt);
-
-		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
-			gameContext.playerEntity
-				.getComponent(InventoryCmp)
-				.pickup(Items.Flamethrower);
-			e.remove();
-		});
-		gameContext.interactSystem.addComponent(ic);
-		e.addComponent(ic);
-
-		return e;
+		return createWeaponItem(_x, _y, Items.Flamethrower, FLAMETHROWER_DEFAULT_ANIMATION, [5], "Flamethrower", kha.Color.Red);
 	}
 
 	public function createMachineGun(_x = 0, _y = 0):Entity {
-		var e = makebaseItem(_x, _y);
+		return createWeaponItem(_x, _y, Items.MachineGun, "default", [3], "Machine Gun", kha.Color.Red);
+	}
+
+	function createWeaponItem(_x:Int, _y:Int, itemType:Items, animName:String, animFrames:Array<Int>, tooltip:String, color:kha.Color):Entity {
+		var e:Entity = makebaseItem(_x, _y);
+
 		var animatedRender = e.getComponent(AnimatedRenderCmp);
-		animatedRender.animations.set("default", [3]);
-		animatedRender.setCurrentAnimation("default");
+		animatedRender.animations.set(animName, animFrames);
+		animatedRender.setCurrentAnimation(animName);
 		animatedRender.frame = 0;
 		gameContext.renderSystem.addComponent(animatedRender);
 
-		var tt:Tooltip = new Tooltip("Machine Gun", kha.Color.Red);
+		var tt:Tooltip = new Tooltip(tooltip, color);
 		e.addComponent(tt);
 		gameContext.tooltipSystem.addComponent(tt);
 
 		var ic = new InteractableCmp(gameContext.camera, function(e:Entity) {
 			gameContext.playerEntity
 				.getComponent(InventoryCmp)
-				.pickup(Items.MachineGun);
+				.pickup(itemType);
 			e.remove();
 		});
 		gameContext.interactSystem.addComponent(ic);

@@ -19,7 +19,6 @@ class ObjectPool<T> {
         if (size == 0)
             return null;
         else {
-            trace("pool get");
             return pool[--size];
         }
     }

@@ -4,7 +4,6 @@ import kha.Scheduler;
 import kha.input.Keyboard;
 import kha.input.Mouse;
 import kha.System;
-import game.PhysState;
 import game.GameState;
 import game.MenuState;
 import rendering.KhaVertexIndexer;

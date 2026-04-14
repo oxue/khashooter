@@ -100,7 +100,7 @@ class AnimatedRenderCmp extends Component {
                 )
             );
 
-            var a = coordX / numRot * 2 * 3.1415;
+            var a = coordX / numRot * 2 * Math.PI;
             var cs = Math.cos(a);
             var sn = Math.sin(a);
             offsetX = reg.x * cs - reg.y * sn;

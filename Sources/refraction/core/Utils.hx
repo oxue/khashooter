@@ -10,7 +10,7 @@ import refraction.generic.PositionCmp;
  */
 class Utils {
 	public static final TWIP:Float = 0.05;
-	public static final RAD2A:Float = 180 / 3.1415926;
+	public static final RAD2A:Float = 180 / Math.PI;
 	public static final A2RAD:Float = 1 / RAD2A;
 
 	public static inline function posDis2(_pos1:PositionCmp, _pos2:PositionCmp):Float {
@@ -41,7 +41,7 @@ class Utils {
 	}
 
 	public static inline function a2rad(a:Float):Float {
-		return a * 3.14159 / 180;
+		return a * Math.PI / 180;
 	}
 
 	public static inline function randomOneOrNegOne():Float {

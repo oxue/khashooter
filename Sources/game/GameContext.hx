@@ -103,7 +103,6 @@ class GameContext {
 
     public var shouldDrawHitBoxes:Bool;
 
-    public var values:Values;
     public var reloadGraphics:Bool;
 
     // Multiplayer
@@ -126,7 +125,6 @@ class GameContext {
 
     public function new(_camera:Camera, _ui:Zui) {
         config = TemplateParser.parseConfig();
-        values = new Values(config);
 
         camera = _camera;
         tilemap = null;

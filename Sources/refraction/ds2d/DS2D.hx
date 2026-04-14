@@ -2,7 +2,6 @@ package refraction.ds2d;
 
 import refraction.core.Application;
 import rendering.Camera;
-import game.GameContext;
 import rendering.KhaVertexIndexer;
 import rendering.TextureAtlas.FloatRect;
 import rendering.pipelines.DecrementPipelineState;
@@ -104,7 +103,7 @@ class DS2D {
             }
         }
         for (l in lights) {
-            l.debugDraw(camera, g);
+            l.debugDraw(camera, g, globalRadius);
             for (ls in shadowPolyLists) {
                 for (p in ls) {
                     renderDebugPolygonShadow(p, l, camera.position(), g);
@@ -211,9 +210,9 @@ class DS2D {
         }
     }
 
-    function renderShadowsForLightsource(gameContext:GameContext, rv:Int, l:LightSource,
+    function renderShadowsForLightsource(camera:Camera, rv:Int, l:LightSource,
             shadowPolyLists:Array<Array<Polygon>>) {
-        var camPos:Vector2 = gameContext.camera.roundedVec2();
+        var camPos:Vector2 = camera.roundedVec2();
 
         sshader.stencilReferenceValue = Static(rv);
         
@@ -248,7 +247,7 @@ class DS2D {
         KhaVertexIndexer.draw();
     }
 
-    public function renderSceneWithLighting(gameContext:GameContext, shadowPolyLists:Array<Array<Polygon>>) {
+    public function renderSceneWithLighting(camera:Camera, tilemap:refraction.tilemap.TileMap, shadowPolyLists:Array<Array<Polygon>>) {
         var backbuffer:Graphics = KhaVertexIndexer.contextG4;
 
         shadowBuffer.g4.begin();
@@ -268,9 +267,9 @@ class DS2D {
             .get("all")
             .image
         );
-        gameContext.tilemap.threashold = true;
-        gameContext.tilemap.mode = 1;
-        gameContext.tilemap.render(gameContext.camera);
+        tilemap.threashold = true;
+        tilemap.mode = 1;
+        tilemap.render(camera);
 
         KhaVertexIndexer.draw();
 
@@ -283,7 +282,7 @@ class DS2D {
                 continue;
             }
             renderShadowsForLightsource(
-                gameContext,
+                camera,
                 stencilValueOne,
                 lightSource,
                 shadowPolyLists
@@ -319,7 +318,7 @@ class DS2D {
 
         backbuffer.end();
 
-        gameContext.tilemap.threashold = false;
+        tilemap.threashold = false;
     }
 
     public function wipeout() {

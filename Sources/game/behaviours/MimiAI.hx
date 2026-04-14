@@ -34,7 +34,7 @@ class MimiAI extends Component {
 		}
 
 		breadcrumbs.breadcrumbs[0].x = position.x + Math.random() * 300 - 150;
-		breadcrumbs.breadcrumbs[0].y = position.x + Math.random() * 300 - 150;
+		breadcrumbs.breadcrumbs[0].y = position.y + Math.random() * 300 - 150;
 	}
 
 	override public function load() {

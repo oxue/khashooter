@@ -1,13 +1,11 @@
 package refraction.control;
 
 import kha.input.KeyCode;
-import game.GameContext;
 import kha.math.FastVector2;
 import refraction.core.Application;
 import refraction.core.Component;
 import refraction.generic.PositionCmp;
 import refraction.generic.VelocityCmp;
-import refraction.tilemap.TileCollisionCmp;
 
 /**
  * ...
@@ -34,9 +32,6 @@ class KeyControl extends Component {
 	}
 
 	override public function update() {
-		// no clip
-		this.entity.getComponent(TileCollisionCmp).enabled = !GameContext.instance().config.system.noclip;
-
 		var acc:FastVector2 = new FastVector2();
 
 		if (Application.keys.get(KeyCode.A))
