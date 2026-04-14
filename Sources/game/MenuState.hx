@@ -1,6 +1,7 @@
 package game;
 
 import net.RoomClient;
+import net.SupabaseTransport;
 import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
@@ -249,15 +250,44 @@ class MenuState extends refraction.core.State {
         return url;
     }
 
+    function generateRoomCode():String {
+        var chars:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var code:String = "";
+        for (i in 0...4) {
+            var idx:Int = Std.int(Math.random() * chars.length);
+            code += chars.charAt(idx);
+        }
+        return code;
+    }
+
     function handleCreateRoom() {
         var mapName:String = maps[selectedMap];
         var name:String = playerName;
-        var wsUrl:String = getServerUrl();
 
-        RoomClient.createRoom(name, mapName, function(code:String) {
-            RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
-            Application.setState(new GameState(mapName, wsUrl, name, code));
-        });
+        // Check if we should use WebSocket (server= query param) or Supabase
+        var wsUrl:String = getServerUrl();
+        var useWebSocket:Bool = false;
+        #if js
+        var search:String = untyped js.Browser.window.location.search;
+        if (search != null && search.indexOf("server=") >= 0) {
+            useWebSocket = true;
+        }
+        #end
+
+        if (useWebSocket) {
+            // Legacy WebSocket path for local dev
+            RoomClient.createRoom(name, mapName, function(code:String) {
+                RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
+                Application.setState(new GameState(mapName, wsUrl, name, code));
+            });
+        } else {
+            // Supabase Realtime path for production
+            var code:String = generateRoomCode();
+            statusMessage = "Creating room " + code + "...";
+            var transport:SupabaseTransport = new SupabaseTransport();
+            transport.createRoom(code, name);
+            Application.setState(new GameState(mapName, null, name, code, transport));
+        }
     }
 
     function handleJoinRoom() {
@@ -265,19 +295,40 @@ class MenuState extends refraction.core.State {
             statusMessage = "Enter a room code!";
             return;
         }
-        statusMessage = "Looking up room...";
+
         var name:String = playerName;
-        RoomClient.getRoom(roomCode, function(room:Dynamic) {
-            if (room == null) {
-                statusMessage = "Room not found!";
-                return;
-            }
-            var wsUrl:String = untyped room.serverUrl;
-            if (wsUrl == null) wsUrl = "ws://localhost:4000";
-            var mapName:String = untyped room.map;
-            if (mapName == null) mapName = "level2";
-            Application.setState(new GameState(mapName, wsUrl, name));
-        });
+        var code:String = roomCode;
+
+        // Check if we should use WebSocket (server= query param) or Supabase
+        var useWebSocket:Bool = false;
+        #if js
+        var search:String = untyped js.Browser.window.location.search;
+        if (search != null && search.indexOf("server=") >= 0) {
+            useWebSocket = true;
+        }
+        #end
+
+        if (useWebSocket) {
+            // Legacy WebSocket path for local dev
+            statusMessage = "Looking up room...";
+            RoomClient.getRoom(code, function(room:Dynamic) {
+                if (room == null) {
+                    statusMessage = "Room not found!";
+                    return;
+                }
+                var wsUrl:String = untyped room.serverUrl;
+                if (wsUrl == null) wsUrl = "ws://localhost:4000";
+                var mapName:String = untyped room.map;
+                if (mapName == null) mapName = "level2";
+                Application.setState(new GameState(mapName, wsUrl, name));
+            });
+        } else {
+            // Supabase Realtime path for production
+            statusMessage = "Joining room " + code + "...";
+            var transport:SupabaseTransport = new SupabaseTransport();
+            transport.joinRoom(code, name);
+            Application.setState(new GameState("level2", null, name, code, transport));
+        }
     }
 
     function keyCodeToChar(key:KeyCode):String {

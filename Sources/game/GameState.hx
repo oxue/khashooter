@@ -2,6 +2,7 @@ package game;
 
 import net.NetManager;
 import net.NetState;
+import net.SupabaseTransport;
 import refraction.display.AnimatedRenderCmp;
 import zui.Zui;
 import haxe.Timer;
@@ -49,21 +50,25 @@ class GameState extends refraction.core.State {
     var multiplayerName:String;
     var roomCode:String;
     var intervals:Array<Interval>;
+    var supabaseTransport:SupabaseTransport;
 
     static var currentServerUrl:String;
+    static var hasSupabaseTransport:Bool = false;
 
-    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String) {
+    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String, ?transport:SupabaseTransport) {
         this.defaultMap = map;
         this.serverUrl = serverUrl;
         currentServerUrl = serverUrl;
         this.multiplayerName = playerName;
         this.roomCode = roomCode;
+        this.supabaseTransport = transport;
+        hasSupabaseTransport = (transport != null);
         this.showMenu = false;
         super();
     }
 
     public static function isMultiplayer():Bool {
-        return currentServerUrl != null;
+        return currentServerUrl != null || hasSupabaseTransport;
     }
 
     function formatResources() {
@@ -143,7 +148,7 @@ class GameState extends refraction.core.State {
 
         isRenderingReady = true;
 
-        // Only connect to multiplayer if a server URL is available
+        // Only connect to multiplayer if a server URL or Supabase transport is available
         if (isMultiplayer()) {
             initMultiplayer();
         } else {
@@ -206,20 +211,24 @@ class GameState extends refraction.core.State {
             }
         };
 
-        // Connect to server - use passed URL, query param, or default to localhost
-        var connectUrl:String = this.serverUrl;
-        if (connectUrl == null) {
-            connectUrl = "ws://localhost:4000";
-            #if js
-            var search:String = untyped js.Browser.window.location.search;
-            if (search != null && search.indexOf("server=") >= 0) {
-                var idx = search.indexOf("server=") + 7;
-                var end = search.indexOf("&", idx);
-                connectUrl = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+        // Connect via Supabase transport or WebSocket
+        if (supabaseTransport != null) {
+            gameContext.netState.client.connectViaSupabase(supabaseTransport);
+        } else {
+            var connectUrl:String = this.serverUrl;
+            if (connectUrl == null) {
+                connectUrl = "ws://localhost:4000";
+                #if js
+                var search:String = untyped js.Browser.window.location.search;
+                if (search != null && search.indexOf("server=") >= 0) {
+                    var idx = search.indexOf("server=") + 7;
+                    var end = search.indexOf("&", idx);
+                    connectUrl = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+                }
+                #end
             }
-            #end
+            gameContext.netState.connect(connectUrl);
         }
-        gameContext.netState.connect(connectUrl);
     }
 
     function initIntervals():Array<Interval> {
@@ -282,12 +291,12 @@ class GameState extends refraction.core.State {
         );
     }
 
-    public static function loadLevel(map:String, ?serverUrl:String, ?playerName:String) {
+    public static function loadLevel(map:String, ?serverUrl:String, ?playerName:String, ?roomCode:String, ?transport:SupabaseTransport) {
         EntFactory.destroyInstance();
         GameContext.destroyInstance();
         NetManager.destroy();
         Application.resetKeyListeners();
-        Application.setState(new GameState(map, serverUrl, playerName));
+        Application.setState(new GameState(map, serverUrl, playerName, roomCode, transport));
     }
 
     function mouseDown(button:Int, x:Int, y:Int) {

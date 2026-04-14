@@ -18,6 +18,8 @@ class NetClient {
     public var useWebRTC:Bool;
     var rtcSend:String -> Void;
 
+    public var supabaseTransport:SupabaseTransport;
+
     public var clientId:Int;
     public var onConnect:Int -> Void;
     public var onDisconnect:Void -> Void;
@@ -27,6 +29,7 @@ class NetClient {
         connected = false;
         useWebRTC = false;
         rtcSend = null;
+        supabaseTransport = null;
         clientId = -1;
     }
 
@@ -43,6 +46,20 @@ class NetClient {
         } catch (e:Dynamic) {
             log("ERROR", 'parse error: $e');
         }
+    }
+
+    public function connectViaSupabase(transport:SupabaseTransport) {
+        supabaseTransport = transport;
+
+        transport.onMessage = function(msg:Dynamic) {
+            handleMessage(msg);
+        };
+
+        transport.onConnect = function() {
+            connected = true;
+            clientId = transport.getLocalId();
+            log("CONNECT", "connected via Supabase, id=" + clientId);
+        };
     }
 
     public function connect(url:String) {
@@ -107,16 +124,20 @@ class NetClient {
     }
 
     public function send(msg:Dynamic) {
-        if (!connected) return;
+        if (!connected && supabaseTransport == null) return;
         #if js
-        var str = Json.stringify(msg);
-        if (useWebRTC && rtcSend != null) {
-            rtcSend(str);
+        if (supabaseTransport != null) {
+            supabaseTransport.send(msg);
         } else {
-            try {
-                ws.send(str);
-            } catch (e:Dynamic) {
-                log("ERROR", 'send failed: $e');
+            var str = Json.stringify(msg);
+            if (useWebRTC && rtcSend != null) {
+                rtcSend(str);
+            } else {
+                try {
+                    ws.send(str);
+                } catch (e:Dynamic) {
+                    log("ERROR", 'send failed: $e');
+                }
             }
         }
         #end
@@ -136,6 +157,7 @@ class NetClient {
     }
 
     public function isConnected():Bool {
+        if (supabaseTransport != null) return supabaseTransport.isConnected();
         return connected;
     }
 
