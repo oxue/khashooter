@@ -350,14 +350,14 @@ class GameState extends refraction.core.State {
             gameContext.environmentSystem.update();
             gameContext.lightSourceSystem.update();
             gameContext.particleSystem.update();
-            gameContext.hitCheckSystem.update(); // Projectile wall collision — must run on all clients
+            gameContext.hitCheckSystem.update(); // Projectile wall collision — all clients
+            gameContext.hitTestSystem.update(); // Collision detection — all clients (handlers gate gameplay behind isHost)
 
-            // Host-authoritative systems (only host runs AI, pathfinding, hit detection)
+            // Host-authoritative systems (only host runs AI, pathfinding)
             if (isHost) {
-                gameContext.hitCheckSystem.hostUpdate(); // gameplay (damage) on host only
+                gameContext.hitCheckSystem.hostUpdate();
                 gameContext.breadCrumbsSystem.update();
                 gameContext.aiSystem.update();
-                gameContext.hitTestSystem.update();
             }
 
             gameContext.beaconSystem.update();
