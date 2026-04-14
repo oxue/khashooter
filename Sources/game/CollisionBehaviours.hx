@@ -89,6 +89,7 @@ function defineCollisionBehaviours(gameContext:GameContext) {
 
 function knockback(entity:Entity, direction:Float, power:Float = 10) {
 	var velocity:VelocityCmp = entity.getComponent(VelocityCmp);
+	if (velocity == null) return; // Remote players have no VelocityCmp
 	var rad:Float = Utils.a2rad(direction);
 	velocity.addVelX(Math.cos(rad) * power);
 	velocity.addVelY(Math.sin(rad) * power);
