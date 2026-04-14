@@ -236,15 +236,26 @@ class MenuState extends refraction.core.State {
         }
     }
 
+    function getServerUrl():String {
+        var url:String = "ws://localhost:3000";
+        #if js
+        var search:String = untyped js.Browser.window.location.search;
+        if (search != null && search.indexOf("server=") >= 0) {
+            var idx = search.indexOf("server=") + 7;
+            var end = search.indexOf("&", idx);
+            url = (end > 0) ? search.substring(idx, end) : search.substring(idx);
+        }
+        #end
+        return url;
+    }
+
     function handleCreateRoom() {
         var mapName:String = maps[selectedMap];
         var name:String = playerName;
-        var wsUrl:String = "ws://localhost:3000";
+        var wsUrl:String = getServerUrl();
 
         RoomClient.createRoom(name, mapName, function(code:String) {
-            // Store server URL in room for guests to find
             RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
-            // Go straight to game — room code shown as in-game overlay
             Application.setState(new GameState(mapName, wsUrl, name, code));
         });
     }
