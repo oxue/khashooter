@@ -237,7 +237,7 @@ class MenuState extends refraction.core.State {
     }
 
     function getServerUrl():String {
-        var url:String = "ws://localhost:3000";
+        var url:String = "ws://localhost:4000";
         #if js
         var search:String = untyped js.Browser.window.location.search;
         if (search != null && search.indexOf("server=") >= 0) {
@@ -273,7 +273,7 @@ class MenuState extends refraction.core.State {
                 return;
             }
             var wsUrl:String = untyped room.serverUrl;
-            if (wsUrl == null) wsUrl = "ws://localhost:3000";
+            if (wsUrl == null) wsUrl = "ws://localhost:4000";
             var mapName:String = untyped room.map;
             if (mapName == null) mapName = "level2";
             Application.setState(new GameState(mapName, wsUrl, name));

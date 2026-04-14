@@ -209,7 +209,7 @@ class GameState extends refraction.core.State {
         // Connect to server - use passed URL, query param, or default to localhost
         var connectUrl:String = this.serverUrl;
         if (connectUrl == null) {
-            connectUrl = "ws://localhost:3000";
+            connectUrl = "ws://localhost:4000";
             #if js
             var search:String = untyped js.Browser.window.location.search;
             if (search != null && search.indexOf("server=") >= 0) {
