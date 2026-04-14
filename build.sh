@@ -10,7 +10,6 @@ cat > build/html5/index.html << 'EOF'
 </head>
 <body>
     <canvas id="khanvas" width="1300" height="800" tabindex="0"></canvas>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="kha.js"></script>
     <script>
         var c=document.getElementById('khanvas');c.focus();

@@ -19,6 +19,8 @@ class NetClient {
     var rtcSend:String -> Void;
 
     public var supabaseTransport:SupabaseTransport;
+    public var peerHost:PeerHost;
+    public var peerGuest:PeerGuest;
 
     public var clientId:Int;
     public var onConnect:Int -> Void;
@@ -30,6 +32,8 @@ class NetClient {
         useWebRTC = false;
         rtcSend = null;
         supabaseTransport = null;
+        peerHost = null;
+        peerGuest = null;
         clientId = -1;
     }
 
@@ -46,6 +50,33 @@ class NetClient {
         } catch (e:Dynamic) {
             log("ERROR", 'parse error: $e');
         }
+    }
+
+    public function connectViaPeerHost(host:PeerHost) {
+        peerHost = host;
+
+        host.onMessage = function(msg:Dynamic) {
+            handleMessage(msg);
+        };
+
+        // The host is immediately "connected" as player 0.
+        // Send a synthetic welcome message so handleMessage processes it
+        // (sets clientId, calls onConnect, etc.) -- same as SupabaseTransport.sendWelcomeToSelf.
+        var mapName:String = host.getMapName();
+        handleMessage({type: "welcome", id: 0, map: mapName, hostId: 0, players: []});
+
+        log("CONNECT", "connected via PeerHost as host, id=0");
+    }
+
+    public function connectViaPeerGuest(guest:PeerGuest) {
+        peerGuest = guest;
+
+        guest.onMessage = function(msg:Dynamic) {
+            handleMessage(msg);
+        };
+
+        // Guest is not fully connected until it receives a "welcome" message from host
+        log("CONNECT", "waiting for welcome from host via PeerGuest...");
     }
 
     public function connectViaSupabase(transport:SupabaseTransport) {
@@ -95,6 +126,7 @@ class NetClient {
         switch (Std.string(msg.type)) {
             case "welcome":
                 clientId = msg.id;
+                connected = true;
                 log("JOIN", 'assigned id=$clientId map=${msg.map} host=${msg.hostId}');
                 // Forward host_change before onConnect so hostId is set
                 if (onMessage != null) {
@@ -124,9 +156,19 @@ class NetClient {
     }
 
     public function send(msg:Dynamic) {
-        if (!connected && supabaseTransport == null) return;
+        if (!connected && supabaseTransport == null && peerHost == null && peerGuest == null) return;
         #if js
-        if (supabaseTransport != null) {
+        if (peerHost != null) {
+            // Host: process message through host authority logic
+            peerHost.sendFromLocal(msg);
+        } else if (peerGuest != null) {
+            // Guest: tag with our ID and send to host via data channel
+            var msgType:String = Std.string(untyped msg.type);
+            if (msgType == "update" || msgType == "shoot" || msgType == "chat" || msgType == "set_name") {
+                untyped msg.from = clientId;
+            }
+            peerGuest.sendToChannel(msg);
+        } else if (supabaseTransport != null) {
             supabaseTransport.send(msg);
         } else {
             var str = Json.stringify(msg);
@@ -158,11 +200,15 @@ class NetClient {
 
     public function isConnected():Bool {
         if (supabaseTransport != null) return supabaseTransport.isConnected();
+        if (peerHost != null) return connected;
+        if (peerGuest != null) return connected;
         return connected;
     }
 
     public function disconnect() {
         #if js
+        if (peerHost != null) peerHost.close();
+        if (peerGuest != null) peerGuest.close();
         if (ws != null) ws.close();
         #end
     }

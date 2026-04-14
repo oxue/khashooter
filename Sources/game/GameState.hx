@@ -3,6 +3,8 @@ package game;
 import net.NetManager;
 import net.NetState;
 import net.SupabaseTransport;
+import net.PeerHost;
+import net.PeerGuest;
 import refraction.display.AnimatedRenderCmp;
 import zui.Zui;
 import haxe.Timer;
@@ -51,24 +53,29 @@ class GameState extends refraction.core.State {
     var roomCode:String;
     var intervals:Array<Interval>;
     var supabaseTransport:SupabaseTransport;
+    var peerHost:PeerHost;
+    var peerGuest:PeerGuest;
 
     static var currentServerUrl:String;
-    static var hasSupabaseTransport:Bool = false;
+    static var hasMultiplayerTransport:Bool = false;
 
-    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String, ?transport:SupabaseTransport) {
+    public function new(map:String = "level2", ?serverUrl:String, ?playerName:String, ?roomCode:String,
+            ?transport:SupabaseTransport, ?peerHost:PeerHost, ?peerGuest:PeerGuest) {
         this.defaultMap = map;
         this.serverUrl = serverUrl;
         currentServerUrl = serverUrl;
         this.multiplayerName = playerName;
         this.roomCode = roomCode;
         this.supabaseTransport = transport;
-        hasSupabaseTransport = (transport != null);
+        this.peerHost = peerHost;
+        this.peerGuest = peerGuest;
+        hasMultiplayerTransport = (transport != null || peerHost != null || peerGuest != null);
         this.showMenu = false;
         super();
     }
 
     public static function isMultiplayer():Bool {
-        return currentServerUrl != null || hasSupabaseTransport;
+        return currentServerUrl != null || hasMultiplayerTransport;
     }
 
     function formatResources() {
@@ -148,7 +155,7 @@ class GameState extends refraction.core.State {
 
         isRenderingReady = true;
 
-        // Only connect to multiplayer if a server URL or Supabase transport is available
+        // Only connect to multiplayer if a transport is available
         if (isMultiplayer()) {
             initMultiplayer();
         } else {
@@ -211,8 +218,12 @@ class GameState extends refraction.core.State {
             }
         };
 
-        // Connect via Supabase transport or WebSocket
-        if (supabaseTransport != null) {
+        // Connect via PeerHost, PeerGuest, Supabase transport, or WebSocket
+        if (peerHost != null) {
+            gameContext.netState.client.connectViaPeerHost(peerHost);
+        } else if (peerGuest != null) {
+            gameContext.netState.client.connectViaPeerGuest(peerGuest);
+        } else if (supabaseTransport != null) {
             gameContext.netState.client.connectViaSupabase(supabaseTransport);
         } else {
             var connectUrl:String = this.serverUrl;

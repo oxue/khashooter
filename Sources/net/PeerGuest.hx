@@ -7,12 +7,37 @@ class PeerGuest {
     var roomCode:String;
     var guestName:String;
     public var onOpen:Void -> Void;
-    public var onMessage:String -> Void;
     public var onClose:Void -> Void;
     var iceCandidates:Array<Dynamic>;
 
+    // Message callback with buffering for early messages
+    var _onMessage:Dynamic -> Void;
+    var messageBuffer:Array<Dynamic>;
+
+    public var onMessage(get, set):Dynamic -> Void;
+
+    function get_onMessage():Dynamic -> Void {
+        return _onMessage;
+    }
+
+    function set_onMessage(cb:Dynamic -> Void):Dynamic -> Void {
+        _onMessage = cb;
+        // Flush any buffered messages
+        if (cb != null && messageBuffer.length > 0) {
+            log("GUEST", "Flushing " + messageBuffer.length + " buffered messages");
+            var buf = messageBuffer.copy();
+            messageBuffer = [];
+            for (msg in buf) {
+                cb(msg);
+            }
+        }
+        return cb;
+    }
+
     public function new() {
         iceCandidates = [];
+        messageBuffer = [];
+        _onMessage = null;
     }
 
     public function joinRoom(code:String, name:String, onError:String -> Void) {
@@ -36,7 +61,7 @@ class PeerGuest {
 
     function connectToHost(room:Dynamic) {
         #if js
-        peerConnection = untyped __js__("new RTCPeerConnection({iceServers: [{urls: 'stun:stun.l.google.com:19302'}]})");
+        peerConnection = untyped __js__("new RTCPeerConnection({iceServers: [{urls: 'stun:stun.l.google.com:19302'}, {urls: 'stun:stun1.l.google.com:19302'}]})");
 
         // Listen for data channel from host
         peerConnection.ondatachannel = function(event:Dynamic) {
@@ -90,18 +115,46 @@ class PeerGuest {
         #end
     }
 
+    function dispatchMessage(msg:Dynamic) {
+        if (_onMessage != null) {
+            _onMessage(msg);
+        } else {
+            // Buffer the message until onMessage callback is set
+            messageBuffer.push(msg);
+            log("GUEST", "Buffered message of type: " + Std.string(untyped msg.type));
+        }
+    }
+
     function setupDataChannel() {
         #if js
         dataChannel.onopen = function() {
             log("GUEST", "Data channel open!");
+            // Send join request to host
+            sendToChannel(untyped __js__("{ type: 'join_request', name: {0} }", guestName));
+
             if (onOpen != null) onOpen();
         };
         dataChannel.onmessage = function(event:Dynamic) {
-            if (onMessage != null) onMessage(untyped event.data);
+            try {
+                var msg = haxe.Json.parse(event.data);
+                dispatchMessage(msg);
+            } catch (e:Dynamic) {
+                log("GUEST", "Parse error: " + Std.string(e));
+            }
         };
         dataChannel.onclose = function() {
+            log("GUEST", "Data channel closed");
             if (onClose != null) onClose();
         };
+        #end
+    }
+
+    // Send a game message to the host (as JSON)
+    public function sendToChannel(msg:Dynamic) {
+        #if js
+        if (dataChannel != null && untyped dataChannel.readyState == "open") {
+            untyped dataChannel.send(haxe.Json.stringify(msg));
+        }
         #end
     }
 

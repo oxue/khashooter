@@ -1,7 +1,8 @@
 package game;
 
 import net.RoomClient;
-import net.SupabaseTransport;
+import net.PeerHost;
+import net.PeerGuest;
 import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
@@ -250,22 +251,11 @@ class MenuState extends refraction.core.State {
         return url;
     }
 
-    function generateRoomCode():String {
-        var chars:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var code:String = "";
-        for (i in 0...4) {
-            var idx:Int = Std.int(Math.random() * chars.length);
-            code += chars.charAt(idx);
-        }
-        return code;
-    }
-
     function handleCreateRoom() {
         var mapName:String = maps[selectedMap];
         var name:String = playerName;
 
-        // Check if we should use WebSocket (server= query param) or Supabase
-        var wsUrl:String = getServerUrl();
+        // Check if we should use WebSocket (server= query param) for local dev fallback
         var useWebSocket:Bool = false;
         #if js
         var search:String = untyped js.Browser.window.location.search;
@@ -276,17 +266,20 @@ class MenuState extends refraction.core.State {
 
         if (useWebSocket) {
             // Legacy WebSocket path for local dev
+            var wsUrl:String = getServerUrl();
             RoomClient.createRoom(name, mapName, function(code:String) {
                 RoomClient.updateRoom(code, cast {serverUrl: wsUrl}, function(room:Dynamic) {});
                 Application.setState(new GameState(mapName, wsUrl, name, code));
             });
         } else {
-            // Supabase Realtime path for production
-            var code:String = generateRoomCode();
-            statusMessage = "Creating room " + code + "...";
-            var transport:SupabaseTransport = new SupabaseTransport();
-            transport.createRoom(code, name);
-            Application.setState(new GameState(mapName, null, name, code, transport));
+            // WebRTC peer-to-peer path
+            statusMessage = "Creating room...";
+            var host:PeerHost = new PeerHost();
+            host.createRoom(name, mapName, function(code:String) {
+                statusMessage = "Room " + code + " created. Waiting for peer...";
+                // Transition to game immediately; game shows room code overlay while waiting
+                Application.setState(new GameState(mapName, null, name, code, null, host));
+            });
         }
     }
 
@@ -299,7 +292,7 @@ class MenuState extends refraction.core.State {
         var name:String = playerName;
         var code:String = roomCode;
 
-        // Check if we should use WebSocket (server= query param) or Supabase
+        // Check if we should use WebSocket (server= query param) for local dev fallback
         var useWebSocket:Bool = false;
         #if js
         var search:String = untyped js.Browser.window.location.search;
@@ -323,11 +316,15 @@ class MenuState extends refraction.core.State {
                 Application.setState(new GameState(mapName, wsUrl, name));
             });
         } else {
-            // Supabase Realtime path for production
+            // WebRTC peer-to-peer path
             statusMessage = "Joining room " + code + "...";
-            var transport:SupabaseTransport = new SupabaseTransport();
-            transport.joinRoom(code, name);
-            Application.setState(new GameState("level2", null, name, code, transport));
+            var guest:PeerGuest = new PeerGuest();
+            guest.joinRoom(code, name, function(error:String) {
+                statusMessage = error;
+            });
+            // Transition to game; guest will receive map from host via welcome message
+            // For now use level2 as placeholder; GameState will get the real map from the welcome
+            Application.setState(new GameState("level2", null, name, code, null, null, guest));
         }
     }
 
